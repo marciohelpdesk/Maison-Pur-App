@@ -169,7 +169,11 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          invoice_number: string | null
+          line_items: Json | null
+          property_ids: string[] | null
           public_token: string
+          service_date: string | null
           status: string
           updated_at: string
           user_id: string
@@ -181,7 +185,11 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          invoice_number?: string | null
+          line_items?: Json | null
+          property_ids?: string[] | null
           public_token?: string
+          service_date?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -193,7 +201,11 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          invoice_number?: string | null
+          line_items?: Json | null
+          property_ids?: string[] | null
           public_token?: string
+          service_date?: string | null
           status?: string
           updated_at?: string
           user_id?: string
