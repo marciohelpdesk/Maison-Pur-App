@@ -1,64 +1,40 @@
 
 
-## Plano: Gestão de Invoices
+## Plan: Robust Invoice System Linked to Properties & Jobs
 
-### 1. Banco de dados — nova tabela `invoices`
+### Problem
+Current invoice form is a simple manual entry with Portuguese text and Euro currency. User needs invoices tied to their properties/jobs, in English, with USD currency.
 
-```sql
-CREATE TABLE public.invoices (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL,
-  client_name text NOT NULL,
-  client_email text NOT NULL DEFAULT '',
-  description text NOT NULL DEFAULT '',
-  amount numeric NOT NULL DEFAULT 0,
-  status text NOT NULL DEFAULT 'pending',  -- 'pending' | 'paid'
-  public_token text NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'),
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
+### Database Migration
+Add new columns to `invoices` table:
+- `property_ids` (text[] — array of property IDs selected)
+- `service_date` (text — date the cleaning was performed)
+- `invoice_number` (text — auto-generated sequential number like INV-001)
+- `line_items` (jsonb — array of `{property_name, address, service_type, price}`)
 
-ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+### Changes to `src/components/InvoiceSection.tsx`
+Complete rewrite of the form and listing, all in English:
+- **Property selector**: Multi-select checklist of user's properties (fetched via `useProperties`). Each selected property auto-populates a line item with its name, address, service type, and `base_price`.
+- **Service date picker**: Date input for when cleaning was performed.
+- **Line items table**: Shows each selected property as a row with editable price. Total auto-calculates.
+- **Client name/email**: Kept as manual fields.
+- **Currency**: All amounts displayed as `$` (USD).
+- **All labels and messages in English**.
 
--- Owner CRUD
-CREATE POLICY "Users can manage own invoices" ON public.invoices
-  FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+### Changes to `src/hooks/useInvoices.ts`
+- Update `Invoice` interface to include new fields (`property_ids`, `service_date`, `invoice_number`, `line_items`).
+- Update `createInvoice` mutation to accept and store the new data.
+- Toast messages in English.
 
--- Public read via token (for /invoice/:id page)
-CREATE POLICY "Public can view invoices by token" ON public.invoices
-  FOR SELECT TO anon, authenticated USING (true);
-  -- We'll filter by token in code; broad SELECT is needed for public page
-```
+### Changes to `src/pages/PublicInvoice.tsx`
+- All text in English ("Billed To", "Description", "Date", "Total", "Paid", "Pending", "Pay Now", "Invoice not found").
+- Currency symbol changed from `€` to `$`.
+- Display line items table showing each property/service with individual prices.
+- Show invoice number and service date.
 
-### 2. Novos ficheiros
-
-| Ficheiro | Finalidade |
-|---|---|
-| `src/hooks/useInvoices.ts` | Hook CRUD com react-query + supabase |
-| `src/components/InvoiceSection.tsx` | Formulário de criação + lista de invoices (usado no Settings) |
-| `src/pages/PublicInvoice.tsx` | Página pública `/invoice/:token` — estilo recibo profissional com botão "Pagar agora" |
-
-### 3. Ficheiros modificados
-
-| Ficheiro | Mudança |
-|---|---|
-| `src/views/SettingsView.tsx` | Adicionar `<InvoiceSection />` abaixo do perfil, recebendo `userId` |
-| `src/lib/routes.tsx` | Adicionar rota pública `/invoice/:token` → `<PublicInvoice />` |
-
-### 4. Detalhes de implementação
-
-**InvoiceSection** — Dentro das Settings, abaixo do profile card:
-- Formulário com campos: nome do cliente, e-mail, descrição do serviço, valor (€)
-- Tabela com colunas: Cliente, Valor, Status (badge), Data, Ações (copiar link)
-- O link copiado será `https://maisonpur.lovable.app/invoice/{public_token}`
-
-**PublicInvoice** — Rota pública sem auth:
-- Busca invoice pelo token na URL
-- Layout estilo recibo: logo Pur, dados do serviço, valor, status
-- Botão "Pagar agora" (placeholder visual — sem integração de pagamento)
-
-**useInvoices** — Hook:
-- `useQuery` para listar invoices do user
-- `useMutation` para criar invoice
-- `useMutation` para alternar status pending↔paid
+### Technical Details
+- `InvoiceSection` will import and use `useProperties(userId)` to get the property list.
+- Selected properties generate line items with pre-filled prices from `base_price`.
+- Invoice number generated client-side as `INV-{timestamp-based sequence}`.
+- No changes to RLS policies needed — same access patterns.
 
