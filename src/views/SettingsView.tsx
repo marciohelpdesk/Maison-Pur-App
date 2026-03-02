@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { TeamManagement } from '@/components/TeamManagement';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { CalendarSyncSection } from '@/components/CalendarSyncSection';
+import { InvoiceSection } from '@/components/InvoiceSection';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Switch } from '@/components/ui/switch';
 
@@ -105,6 +106,9 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
             onDeleteEmployee={onDeleteEmployee}
           />
         </motion.div>
+
+        {/* Invoice Section */}
+        <InvoiceSection userId={userId} />
 
         {/* Calendar Sync Section */}
         <CalendarSyncSection userId={userId} />

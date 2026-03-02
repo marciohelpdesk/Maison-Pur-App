@@ -18,6 +18,7 @@ const Settings = lazy(() => import('@/pages/Settings'));
 const Finance = lazy(() => import('@/pages/Finance'));
 const Reports = lazy(() => import('@/pages/Reports'));
 const PublicReport = lazy(() => import('@/pages/PublicReport'));
+const PublicInvoice = lazy(() => import('@/pages/PublicInvoice'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Animated Loading component
@@ -184,6 +185,16 @@ export const routes = [
     element: (
       <SuspenseWrapper>
         <PublicReport />
+      </SuspenseWrapper>
+    ),
+  },
+
+  // Public invoice viewer (no auth)
+  {
+    path: '/invoice/:token',
+    element: (
+      <SuspenseWrapper>
+        <PublicInvoice />
       </SuspenseWrapper>
     ),
   },
