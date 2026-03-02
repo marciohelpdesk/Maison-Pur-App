@@ -161,6 +161,45 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          client_email: string
+          client_name: string
+          created_at: string
+          description: string
+          id: string
+          public_token: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          client_email?: string
+          client_name: string
+          created_at?: string
+          description?: string
+          id?: string
+          public_token?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          client_email?: string
+          client_name?: string
+          created_at?: string
+          description?: string
+          id?: string
+          public_token?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           address: string
