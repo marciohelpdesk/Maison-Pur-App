@@ -2,6 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+export interface LineItem {
+  property_name: string;
+  address: string;
+  service_type: string;
+  price: number;
+}
+
 export interface Invoice {
   id: string;
   user_id: string;
@@ -11,6 +18,10 @@ export interface Invoice {
   amount: number;
   status: string;
   public_token: string;
+  property_ids: string[];
+  service_date: string;
+  invoice_number: string;
+  line_items: LineItem[];
   created_at: string;
   updated_at: string;
 }
@@ -27,16 +38,29 @@ export function useInvoices(userId?: string) {
         .eq('user_id', userId!)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data as Invoice[];
+      return (data as any[]).map((d) => ({
+        ...d,
+        property_ids: d.property_ids || [],
+        line_items: d.line_items || [],
+      })) as Invoice[];
     },
     enabled: !!userId,
   });
 
   const createInvoice = useMutation({
-    mutationFn: async (invoice: { client_name: string; client_email: string; description: string; amount: number }) => {
+    mutationFn: async (invoice: {
+      client_name: string;
+      client_email: string;
+      description: string;
+      amount: number;
+      property_ids: string[];
+      service_date: string;
+      invoice_number: string;
+      line_items: LineItem[];
+    }) => {
       const { data, error } = await supabase
         .from('invoices')
-        .insert({ ...invoice, user_id: userId! })
+        .insert({ ...invoice, user_id: userId!, line_items: invoice.line_items as any })
         .select()
         .single();
       if (error) throw error;
@@ -44,9 +68,9 @@ export function useInvoices(userId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices', userId] });
-      toast.success('Invoice criada com sucesso!');
+      toast.success('Invoice created successfully!');
     },
-    onError: () => toast.error('Erro ao criar invoice'),
+    onError: () => toast.error('Failed to create invoice'),
   });
 
   const toggleStatus = useMutation({
@@ -60,9 +84,9 @@ export function useInvoices(userId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices', userId] });
-      toast.success('Status atualizado!');
+      toast.success('Status updated!');
     },
-    onError: () => toast.error('Erro ao atualizar status'),
+    onError: () => toast.error('Failed to update status'),
   });
 
   const deleteInvoice = useMutation({
@@ -72,9 +96,9 @@ export function useInvoices(userId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices', userId] });
-      toast.success('Invoice eliminada!');
+      toast.success('Invoice deleted!');
     },
-    onError: () => toast.error('Erro ao eliminar invoice'),
+    onError: () => toast.error('Failed to delete invoice'),
   });
 
   return { invoices, isLoading, createInvoice, toggleStatus, deleteInvoice };
@@ -90,7 +114,12 @@ export function usePublicInvoice(token?: string) {
         .eq('public_token', token!)
         .single();
       if (error) throw error;
-      return data as Invoice;
+      const d = data as any;
+      return {
+        ...d,
+        property_ids: d.property_ids || [],
+        line_items: d.line_items || [],
+      } as Invoice;
     },
     enabled: !!token,
   });
