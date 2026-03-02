@@ -1,36 +1,36 @@
 
 
-## Plano: Branding nos links compartilhados
+## Plano: Melhorar seção "Checklist Base" com todas as categorias e interatividade
 
-### Problema atual
-1. O `getShareUrl` aponta diretamente para `maisonpur.lovable.app/r/{token}` — os bots de redes sociais (WhatsApp, iMessage, Instagram) não conseguem ler as OG tags porque o SPA não as serve no HTML inicial
-2. A edge function `share-report` existe exatamente para resolver isso (serve OG tags para bots, redireciona browsers normais), mas **não está sendo usada** no link copiado
-3. A imagem OG na edge function aponta para `/og-image.png` (genérica), enquanto o `index.html` já usa uma imagem branded diferente
+### Situação atual
+- A seção "Checklist Base" no Dashboard tem 4 templates estáticos (Airbnb Premium, Residencial, Comercial, Pós-obra) sem ação ao clicar
+- O sistema possui 7 templates de checklist: Standard, Airbnb, Deep Clean, Move-in/out, Recurring, Post Construction, Commercial
+- Os cards não têm `onClick` — são visuais apenas
 
-### Mudanças
+### Mudanças em `src/views/DashboardView.tsx`
 
-**1. `src/pages/Reports.tsx`** — Alterar `getShareUrl` para usar a edge function
-```
-// De:
-return `https://maisonpur.lovable.app/r/${report.public_token}`;
+**1. Expandir `checklistTemplates` para incluir todas as 7 categorias** com dados reais calculados a partir dos templates:
 
-// Para:
-return `https://ebafqcanwdqomqcrifrj.supabase.co/functions/v1/share-report?token=${report.public_token}`;
-```
+| Template | Ícone | Cor | Cômodos | Tarefas |
+|---|---|---|---|---|
+| Airbnb Premium | 🏠 | orange | 7 seções | 42 tarefas |
+| Residencial | 🏡 | emerald | 5 seções | 27 tarefas |
+| Deep Clean | 🧹 | blue | 5 seções | 45 tarefas |
+| Move-in/out | 📦 | purple | 5 seções | 47 tarefas |
+| Recorrente | 🔄 | teal | 5 seções | 24 tarefas |
+| Pós-obra | 🔨 | amber | 6 seções | 37 tarefas |
+| Comercial | 🏢 | slate | 6 seções | 36 tarefas |
 
-**2. `supabase/functions/share-report/index.ts`** — Atualizar OG image para a imagem branded e melhorar os textos
-- Trocar `OG_IMAGE` de `/og-image.png` para a imagem branded já usada no index.html: `https://storage.googleapis.com/gpt-engineer-file-uploads/LWW1I6T5b8gH99kiEm571PLbSUL2/social-images/social-1772082935113-Design_sem_nome.webp`
-- Melhorar `og:site_name` para `"Pur"` 
-- Melhorar description para incluir data formatada e propriedade: `"Visit Report for {property} — {date}"`
-- Adicionar `og:image:width`, `og:image:height` para melhor rendering em previews
+**2. Adicionar interatividade ao clicar** — Abrir um Drawer com:
+- Nome do template e ícone
+- Lista das seções com contagem de tarefas
+- Botão "Criar Job com este template" que navega para `/agenda`
 
-**3. `src/pages/PublicReport.tsx`** (linha 82) — Corrigir referência OG image no useEffect
-- Trocar `'https://mirror-frame.lovable.app/og-image.png'` pela mesma imagem branded
+**3. Remover botão "Ver todos"** (já que todas as categorias estarão visíveis no scroll horizontal)
 
-### Resultado
-Ao colar o link no WhatsApp, iMessage, Instagram ou qualquer rede social, aparecerá:
-- **Imagem**: banner branded da Pur
-- **Título**: "Pur | Nome da Propriedade"  
-- **Descrição**: "Visit Report — Kamila Petters"
-- **Site**: "Pur"
+### Seção técnica
+- Arquivo: `src/views/DashboardView.tsx`
+- Adicionar estado `selectedTemplate` (número | null)
+- Importar os templates de `src/data/checklist.ts` para calcular dados reais
+- Adicionar segundo `Drawer` para exibir detalhes do template selecionado
 
