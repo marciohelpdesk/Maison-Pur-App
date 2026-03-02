@@ -1,36 +1,64 @@
 
 
-## Plano: Melhorar seção "Checklist Base" com todas as categorias e interatividade
+## Plano: Gestão de Invoices
 
-### Situação atual
-- A seção "Checklist Base" no Dashboard tem 4 templates estáticos (Airbnb Premium, Residencial, Comercial, Pós-obra) sem ação ao clicar
-- O sistema possui 7 templates de checklist: Standard, Airbnb, Deep Clean, Move-in/out, Recurring, Post Construction, Commercial
-- Os cards não têm `onClick` — são visuais apenas
+### 1. Banco de dados — nova tabela `invoices`
 
-### Mudanças em `src/views/DashboardView.tsx`
+```sql
+CREATE TABLE public.invoices (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  client_name text NOT NULL,
+  client_email text NOT NULL DEFAULT '',
+  description text NOT NULL DEFAULT '',
+  amount numeric NOT NULL DEFAULT 0,
+  status text NOT NULL DEFAULT 'pending',  -- 'pending' | 'paid'
+  public_token text NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 
-**1. Expandir `checklistTemplates` para incluir todas as 7 categorias** com dados reais calculados a partir dos templates:
+ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 
-| Template | Ícone | Cor | Cômodos | Tarefas |
-|---|---|---|---|---|
-| Airbnb Premium | 🏠 | orange | 7 seções | 42 tarefas |
-| Residencial | 🏡 | emerald | 5 seções | 27 tarefas |
-| Deep Clean | 🧹 | blue | 5 seções | 45 tarefas |
-| Move-in/out | 📦 | purple | 5 seções | 47 tarefas |
-| Recorrente | 🔄 | teal | 5 seções | 24 tarefas |
-| Pós-obra | 🔨 | amber | 6 seções | 37 tarefas |
-| Comercial | 🏢 | slate | 6 seções | 36 tarefas |
+-- Owner CRUD
+CREATE POLICY "Users can manage own invoices" ON public.invoices
+  FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
-**2. Adicionar interatividade ao clicar** — Abrir um Drawer com:
-- Nome do template e ícone
-- Lista das seções com contagem de tarefas
-- Botão "Criar Job com este template" que navega para `/agenda`
+-- Public read via token (for /invoice/:id page)
+CREATE POLICY "Public can view invoices by token" ON public.invoices
+  FOR SELECT TO anon, authenticated USING (true);
+  -- We'll filter by token in code; broad SELECT is needed for public page
+```
 
-**3. Remover botão "Ver todos"** (já que todas as categorias estarão visíveis no scroll horizontal)
+### 2. Novos ficheiros
 
-### Seção técnica
-- Arquivo: `src/views/DashboardView.tsx`
-- Adicionar estado `selectedTemplate` (número | null)
-- Importar os templates de `src/data/checklist.ts` para calcular dados reais
-- Adicionar segundo `Drawer` para exibir detalhes do template selecionado
+| Ficheiro | Finalidade |
+|---|---|
+| `src/hooks/useInvoices.ts` | Hook CRUD com react-query + supabase |
+| `src/components/InvoiceSection.tsx` | Formulário de criação + lista de invoices (usado no Settings) |
+| `src/pages/PublicInvoice.tsx` | Página pública `/invoice/:token` — estilo recibo profissional com botão "Pagar agora" |
+
+### 3. Ficheiros modificados
+
+| Ficheiro | Mudança |
+|---|---|
+| `src/views/SettingsView.tsx` | Adicionar `<InvoiceSection />` abaixo do perfil, recebendo `userId` |
+| `src/lib/routes.tsx` | Adicionar rota pública `/invoice/:token` → `<PublicInvoice />` |
+
+### 4. Detalhes de implementação
+
+**InvoiceSection** — Dentro das Settings, abaixo do profile card:
+- Formulário com campos: nome do cliente, e-mail, descrição do serviço, valor (€)
+- Tabela com colunas: Cliente, Valor, Status (badge), Data, Ações (copiar link)
+- O link copiado será `https://maisonpur.lovable.app/invoice/{public_token}`
+
+**PublicInvoice** — Rota pública sem auth:
+- Busca invoice pelo token na URL
+- Layout estilo recibo: logo Pur, dados do serviço, valor, status
+- Botão "Pagar agora" (placeholder visual — sem integração de pagamento)
+
+**useInvoices** — Hook:
+- `useQuery` para listar invoices do user
+- `useMutation` para criar invoice
+- `useMutation` para alternar status pending↔paid
 
