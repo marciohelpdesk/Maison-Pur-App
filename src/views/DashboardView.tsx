@@ -10,6 +10,16 @@ import {
 } from 'lucide-react';
 import purLogo from '@/assets/pur-logo.png';
 import { openAddressInMaps } from '@/lib/utils';
+import {
+  AIRBNB_CHECKLIST_TEMPLATE,
+  STANDARD_CHECKLIST_TEMPLATE,
+  DEEP_CLEAN_CHECKLIST_TEMPLATE,
+  MOVE_IN_OUT_CHECKLIST_TEMPLATE,
+  RECURRING_CHECKLIST_TEMPLATE,
+  POST_CONSTRUCTION_CHECKLIST_TEMPLATE,
+  COMMERCIAL_CHECKLIST_TEMPLATE,
+} from '@/data/checklist';
+import { ChecklistSection } from '@/types';
 import { Job, JobStatus, Property } from '@/types';
 import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -30,6 +40,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
   const { t } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -76,13 +87,23 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
     { icon: Briefcase, label: 'Comercial', color: 'from-slate-500 to-slate-400', description: 'Limpeza de escritórios e espaços comerciais. Manutenção profissional com horários flexíveis para não interferir nas operações.' },
   ];
 
-  // Checklist templates
-  const checklistTemplates = [
-    { title: 'Airbnb Premium', rooms: 6, tasks: 42, icon: '🏠', border: 'border-l-orange-400' },
-    { title: 'Residencial', rooms: 4, tasks: 28, icon: '🏡', border: 'border-l-emerald-400' },
-    { title: 'Comercial', rooms: 8, tasks: 35, icon: '🏢', border: 'border-l-slate-400' },
-    { title: 'Pós-obra', rooms: 5, tasks: 50, icon: '🔨', border: 'border-l-amber-400' },
-  ];
+  // Checklist templates - computed from real data
+  const checklistTemplates = useMemo(() => {
+    const templates: { title: string; icon: string; border: string; template: ChecklistSection[] }[] = [
+      { title: 'Airbnb Premium', icon: '🏠', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE },
+      { title: 'Residencial', icon: '🏡', border: 'border-l-emerald-400', template: STANDARD_CHECKLIST_TEMPLATE },
+      { title: 'Deep Clean', icon: '🧹', border: 'border-l-blue-400', template: DEEP_CLEAN_CHECKLIST_TEMPLATE },
+      { title: 'Move-in/out', icon: '📦', border: 'border-l-purple-400', template: MOVE_IN_OUT_CHECKLIST_TEMPLATE },
+      { title: 'Recorrente', icon: '🔄', border: 'border-l-teal-400', template: RECURRING_CHECKLIST_TEMPLATE },
+      { title: 'Pós-obra', icon: '🔨', border: 'border-l-amber-400', template: POST_CONSTRUCTION_CHECKLIST_TEMPLATE },
+      { title: 'Comercial', icon: '🏢', border: 'border-l-slate-400', template: COMMERCIAL_CHECKLIST_TEMPLATE },
+    ];
+    return templates.map(t => ({
+      ...t,
+      rooms: t.template.length,
+      tasks: t.template.reduce((sum, s) => sum + s.items.length, 0),
+    }));
+  }, []);
 
   return (
     <div className="flex flex-col h-full relative z-10 pb-8">
@@ -223,14 +244,9 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
 
         {/* Checklist Templates - Horizontal Scroll */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
-              Checklist Base
-            </h2>
-            <button className="text-primary text-xs font-medium flex items-center gap-1">
-              Ver todos <ChevronRight size={12} />
-            </button>
-          </div>
+          <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
+            Checklist Base
+          </h2>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
             {checklistTemplates.map((tmpl, idx) => (
               <motion.div
@@ -238,11 +254,12 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08 }}
-                className={`min-w-[160px] glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border}`}
+                onClick={() => setSelectedTemplate(idx)}
+                className={`min-w-[160px] glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95`}
               >
                 <span className="text-3xl mb-2 block">{tmpl.icon}</span>
                 <h4 className="font-bold text-foreground text-sm mb-1">{tmpl.title}</h4>
-                <p className="text-[10px] text-muted-foreground">{tmpl.rooms} cômodos • {tmpl.tasks} tarefas</p>
+                <p className="text-[10px] text-muted-foreground">{tmpl.rooms} seções • {tmpl.tasks} tarefas</p>
               </motion.div>
             ))}
           </div>
@@ -453,6 +470,47 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                   <Button onClick={() => { setSelectedCategory(null); navigate('/agenda'); }} className="w-full">
                     <Plus size={16} />
                     Criar Job — {cat.label}
+                  </Button>
+                  <DrawerClose asChild>
+                    <Button variant="outline" className="w-full">Fechar</Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </>
+            );
+          })()}
+        </DrawerContent>
+      </Drawer>
+
+      {/* Checklist Template Detail Drawer */}
+      <Drawer open={selectedTemplate !== null} onOpenChange={(open) => !open && setSelectedTemplate(null)}>
+        <DrawerContent>
+          {selectedTemplate !== null && (() => {
+            const tmpl = checklistTemplates[selectedTemplate];
+            return (
+              <>
+                <DrawerHeader className="text-left">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-4xl">{tmpl.icon}</span>
+                    <div>
+                      <DrawerTitle className="text-xl">{tmpl.title}</DrawerTitle>
+                      <DrawerDescription>{tmpl.rooms} seções • {tmpl.tasks} tarefas</DrawerDescription>
+                    </div>
+                  </div>
+                </DrawerHeader>
+                <div className="px-4 pb-4 space-y-2 max-h-[40vh] overflow-y-auto">
+                  {tmpl.template.map((section) => (
+                    <div key={section.id} className="flex items-center justify-between py-2.5 px-3 rounded-xl glass-panel-subtle">
+                      <span className="text-sm font-medium text-foreground">{section.title}</span>
+                      <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {section.items.length} tarefas
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <DrawerFooter>
+                  <Button onClick={() => { setSelectedTemplate(null); navigate('/agenda'); }} className="w-full">
+                    <Plus size={16} />
+                    Criar Job — {tmpl.title}
                   </Button>
                   <DrawerClose asChild>
                     <Button variant="outline" className="w-full">Fechar</Button>
