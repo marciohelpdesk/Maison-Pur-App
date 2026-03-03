@@ -28,4 +28,3 @@ The `LineItem` interface already supports `description`, `property_name`, `quant
 - The quick-add presets are a simple array of `{ label, description }` rendered as chips
 - No database migration required — `line_items` JSONB already stores arbitrary items
 - Public invoice Zelle button uses `mailto:` link or clipboard copy for the payment email
-
