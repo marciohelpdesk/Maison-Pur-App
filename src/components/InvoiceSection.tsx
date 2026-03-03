@@ -17,6 +17,15 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
+const SERVICE_PRESETS = [
+  { label: '🛋️ Sofa Cleaning', description: 'Sofa / Upholstery Cleaning' },
+  { label: '💨 Steam Cleaning', description: 'Steam Cleaning Service' },
+  { label: '🔥 Stove Deep Clean', description: 'Stove / Oven Deep Cleaning' },
+  { label: '🪟 Window Cleaning', description: 'Window Cleaning Service' },
+  { label: '🧹 Deep Clean', description: 'Full Deep Cleaning Service' },
+  { label: '🚿 Bathroom Sanitize', description: 'Bathroom Deep Sanitization' },
+];
+
 interface InvoiceSectionProps {
   userId?: string;
 }
@@ -73,6 +82,28 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
     }));
   };
 
+  const addCustomService = (description = 'Custom Service', rate = 0) => {
+    setLineItems(prev => [...prev, {
+      description,
+      property_name: '',
+      address: '',
+      service_type: 'Custom',
+      quantity: 1,
+      rate,
+      total: rate,
+    }]);
+  };
+
+  const removeLineItem = (index: number) => {
+    const li = lineItems[index];
+    // If it was from a property, also uncheck the property
+    if (li.property_name && li.address) {
+      const prop = properties.find(p => p.name === li.property_name && p.address === li.address);
+      if (prop) setSelectedPropertyIds(prev => prev.filter(id => id !== prop.id));
+    }
+    setLineItems(prev => prev.filter((_, i) => i !== index));
+  };
+
   const subtotal = lineItems.reduce((sum, li) => sum + li.total, 0);
   const grandTotal = subtotal + tax - discount;
 
@@ -87,7 +118,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName.trim() || lineItems.length === 0) {
-      toast.error('Please add a client name and select at least one property.');
+      toast.error('Please add a client name and at least one service.');
       return;
     }
     const invoiceNumber = `MP-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, '0')}`;
@@ -225,7 +256,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
 
               {/* Section: Properties */}
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Select Properties</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Select Properties (optional)</p>
                 <div className="max-h-36 overflow-y-auto space-y-1 border border-border/50 rounded-xl p-2.5 bg-card/30">
                   {properties.length === 0 ? (
                     <p className="text-xs text-muted-foreground py-3 text-center">No properties found</p>
@@ -241,6 +272,32 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                 </div>
               </div>
 
+              {/* Section: Quick-Add Services */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Quick-Add Services</p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {SERVICE_PRESETS.map(preset => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => addCustomService(preset.description)}
+                      className="text-xs px-3 py-1.5 rounded-full border border-border/50 bg-card/50 hover:bg-primary/10 hover:border-primary/30 transition-colors text-foreground"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addCustomService()}
+                  className="rounded-xl h-8 gap-1.5 text-xs"
+                >
+                  <Plus size={14} /> Add Custom Service
+                </Button>
+              </div>
+
               {/* Section: Line Items */}
               {lineItems.length > 0 && (
                 <div>
@@ -253,6 +310,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                           <TableHead className="text-[10px] font-bold uppercase h-8 w-16 text-center">Qty</TableHead>
                           <TableHead className="text-[10px] font-bold uppercase h-8 w-24 text-right">Rate</TableHead>
                           <TableHead className="text-[10px] font-bold uppercase h-8 w-20 text-right">Total</TableHead>
+                          <TableHead className="text-[10px] font-bold uppercase h-8 w-10"></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -260,7 +318,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                           <TableRow key={i}>
                             <TableCell className="py-2">
                               <Input value={li.description} onChange={e => updateLineItem(i, 'description', e.target.value)} className="h-7 text-xs border-0 bg-transparent p-0" />
-                              <span className="text-[9px] text-muted-foreground">{li.property_name}</span>
+                              {li.property_name && <span className="text-[9px] text-muted-foreground">{li.property_name}</span>}
                             </TableCell>
                             <TableCell className="py-2 text-center">
                               <Input type="number" min="1" value={li.quantity} onChange={e => updateLineItem(i, 'quantity', parseInt(e.target.value) || 1)} className="h-7 w-12 text-xs text-center mx-auto border-0 bg-transparent p-0" />
@@ -269,6 +327,11 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                               <Input type="number" step="0.01" min="0" value={li.rate} onChange={e => updateLineItem(i, 'rate', parseFloat(e.target.value) || 0)} className="h-7 w-20 text-xs text-right ml-auto border-0 bg-transparent p-0" />
                             </TableCell>
                             <TableCell className="py-2 text-right text-xs font-semibold">${li.total.toFixed(2)}</TableCell>
+                            <TableCell className="py-2 text-center">
+                              <button type="button" onClick={() => removeLineItem(i)} className="text-destructive hover:text-destructive/80 transition-colors">
+                                <Trash2 size={13} />
+                              </button>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

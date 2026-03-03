@@ -215,33 +215,45 @@ export default function PublicInvoice() {
                 ✓ This invoice has been paid
               </div>
             ) : (
-              <button
-                className="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90 active:scale-[0.99]"
-                style={{ background: 'linear-gradient(135deg, #2D5016, #4A7C2E)' }}
-                onClick={() => { /* placeholder for payment */ }}
-              >
-                Pay Now — ${total.toFixed(2)}
-              </button>
-            )}
-          </div>
+              <div className="space-y-4">
+                {/* Zelle CTA */}
+                <div className="rounded-xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(45, 80, 22, 0.06), rgba(74, 124, 46, 0.1))', border: '1px solid rgba(45, 80, 22, 0.15)' }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#2D5016' }}>Pay via Zelle</p>
+                  <p className="text-sm mb-3" style={{ color: '#4b5563' }}>Send <strong style={{ color: '#2D5016' }}>${total.toFixed(2)}</strong> to:</p>
+                  <div
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ background: '#2D5016', color: '#ffffff' }}
+                    onClick={() => {
+                      navigator.clipboard.writeText('payments@maisonpurusa.com');
+                      const el = document.getElementById('zelle-copied');
+                      if (el) { el.textContent = 'Copied!'; setTimeout(() => { el.textContent = 'Tap to copy'; }, 2000); }
+                    }}
+                  >
+                    <Mail size={16} />
+                    <span className="font-semibold text-sm">payments@maisonpurusa.com</span>
+                  </div>
+                  <p id="zelle-copied" className="text-[10px] mt-2" style={{ color: '#6b7280' }}>Tap to copy</p>
+                  <p className="text-[11px] mt-3" style={{ color: '#6b7280' }}>
+                    Please include invoice <strong>{invoice.invoice_number || 'number'}</strong> in the memo.
+                  </p>
+                </div>
 
-          {/* Payment Methods */}
-          <div className="mx-8 mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#2D5016' }}>Payment Methods</p>
-            <div className="space-y-1 text-xs" style={{ color: '#6b7280' }}>
-              <div className="flex items-center gap-2">
-                <Mail size={11} />
-                <span><strong>Zelle:</strong> payments@maisonpurusa.com</span>
+                {/* Alternative methods */}
+                <div className="text-center">
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9ca3af' }}>Other Payment Methods</p>
+                  <div className="space-y-1 text-xs" style={{ color: '#6b7280' }}>
+                    <div className="flex items-center justify-center gap-2">
+                      <CreditCard size={11} />
+                      <span>Credit Card — available at maisonpurusa.com</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-sm">🏦</span>
+                      <span>Check payable to: <strong>Maison Purusa LLC</strong></span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <CreditCard size={11} />
-                <span>Credit Card — available online at maisonpurusa.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm">🏦</span>
-                <span>Check payable to: <strong>Maison Purusa LLC</strong></span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Footer */}
