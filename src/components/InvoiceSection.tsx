@@ -67,6 +67,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
         quantity: 1,
         rate,
         total: rate,
+        service_date: format(new Date(), 'yyyy-MM-dd'),
       }]);
     }
   };
@@ -91,6 +92,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
       quantity: 1,
       rate,
       total: rate,
+      service_date: format(new Date(), 'yyyy-MM-dd'),
     }]);
   };
 
@@ -131,7 +133,12 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
         description: lineItems.map(li => `${li.description} — ${li.property_name}`).join('; '),
         amount: grandTotal,
         property_ids: selectedPropertyIds,
-        service_date: serviceDate ? format(serviceDate, 'yyyy-MM-dd') : '',
+        service_date: (() => {
+          const dates = lineItems.map(li => li.service_date).filter(Boolean).sort();
+          if (dates.length === 0) return '';
+          if (dates.length === 1 || dates[0] === dates[dates.length - 1]) return dates[0]!;
+          return `${format(new Date(dates[0]! + 'T12:00:00'), 'MMM dd')} – ${format(new Date(dates[dates.length - 1]! + 'T12:00:00'), 'MMM dd, yyyy')}`;
+        })(),
         due_date: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
         invoice_number: invoiceNumber,
         line_items: lineItems,
@@ -219,38 +226,21 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                 </div>
               </div>
 
-              {/* Section: Dates */}
+              {/* Section: Due Date */}
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Dates</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Service Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-xl bg-card/50 border-border/50", !serviceDate && "text-muted-foreground")}>
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {serviceDate ? format(serviceDate, 'MMM dd, yyyy') : 'Select'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={serviceDate} onSelect={setServiceDate} initialFocus className="p-3 pointer-events-auto" />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Due Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-xl bg-card/50 border-border/50", !dueDate && "text-muted-foreground")}>
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dueDate ? format(dueDate, 'MMM dd, yyyy') : 'Select'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus className="p-3 pointer-events-auto" />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Due Date</p>
+                <div className="w-1/2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-xl bg-card/50 border-border/50", !dueDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dueDate ? format(dueDate, 'MMM dd, yyyy') : 'Select due date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
@@ -307,6 +297,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                       <TableHeader>
                         <TableRow className="bg-primary/5">
                           <TableHead className="text-[10px] font-bold uppercase h-8">Description</TableHead>
+                          <TableHead className="text-[10px] font-bold uppercase h-8 w-28">Date</TableHead>
                           <TableHead className="text-[10px] font-bold uppercase h-8 w-16 text-center">Qty</TableHead>
                           <TableHead className="text-[10px] font-bold uppercase h-8 w-24 text-right">Rate</TableHead>
                           <TableHead className="text-[10px] font-bold uppercase h-8 w-20 text-right">Total</TableHead>
@@ -319,6 +310,25 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                             <TableCell className="py-2">
                               <Input value={li.description} onChange={e => updateLineItem(i, 'description', e.target.value)} className="h-7 text-xs border-0 bg-transparent p-0" />
                               {li.property_name && <span className="text-[9px] text-muted-foreground">{li.property_name}</span>}
+                            </TableCell>
+                            <TableCell className="py-2">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="ghost" size="sm" className={cn("h-7 text-[11px] px-1.5 w-full justify-start gap-1", !li.service_date && "text-muted-foreground")}>
+                                    <CalendarIcon size={12} />
+                                    {li.service_date ? format(new Date(li.service_date + 'T12:00:00'), 'MMM dd') : 'Date'}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={li.service_date ? new Date(li.service_date + 'T12:00:00') : undefined}
+                                    onSelect={(d) => updateLineItem(i, 'service_date', d ? format(d, 'yyyy-MM-dd') : '')}
+                                    initialFocus
+                                    className="p-3 pointer-events-auto"
+                                  />
+                                </PopoverContent>
+                              </Popover>
                             </TableCell>
                             <TableCell className="py-2 text-center">
                               <Input type="number" min="1" value={li.quantity} onChange={e => updateLineItem(i, 'quantity', parseInt(e.target.value) || 1)} className="h-7 w-12 text-xs text-center mx-auto border-0 bg-transparent p-0" />
