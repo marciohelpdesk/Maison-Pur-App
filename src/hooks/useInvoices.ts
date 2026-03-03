@@ -10,6 +10,7 @@ export interface LineItem {
   quantity: number;
   rate: number;
   total: number;
+  service_date?: string;
 }
 
 export interface Invoice {

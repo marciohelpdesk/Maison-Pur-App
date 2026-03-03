@@ -145,17 +145,21 @@ export default function PublicInvoice() {
                   <thead>
                     <tr style={{ background: '#2D5016' }}>
                       <th className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white">Description</th>
-                      <th className="text-center px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-white w-16">Qty</th>
-                      <th className="text-right px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-white w-24">Rate</th>
-                      <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white w-24">Amount</th>
+                      <th className="text-center px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-white w-20">Date</th>
+                      <th className="text-center px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-white w-12">Qty</th>
+                      <th className="text-right px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-white w-20">Rate</th>
+                      <th className="text-right px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-white w-20">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {invoice.line_items.map((li, i) => (
+                    {[...invoice.line_items].sort((a, b) => (a.service_date || '').localeCompare(b.service_date || '')).map((li, i) => (
                       <tr key={i} style={{ borderBottom: '1px solid #f3f4f6', background: i % 2 === 0 ? '#fafaf7' : '#ffffff' }}>
                         <td className="px-4 py-3">
                           <p className="text-sm font-medium" style={{ color: '#1f2937' }}>{li.property_name || li.description || li.service_type}</p>
                           {li.property_name && <p className="text-[11px]" style={{ color: '#9ca3af' }}>{li.description}{li.address ? ` · ${li.address}` : ''}</p>}
+                        </td>
+                        <td className="text-center px-3 py-3 text-[11px] font-medium" style={{ color: '#4b5563' }}>
+                          {li.service_date ? format(new Date(li.service_date + 'T12:00:00'), 'MMM dd') : '—'}
                         </td>
                         <td className="text-center px-3 py-3 text-sm" style={{ color: '#4b5563' }}>{li.quantity || 1}</td>
                         <td className="text-right px-3 py-3 text-sm" style={{ color: '#4b5563' }}>${Number(li.rate || li.total).toFixed(2)}</td>
