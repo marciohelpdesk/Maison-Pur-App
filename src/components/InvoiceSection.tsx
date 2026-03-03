@@ -151,7 +151,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   };
 
   const copyLink = (token: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/invoice/${token}`);
+    navigator.clipboard.writeText(`https://maisonpur.lovable.app/invoice/${token}`);
     toast.success('Invoice link copied!');
   };
 
