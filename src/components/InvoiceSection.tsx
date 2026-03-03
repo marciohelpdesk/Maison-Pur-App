@@ -60,7 +60,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
       setSelectedPropertyIds(prev => [...prev, propertyId]);
       const rate = property.basePrice || 0;
       setLineItems(prev => [...prev, {
-        description: `${property.serviceType || 'Standard'} Cleaning`,
+        description: `${property.serviceType || 'Standard'} Cleaning — ${property.name}`,
         property_name: property.name,
         address: property.address,
         service_type: property.serviceType || 'Standard',

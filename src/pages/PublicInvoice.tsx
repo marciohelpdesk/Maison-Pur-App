@@ -154,8 +154,8 @@ export default function PublicInvoice() {
                     {invoice.line_items.map((li, i) => (
                       <tr key={i} style={{ borderBottom: '1px solid #f3f4f6', background: i % 2 === 0 ? '#fafaf7' : '#ffffff' }}>
                         <td className="px-4 py-3">
-                          <p className="text-sm font-medium" style={{ color: '#1f2937' }}>{li.description || li.service_type}</p>
-                          <p className="text-[11px]" style={{ color: '#9ca3af' }}>{li.property_name}{li.address ? ` · ${li.address}` : ''}</p>
+                          <p className="text-sm font-medium" style={{ color: '#1f2937' }}>{li.property_name || li.description || li.service_type}</p>
+                          {li.property_name && <p className="text-[11px]" style={{ color: '#9ca3af' }}>{li.description}{li.address ? ` · ${li.address}` : ''}</p>}
                         </td>
                         <td className="text-center px-3 py-3 text-sm" style={{ color: '#4b5563' }}>{li.quantity || 1}</td>
                         <td className="text-right px-3 py-3 text-sm" style={{ color: '#4b5563' }}>${Number(li.rate || li.total).toFixed(2)}</td>
@@ -224,13 +224,13 @@ export default function PublicInvoice() {
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{ background: '#2D5016', color: '#ffffff' }}
                     onClick={() => {
-                      navigator.clipboard.writeText('payments@maisonpurusa.com');
+                      navigator.clipboard.writeText('9413304713');
                       const el = document.getElementById('zelle-copied');
                       if (el) { el.textContent = 'Copied!'; setTimeout(() => { el.textContent = 'Tap to copy'; }, 2000); }
                     }}
                   >
-                    <Mail size={16} />
-                    <span className="font-semibold text-sm">payments@maisonpurusa.com</span>
+                    <Phone size={16} />
+                    <span className="font-semibold text-sm">(941) 330-4713</span>
                   </div>
                   <p id="zelle-copied" className="text-[10px] mt-2" style={{ color: '#6b7280' }}>Tap to copy</p>
                   <p className="text-[11px] mt-3" style={{ color: '#6b7280' }}>
