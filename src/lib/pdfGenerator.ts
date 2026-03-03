@@ -811,8 +811,7 @@ class PremiumReportGenerator {
 
     // Build dossier URL from publicToken
     if (data.publicToken) {
-      const baseUrl = window.location.origin;
-      this.dossierUrl = `${baseUrl}/r/${data.publicToken}`;
+      this.dossierUrl = `https://maisonpur.lovable.app/r/${data.publicToken}`;
     }
 
     const { job, inventory, lostAndFound } = data;
