@@ -3,10 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export interface LineItem {
+  description: string;
   property_name: string;
   address: string;
   service_type: string;
-  price: number;
+  quantity: number;
+  rate: number;
+  total: number;
 }
 
 export interface Invoice {
@@ -14,14 +17,20 @@ export interface Invoice {
   user_id: string;
   client_name: string;
   client_email: string;
+  client_address: string;
+  client_phone: string;
   description: string;
   amount: number;
   status: string;
   public_token: string;
   property_ids: string[];
   service_date: string;
+  due_date: string;
   invoice_number: string;
   line_items: LineItem[];
+  notes: string;
+  discount: number;
+  tax: number;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +51,8 @@ export function useInvoices(userId?: string) {
         ...d,
         property_ids: d.property_ids || [],
         line_items: d.line_items || [],
+        discount: Number(d.discount) || 0,
+        tax: Number(d.tax) || 0,
       })) as Invoice[];
     },
     enabled: !!userId,
@@ -51,16 +62,26 @@ export function useInvoices(userId?: string) {
     mutationFn: async (invoice: {
       client_name: string;
       client_email: string;
+      client_address: string;
+      client_phone: string;
       description: string;
       amount: number;
       property_ids: string[];
       service_date: string;
+      due_date: string;
       invoice_number: string;
       line_items: LineItem[];
+      notes: string;
+      discount: number;
+      tax: number;
     }) => {
       const { data, error } = await supabase
         .from('invoices')
-        .insert({ ...invoice, user_id: userId!, line_items: invoice.line_items as any })
+        .insert({
+          ...invoice,
+          user_id: userId!,
+          line_items: invoice.line_items as any,
+        })
         .select()
         .single();
       if (error) throw error;
@@ -119,6 +140,8 @@ export function usePublicInvoice(token?: string) {
         ...d,
         property_ids: d.property_ids || [],
         line_items: d.line_items || [],
+        discount: Number(d.discount) || 0,
+        tax: Number(d.tax) || 0,
       } as Invoice;
     },
     enabled: !!token,

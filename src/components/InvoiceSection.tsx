@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FileText, Plus, Copy, Trash2, CheckCircle, Clock, X, CalendarIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FileText, Plus, Copy, Trash2, CheckCircle, Clock, X, CalendarIcon, ExternalLink, ChevronRight, DollarSign, Receipt } from 'lucide-react';
 import { useInvoices, LineItem } from '@/hooks/useInvoices';
 import { useProperties } from '@/hooks/useProperties';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface InvoiceSectionProps {
   userId?: string;
@@ -22,10 +24,19 @@ interface InvoiceSectionProps {
 export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   const { invoices, isLoading, createInvoice, toggleStatus, deleteInvoice } = useInvoices(userId);
   const { properties } = useProperties(userId);
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+
+  // Form state
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
+  const [clientAddress, setClientAddress] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
   const [serviceDate, setServiceDate] = useState<Date>();
+  const [dueDate, setDueDate] = useState<Date>();
+  const [notes, setNotes] = useState('Thank you for choosing Maison Purusa and supporting sustainable practices that care for your home and the planet!');
+  const [discount, setDiscount] = useState(0);
+  const [tax, setTax] = useState(0);
   const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>([]);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
@@ -38,20 +49,40 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
       setLineItems(prev => prev.filter(li => li.property_name !== property.name || li.address !== property.address));
     } else {
       setSelectedPropertyIds(prev => [...prev, propertyId]);
+      const rate = property.basePrice || 0;
       setLineItems(prev => [...prev, {
+        description: `${property.serviceType || 'Standard'} Cleaning`,
         property_name: property.name,
         address: property.address,
         service_type: property.serviceType || 'Standard',
-        price: property.basePrice || 0,
+        quantity: 1,
+        rate,
+        total: rate,
       }]);
     }
   };
 
-  const updateLineItemPrice = (index: number, price: number) => {
-    setLineItems(prev => prev.map((li, i) => i === index ? { ...li, price } : li));
+  const updateLineItem = (index: number, field: keyof LineItem, value: any) => {
+    setLineItems(prev => prev.map((li, i) => {
+      if (i !== index) return li;
+      const updated = { ...li, [field]: value };
+      if (field === 'quantity' || field === 'rate') {
+        updated.total = (updated.quantity || 0) * (updated.rate || 0);
+      }
+      return updated;
+    }));
   };
 
-  const total = lineItems.reduce((sum, li) => sum + li.price, 0);
+  const subtotal = lineItems.reduce((sum, li) => sum + li.total, 0);
+  const grandTotal = subtotal + tax - discount;
+
+  const resetForm = () => {
+    setClientName(''); setClientEmail(''); setClientAddress(''); setClientPhone('');
+    setServiceDate(undefined); setDueDate(undefined);
+    setNotes('Thank you for choosing Maison Purusa and supporting sustainable practices that care for your home and the planet!');
+    setDiscount(0); setTax(0); setSelectedPropertyIds([]); setLineItems([]);
+    setShowForm(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,172 +90,284 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
       toast.error('Please add a client name and select at least one property.');
       return;
     }
-    const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`;
+    const invoiceNumber = `MP-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, '0')}`;
     createInvoice.mutate(
       {
         client_name: clientName.trim(),
         client_email: clientEmail.trim(),
-        description: lineItems.map(li => `${li.service_type} — ${li.property_name}`).join('; '),
-        amount: total,
+        client_address: clientAddress.trim(),
+        client_phone: clientPhone.trim(),
+        description: lineItems.map(li => `${li.description} — ${li.property_name}`).join('; '),
+        amount: grandTotal,
         property_ids: selectedPropertyIds,
         service_date: serviceDate ? format(serviceDate, 'yyyy-MM-dd') : '',
+        due_date: dueDate ? format(dueDate, 'yyyy-MM-dd') : '',
         invoice_number: invoiceNumber,
         line_items: lineItems,
+        notes: notes.trim(),
+        discount,
+        tax,
       },
-      {
-        onSuccess: () => {
-          setClientName(''); setClientEmail(''); setServiceDate(undefined);
-          setSelectedPropertyIds([]); setLineItems([]); setShowForm(false);
-        },
-      }
+      { onSuccess: resetForm }
     );
   };
 
   const copyLink = (token: string) => {
     navigator.clipboard.writeText(`${window.location.origin}/invoice/${token}`);
-    toast.success('Link copied!');
+    toast.success('Invoice link copied!');
   };
 
+  const recentInvoices = invoices.slice(0, 3);
+  const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.amount), 0);
+  const pendingTotal = invoices.filter(i => i.status === 'pending').reduce((s, i) => s + Number(i.amount), 0);
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-panel p-4 mb-4">
-      <div className="flex items-center justify-between mb-4">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-panel p-5 mb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <FileText size={20} className="text-primary" />
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/20 to-primary/10 flex items-center justify-center">
+            <Receipt size={22} className="text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Invoices</h3>
-            <p className="text-xs text-muted-foreground">{invoices.length} invoice{invoices.length !== 1 ? 's' : ''}</p>
+            <h3 className="font-bold text-foreground text-base">Invoices</h3>
+            <p className="text-[11px] text-muted-foreground">{invoices.length} total · ${totalRevenue.toFixed(0)} earned</p>
           </div>
         </div>
-        <Button size="sm" variant="outline" onClick={() => setShowForm(!showForm)}>
-          {showForm ? <X size={16} /> : <Plus size={16} />}
-          <span className="ml-1">{showForm ? 'Close' : 'New'}</span>
+        <Button size="sm" onClick={() => setShowForm(!showForm)} className="rounded-xl h-9 gap-1.5">
+          {showForm ? <X size={15} /> : <Plus size={15} />}
+          {showForm ? 'Cancel' : 'New Invoice'}
         </Button>
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="space-y-4 mb-4 p-4 rounded-lg bg-muted/30 border border-border">
-          {/* Client info */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Client Name</Label>
-              <Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="e.g. John Smith" required className="h-9 text-sm" />
-            </div>
-            <div>
-              <Label className="text-xs">Client Email</Label>
-              <Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="client@email.com" className="h-9 text-sm" />
-            </div>
+      {/* Revenue Summary */}
+      {!showForm && invoices.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Paid</p>
+            <p className="text-lg font-bold text-emerald-600">${totalRevenue.toFixed(2)}</p>
           </div>
-
-          {/* Service date */}
-          <div>
-            <Label className="text-xs">Service Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-9 text-sm", !serviceDate && "text-muted-foreground")}>
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {serviceDate ? format(serviceDate, 'PPP') : 'Pick a date'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={serviceDate} onSelect={setServiceDate} initialFocus className={cn("p-3 pointer-events-auto")} />
-              </PopoverContent>
-            </Popover>
+          <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-amber-600 font-semibold">Pending</p>
+            <p className="text-lg font-bold text-amber-600">${pendingTotal.toFixed(2)}</p>
           </div>
-
-          {/* Property selector */}
-          <div>
-            <Label className="text-xs mb-2 block">Select Properties</Label>
-            <div className="max-h-40 overflow-y-auto space-y-1 border border-border rounded-lg p-2">
-              {properties.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-2 text-center">No properties found</p>
-              ) : properties.map(p => (
-                <label key={p.id} className="flex items-center gap-2 p-1.5 rounded hover:bg-muted/50 cursor-pointer">
-                  <Checkbox checked={selectedPropertyIds.includes(p.id)} onCheckedChange={() => toggleProperty(p.id)} />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium text-foreground truncate block">{p.name}</span>
-                    <span className="text-[10px] text-muted-foreground truncate block">{p.address} · ${p.basePrice?.toFixed(2) || '0.00'}</span>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Line items */}
-          {lineItems.length > 0 && (
-            <div>
-              <Label className="text-xs mb-2 block">Line Items</Label>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs h-8">Property</TableHead>
-                    <TableHead className="text-xs h-8">Service</TableHead>
-                    <TableHead className="text-xs h-8 text-right">Price ($)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {lineItems.map((li, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="py-1.5 text-xs">{li.property_name}</TableCell>
-                      <TableCell className="py-1.5 text-xs">{li.service_type}</TableCell>
-                      <TableCell className="py-1.5 text-right">
-                        <Input type="number" step="0.01" min="0" value={li.price} onChange={e => updateLineItemPrice(i, parseFloat(e.target.value) || 0)} className="h-7 w-24 text-xs text-right ml-auto" />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow>
-                    <TableCell colSpan={2} className="py-1.5 text-xs font-semibold text-right">Total</TableCell>
-                    <TableCell className="py-1.5 text-xs font-bold text-right">${total.toFixed(2)}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-          <Button type="submit" size="sm" disabled={createInvoice.isPending} className="w-full h-9">
-            {createInvoice.isPending ? 'Creating...' : `Create Invoice — $${total.toFixed(2)}`}
-          </Button>
-        </form>
+        </div>
       )}
 
-      {/* Invoice list */}
-      {isLoading ? (
-        <div className="text-center py-4 text-muted-foreground text-sm">Loading...</div>
-      ) : invoices.length === 0 ? (
-        <div className="text-center py-6 text-muted-foreground text-sm">No invoices created yet</div>
-      ) : (
-        <div className="space-y-2">
-          {invoices.map(inv => (
-            <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-sm text-foreground truncate">{inv.client_name}</p>
-                  {inv.invoice_number && <span className="text-[10px] text-muted-foreground">{inv.invoice_number}</span>}
-                  <Badge variant={inv.status === 'paid' ? 'default' : 'secondary'} className={`text-[10px] ${inv.status === 'paid' ? 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30' : 'bg-amber-500/20 text-amber-600 border-amber-500/30'}`}>
-                    {inv.status === 'paid' ? <CheckCircle size={10} className="mr-1" /> : <Clock size={10} className="mr-1" />}
-                    {inv.status === 'paid' ? 'Paid' : 'Pending'}
-                  </Badge>
+      {/* Create Form */}
+      <AnimatePresence>
+        {showForm && (
+          <motion.form
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            onSubmit={handleSubmit}
+            className="space-y-4 mb-4 overflow-hidden"
+          >
+            <div className="p-4 rounded-2xl bg-card/50 border border-border/50 space-y-4">
+              {/* Section: Client */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Client Information</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Full Name *</Label>
+                    <Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="John Smith" required className="h-10 rounded-xl bg-card/50 border-border/50" />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Email</Label>
+                    <Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="john@email.com" className="h-10 rounded-xl bg-card/50 border-border/50" />
+                  </div>
+                  <div className="col-span-2">
+                    <Label className="text-xs text-muted-foreground">Address</Label>
+                    <Input value={clientAddress} onChange={e => setClientAddress(e.target.value)} placeholder="123 Main St, City, State" className="h-10 rounded-xl bg-card/50 border-border/50" />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Phone</Label>
+                    <Input value={clientPhone} onChange={e => setClientPhone(e.target.value)} placeholder="+1 (941) 000-0000" className="h-10 rounded-xl bg-card/50 border-border/50" />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  ${Number(inv.amount).toFixed(2)} · {format(new Date(inv.created_at), 'MMM dd, yyyy')}
-                  {inv.line_items?.length > 0 && ` · ${inv.line_items.length} propert${inv.line_items.length !== 1 ? 'ies' : 'y'}`}
-                </p>
               </div>
-              <div className="flex items-center gap-1 ml-2">
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => toggleStatus.mutate({ id: inv.id, currentStatus: inv.status })} title="Toggle status">
-                  {inv.status === 'paid' ? <Clock size={14} /> : <CheckCircle size={14} />}
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => copyLink(inv.public_token)} title="Copy link">
-                  <Copy size={14} />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
-                  <Trash2 size={14} />
-                </Button>
+
+              {/* Section: Dates */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Dates</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Service Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-xl bg-card/50 border-border/50", !serviceDate && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {serviceDate ? format(serviceDate, 'MMM dd, yyyy') : 'Select'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar mode="single" selected={serviceDate} onSelect={setServiceDate} initialFocus className="p-3 pointer-events-auto" />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Due Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-xl bg-card/50 border-border/50", !dueDate && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dueDate ? format(dueDate, 'MMM dd, yyyy') : 'Select'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus className="p-3 pointer-events-auto" />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section: Properties */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Select Properties</p>
+                <div className="max-h-36 overflow-y-auto space-y-1 border border-border/50 rounded-xl p-2.5 bg-card/30">
+                  {properties.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-3 text-center">No properties found</p>
+                  ) : properties.map(p => (
+                    <label key={p.id} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                      <Checkbox checked={selectedPropertyIds.includes(p.id)} onCheckedChange={() => toggleProperty(p.id)} />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-foreground truncate block">{p.name}</span>
+                        <span className="text-[10px] text-muted-foreground truncate block">{p.address} · ${p.basePrice?.toFixed(2) || '0.00'}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section: Line Items */}
+              {lineItems.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Services</p>
+                  <div className="overflow-x-auto rounded-xl border border-border/50">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-primary/5">
+                          <TableHead className="text-[10px] font-bold uppercase h-8">Description</TableHead>
+                          <TableHead className="text-[10px] font-bold uppercase h-8 w-16 text-center">Qty</TableHead>
+                          <TableHead className="text-[10px] font-bold uppercase h-8 w-24 text-right">Rate</TableHead>
+                          <TableHead className="text-[10px] font-bold uppercase h-8 w-20 text-right">Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {lineItems.map((li, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="py-2">
+                              <Input value={li.description} onChange={e => updateLineItem(i, 'description', e.target.value)} className="h-7 text-xs border-0 bg-transparent p-0" />
+                              <span className="text-[9px] text-muted-foreground">{li.property_name}</span>
+                            </TableCell>
+                            <TableCell className="py-2 text-center">
+                              <Input type="number" min="1" value={li.quantity} onChange={e => updateLineItem(i, 'quantity', parseInt(e.target.value) || 1)} className="h-7 w-12 text-xs text-center mx-auto border-0 bg-transparent p-0" />
+                            </TableCell>
+                            <TableCell className="py-2 text-right">
+                              <Input type="number" step="0.01" min="0" value={li.rate} onChange={e => updateLineItem(i, 'rate', parseFloat(e.target.value) || 0)} className="h-7 w-20 text-xs text-right ml-auto border-0 bg-transparent p-0" />
+                            </TableCell>
+                            <TableCell className="py-2 text-right text-xs font-semibold">${li.total.toFixed(2)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Financial Summary */}
+                  <div className="mt-3 space-y-1.5 text-right">
+                    <div className="flex justify-end items-center gap-4 text-xs">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium w-24">${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-end items-center gap-2 text-xs">
+                      <span className="text-muted-foreground">Eco Fee / Tax</span>
+                      <Input type="number" step="0.01" min="0" value={tax} onChange={e => setTax(parseFloat(e.target.value) || 0)} className="h-7 w-20 text-xs text-right border-0 bg-card/50 rounded-lg" />
+                    </div>
+                    <div className="flex justify-end items-center gap-2 text-xs">
+                      <span className="text-muted-foreground">Discount</span>
+                      <Input type="number" step="0.01" min="0" value={discount} onChange={e => setDiscount(parseFloat(e.target.value) || 0)} className="h-7 w-20 text-xs text-right border-0 bg-card/50 rounded-lg" />
+                    </div>
+                    <div className="flex justify-end items-center gap-4 text-sm font-bold border-t border-border/50 pt-2 mt-2">
+                      <span>TOTAL</span>
+                      <span className="w-24 text-primary">${grandTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              <div>
+                <Label className="text-xs text-muted-foreground">Thank You Note</Label>
+                <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className="rounded-xl bg-card/50 border-border/50 text-xs" />
               </div>
             </div>
-          ))}
-        </div>
+
+            <Button type="submit" disabled={createInvoice.isPending} className="w-full h-11 rounded-xl font-bold text-sm">
+              {createInvoice.isPending ? 'Creating...' : `Generate Invoice — $${grandTotal.toFixed(2)}`}
+            </Button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      {/* Recent Invoices */}
+      {!showForm && (
+        <>
+          {isLoading ? (
+            <div className="text-center py-4 text-muted-foreground text-sm">Loading...</div>
+          ) : invoices.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText size={32} className="mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-sm text-muted-foreground">No invoices yet</p>
+              <p className="text-[11px] text-muted-foreground/60">Create your first invoice above</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {recentInvoices.map(inv => (
+                <motion.div
+                  key={inv.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-card/30 border border-border/30 hover:border-border/60 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="font-semibold text-sm text-foreground truncate">{inv.client_name}</p>
+                      <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 ${inv.status === 'paid' ? 'border-emerald-500/40 text-emerald-600 bg-emerald-500/10' : 'border-amber-500/40 text-amber-600 bg-amber-500/10'}`}>
+                        {inv.status === 'paid' ? 'Paid' : 'Pending'}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      {inv.invoice_number && <span className="font-mono">{inv.invoice_number} · </span>}
+                      ${Number(inv.amount).toFixed(2)} · {format(new Date(inv.created_at), 'MMM dd')}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-0.5 ml-2">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => toggleStatus.mutate({ id: inv.id, currentStatus: inv.status })} title="Toggle status">
+                      {inv.status === 'paid' ? <Clock size={14} /> : <CheckCircle size={14} />}
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => copyLink(inv.public_token)} title="Copy public link">
+                      <Copy size={14} />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => window.open(`/invoice/${inv.public_token}`, '_blank')} title="View invoice">
+                      <ExternalLink size={14} />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg text-destructive hover:text-destructive" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+
+              {invoices.length > 3 && (
+                <Button variant="ghost" className="w-full text-xs text-muted-foreground gap-1 h-9 rounded-xl" onClick={() => navigate('/invoices')}>
+                  View All {invoices.length} Invoices <ChevronRight size={14} />
+                </Button>
+              )}
+            </div>
+          )}
+        </>
       )}
     </motion.div>
   );
