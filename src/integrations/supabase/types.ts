@@ -164,49 +164,67 @@ export type Database = {
       invoices: {
         Row: {
           amount: number
+          client_address: string | null
           client_email: string
           client_name: string
+          client_phone: string | null
           created_at: string
           description: string
+          discount: number | null
+          due_date: string | null
           id: string
           invoice_number: string | null
           line_items: Json | null
+          notes: string | null
           property_ids: string[] | null
           public_token: string
           service_date: string | null
           status: string
+          tax: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           amount?: number
+          client_address?: string | null
           client_email?: string
           client_name: string
+          client_phone?: string | null
           created_at?: string
           description?: string
+          discount?: number | null
+          due_date?: string | null
           id?: string
           invoice_number?: string | null
           line_items?: Json | null
+          notes?: string | null
           property_ids?: string[] | null
           public_token?: string
           service_date?: string | null
           status?: string
+          tax?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
+          client_address?: string | null
           client_email?: string
           client_name?: string
+          client_phone?: string | null
           created_at?: string
           description?: string
+          discount?: number | null
+          due_date?: string | null
           id?: string
           invoice_number?: string | null
           line_items?: Json | null
+          notes?: string | null
           property_ids?: string[] | null
           public_token?: string
           service_date?: string | null
           status?: string
+          tax?: number | null
           updated_at?: string
           user_id?: string
         }
