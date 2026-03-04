@@ -1,34 +1,55 @@
 
 
-## Plan: Move Invoices to Dedicated Page + Fix Mobile Responsiveness
+## Plan: OG Meta for Invoice Links + Duplicate Property Support + Logo Improvements
 
-### Two Issues
-
-**1. Invoice section is embedded in Settings** — should be its own dedicated page (like Finance/Invoice History), accessible via a navigation button in Settings instead of the full form inline.
-
-**2. Public invoice is squeezed on mobile** — the screenshot shows text crammed together because the table uses fixed column widths (`w-20`, `w-12`) and padding (`px-8`) that don't adapt to small screens.
+### 3 Issues to Fix
 
 ---
 
-### Changes
+### 1. OG Meta Tags for Invoice Links (Brand Preview when sharing)
 
-#### 1. Create dedicated Invoice page (`src/pages/Invoices.tsx`)
-- New page that renders the `InvoiceSection` component within its own full-screen layout (same pattern as Finance/InvoiceHistory pages — back button header, scrollable content).
-- Route already exists at `/invoices` pointing to InvoiceHistory. We'll create a new route `/invoices/new` for the creation flow, or better: merge creation + history into a single `/invoices` page with tabs.
+**Problem**: When sharing `/invoice/:token` on WhatsApp/iMessage, the link preview shows generic app metadata instead of the Pur brand with invoice details.
 
-**Approach**: Replace the current `/invoices` page (InvoiceHistory) with a combined page that has two tabs: **"New Invoice"** (the creation form) and **"History"** (the existing invoice list). This keeps everything in one clean section.
+**Solution**: Create a new edge function `share-invoice` (modeled after `share-report`) that:
+- Accepts `?token=XXX` parameter
+- For social bots: serves HTML with OG meta tags showing the Pur logo, client name, invoice number, and amount
+- For regular browsers: redirects to `https://maisonpur.lovable.app/invoice/{token}`
+- Update `copyLink` in `InvoiceSection.tsx` and `InvoiceHistoryContent.tsx` to generate links through this edge function instead of direct `/invoice/:token` URLs
 
-#### 2. Update Settings (`src/views/SettingsView.tsx`)
-- Remove the inline `<InvoiceSection />` component.
-- Replace it with a navigation button (same style as the "Earnings" button) that navigates to `/invoices`.
+**Files**:
+- `supabase/functions/share-invoice/index.ts` (new)
+- `src/components/InvoiceSection.tsx` — update `copyLink`
+- `src/components/InvoiceHistoryContent.tsx` — update copy link logic
 
-#### 3. Fix Public Invoice mobile responsiveness (`src/pages/PublicInvoice.tsx`)
-From the screenshot, the issues are:
-- `px-8` padding is too wide for small screens — change to `px-4 sm:px-8`
-- Table columns `w-20`, `w-12` are fixed and squeeze the description — use responsive approach
-- On mobile (<640px), switch to a **card-based layout** instead of a table: each line item as a stacked card showing property name, date, rate, and amount
-- Header section needs `flex-col` on mobile instead of side-by-side
-- Font sizes and spacing need mobile breakpoints
+---
+
+### 2. Allow Same Property Multiple Times (different dates)
+
+**Problem**: The property selection uses checkboxes — toggling adds or removes the property. You cannot add "Mahalo" twice (e.g., cleaned on March 28 AND March 30).
+
+**Solution**: Change the property selection from toggle checkboxes to an "Add" button approach:
+- Each property gets a **"+ Add"** button instead of a checkbox
+- Clicking it adds a new line item for that property (with today's date as default)
+- You can add the same property multiple times — each gets its own row with its own date
+- The remove button (trash icon) on each line item already handles removal individually
+- Remove `selectedPropertyIds` state and the checkbox-based toggle logic
+
+**File**: `src/components/InvoiceSection.tsx`
+
+---
+
+### 3. Logo Centered and Larger on Public Invoice
+
+**Problem**: Logo is left-aligned and small (`h-10 sm:h-12`).
+
+**Solution**: Center the logo above the header content and increase its size:
+- Move the logo to a centered position above the company info / invoice title row
+- Increase size to `h-14 sm:h-16`
+- Add subtle bottom margin for spacing
+
+**File**: `src/pages/PublicInvoice.tsx`
+
+---
 
 ### No database changes needed.
 
