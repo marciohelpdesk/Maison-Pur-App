@@ -43,7 +43,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   const [clientPhone, setClientPhone] = useState('');
   const [serviceDate, setServiceDate] = useState<Date>();
   const [dueDate, setDueDate] = useState<Date>();
-  const [notes, setNotes] = useState('Thank you for choosing Maison Purusa and supporting sustainable practices that care for your home and the planet!');
+  const [notes, setNotes] = useState('Thank you for choosing Maison Pur and supporting sustainable practices that care for your home and the planet!');
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
@@ -98,7 +98,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   const resetForm = () => {
     setClientName(''); setClientEmail(''); setClientAddress(''); setClientPhone('');
     setServiceDate(undefined); setDueDate(undefined);
-    setNotes('Thank you for choosing Maison Purusa and supporting sustainable practices that care for your home and the planet!');
+    setNotes('Thank you for choosing Maison Pur and supporting sustainable practices that care for your home and the planet!');
     setDiscount(0); setTax(0); setLineItems([]);
     setShowForm(false);
   };
@@ -418,7 +418,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
                     <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => copyLink(inv.public_token)} title="Copy public link">
                       <Copy size={14} />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => window.open(`/invoice/${inv.public_token}`, '_blank')} title="View invoice">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => window.open(`https://maisonpur.lovable.app/invoice/${inv.public_token}`, '_blank')} title="View invoice">
                       <ExternalLink size={14} />
                     </Button>
                     <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg text-destructive hover:text-destructive" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">

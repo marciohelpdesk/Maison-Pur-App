@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 import { usePublicInvoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, Loader2, Leaf, Mail, Phone, MapPin, Globe, CreditCard } from 'lucide-react';
-import purLogo from '@/assets/pur-logo.png';
+const purLogo = 'https://i.ibb.co/LXGHmRYY/Logo-solo.png';
 
 export default function PublicInvoice() {
   const { token } = useParams<{ token: string }>();
@@ -64,7 +64,7 @@ export default function PublicInvoice() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Globe size={10} />
-                    <a href="https://maisonpurusa.com" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">maisonpurusa.com</a>
+                    <a href="https://maisonpurusa.com" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">maisonpur.com</a>
                   </div>
                 </div>
               </div>
@@ -280,11 +280,11 @@ export default function PublicInvoice() {
                   <div className="space-y-1 text-xs" style={{ color: '#6b7280' }}>
                     <div className="flex items-center justify-center gap-2">
                       <CreditCard size={11} />
-                      <span>Credit Card — available at maisonpurusa.com</span>
+                      <span>Credit Card — available at maisonpur.com</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm">🏦</span>
-                      <span>Check payable to: <strong>Maison Purusa LLC</strong></span>
+                      <span>Check payable to: <strong>Maison Pur LLC</strong></span>
                     </div>
                   </div>
                 </div>
@@ -300,7 +300,7 @@ export default function PublicInvoice() {
                 <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">Eco-Innovation & Empowerment Ethos</span>
               </div>
               <span className="text-[10px] text-white/50">
-                Maison Purusa LLC · maisonpurusa.com
+                Maison Pur LLC · maisonpur.com
               </span>
             </div>
             <p className="text-[9px] text-white/40 mt-2 text-center">
