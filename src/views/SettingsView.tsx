@@ -40,7 +40,7 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
   return (
     <div className="flex flex-col h-full relative z-10 pb-8">
       {/* Header */}
-      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'transparent' }}>
         <div>
           
           <h1 className="font-bold text-foreground text-2xl">{t('settings.title')}</h1>
