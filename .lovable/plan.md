@@ -1,67 +1,52 @@
 
-Problema real identificado (com causa raiz)
-- Você não está vendo o logo no formulário e no report porque a URL configurada em `src/lib/brand.ts` (`https://i.ibb.co/yBMkg7CV/Design-sem-nome.png`) está retornando placeholder/404 do i.ibb em runtime.
-- O arquivo antigo local também está corrompido: `src/assets/pur-logo.png` (e `public/logo-pur.png`) contém uma captura de invoice com “imgbb image not found”, não o logo.
-- Existe um logo válido no projeto: `public/logo-512.png` (gota correta).
+Objetivo aprovado: corrigir apenas o logo dentro das páginas públicas de Invoice e Checklist Report, mantendo o brand social (mulher + gota) igual ao que já estava escolhido para iMessage/WhatsApp.
 
-Do I know what the issue is?
-- Sim. O app está apontando para uma origem externa instável/indisponível e, quando ela falha, cai em imagem inválida (ou em asset local corrompido).
+Diagnóstico (causa raiz)
+- O problema não é de rota nem de banco.
+- O `BrandLogo` tenta carregar a URL externa (`i.ibb.co`) e, em alguns acessos, recebe a imagem-placeholder “imgbb image not found” com resposta válida (HTTP 200), então `onError` não dispara.
+- A validação atual de placeholder no `BrandLogo` está restrita demais (`<50x50`) e não captura esse placeholder (que é maior).
+- Além disso, `src/assets/pur-logo.png` e `public/logo-pur.png` estão corrompidos (contêm screenshot), então não podem ser usados como fallback.
+- O asset confiável no projeto é `public/logo-512.png` (gota correta).
 
-Arquivos onde o erro aparece hoje
-- Formulários/auth:
-  - `src/pages/auth/Login.tsx`
-  - `src/pages/auth/ResetPassword.tsx`
-  - `src/views/LoginView.tsx`
-  - `src/views/ResetPasswordView.tsx`
-- Report/Invoice públicos:
-  - `src/pages/PublicReport.tsx`
-  - `src/pages/PublicInvoice.tsx`
-- Outros pontos de branding:
-  - `src/views/DashboardView.tsx`
-  - `src/lib/pdfGenerator.ts`
+Escopo exato da correção
+1) Manter o brand de compartilhamento social (preview de WhatsApp/iMessage) sem alteração.
+   - Não alterar `BRAND_OG_IMAGE`.
+   - Não alterar o comportamento das funções de compartilhamento (`share-invoice` / `share-report`) para o card social.
+
+2) Corrigir somente exibição do logo dentro dos relatórios públicos:
+   - Invoice público (`/invoice/:token`)
+   - Checklist report público (`/r/:token`)
+
+Plano de implementação
+1. Ajustar `src/lib/brand.ts`
+- Definir o logo local estável (`/logo-512.png`) como fonte principal para renderização dentro do app.
+- Manter a URL externa apenas como opcional/backup (não como primária).
+- Preservar `BRAND_OG_IMAGE` atual (mulher + gota) para previews sociais.
+
+2. Ajustar `src/components/BrandLogo.tsx`
+- Tornar o fluxo resiliente para nunca mostrar placeholder azul do imgbb:
+  - Carregar primeiro o logo local estável.
+  - Se houver tentativa de URL externa, validar placeholder por dimensão realista (não só `<50x50`).
+  - Em qualquer falha/placeholder, forçar `/logo-512.png`.
+- Resultado: logo sempre visível no Invoice e no Report, sem depender de hotlink externo.
+
+3. Garantir consumo nos pontos públicos
+- Confirmar que `src/pages/PublicInvoice.tsx` e `src/pages/PublicReport.tsx` continuam usando `<BrandLogo />` (já usam), então a correção central no componente propaga para ambos automaticamente.
+
+4. Alinhar PDF (consistência de marca)
+- Ajustar `src/lib/pdfGenerator.ts` para usar a mesma prioridade de logo estável (local primeiro), evitando placeholder em exportações de relatório.
+
+Validação fim a fim
+1) Abrir um link real de invoice público enviado ao cliente e confirmar o logo da gota no cabeçalho.
+2) Abrir um link real de checklist report público e confirmar o logo no topo/rodapé.
+3) Colar o link no WhatsApp e no iMessage e confirmar que o card de preview continua com o brand anterior (mulher + gota), sem regressão.
+4) Fazer um teste com `?v=timestamp` para evitar cache antigo de preview.
+
+Detalhes técnicos (resumo)
+- Arquivos-alvo:
   - `src/lib/brand.ts`
-
-Plano de correção (definitivo)
-1) Blindar branding central
-- Atualizar `src/lib/brand.ts` para manter:
-  - URL externa oficial (como primary)
-  - fallback local confiável (`/logo-512.png`)
-- Exemplo de estratégia: `BRAND_LOGO_PRIMARY`, `BRAND_LOGO_FALLBACK`, `BRAND_LOGO_URLS`.
-
-2) Criar componente único de logo resiliente
-- Criar `src/components/BrandLogo.tsx` para substituir `<img>` direto.
-- Regras no componente:
-  - `src` inicial = URL externa oficial.
-  - `onError` -> troca para fallback local.
-  - `onLoad` -> valida se imagem carregada é “placeholder” (ex.: dimensões muito pequenas / padrão de erro) e troca para fallback.
-  - aplicar `referrerPolicy="no-referrer"` para reduzir bloqueio por hotlink.
-- Resultado: continua priorizando o link que você enviou, mas sem quebrar visual quando ele falhar.
-
-3) Aplicar o componente nos pontos visíveis (form e report + consistência geral)
-- Trocar todos os `<img src={purLogo}>` por `<BrandLogo .../>` em:
-  - `src/pages/auth/Login.tsx`
-  - `src/pages/auth/ResetPassword.tsx`
-  - `src/views/LoginView.tsx`
-  - `src/views/ResetPasswordView.tsx`
-  - `src/pages/PublicReport.tsx` (logo do topo e logo do footer)
-  - `src/pages/PublicInvoice.tsx`
-  - `src/views/DashboardView.tsx`
-
-4) Corrigir logo no PDF/report exportado
-- Em `src/lib/pdfGenerator.ts`, alterar `loadLogo()` para tentar múltiplas fontes:
-  - 1º URL externa oficial
-  - 2º fallback local `/logo-512.png`
-- Validar imagem carregada antes de embutir (evitar salvar “imgbb not found” no PDF).
-
-5) Pequena limpeza de consistência
-- Em `src/pages/PublicReport.tsx`, trocar `ogUrl` hardcoded por `BRAND_OG_IMAGE` de `src/lib/brand.ts`.
-
-Validação fim a fim (obrigatória)
-1. Abrir `/login` e `/reset-password`: logo deve aparecer.
-2. Abrir um link público de report `/r/:token`: logo do topo e footer devem aparecer.
-3. Abrir um link público de invoice `/invoice/:token`: logo no header deve aparecer.
-4. Gerar PDF de report: logo deve sair correto no documento.
-5. Testar com cache-buster (`?v=timestamp`) para garantir que não é cache antigo.
-
-Banco de dados
-- Sem mudanças de banco.
+  - `src/components/BrandLogo.tsx`
+  - `src/lib/pdfGenerator.ts`
+  - (validação de uso) `src/pages/PublicInvoice.tsx`, `src/pages/PublicReport.tsx`
+- Sem alterações de banco de dados.
+- Sem mudanças de autenticação/permite público como já está.
