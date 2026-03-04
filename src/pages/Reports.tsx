@@ -98,8 +98,7 @@ export default function Reports() {
   };
 
   const getShareUrl = (report: CleaningReport) => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    return `${supabaseUrl}/functions/v1/share-report?token=${report.public_token}`;
+    return `https://maisonpur.lovable.app/r/${report.public_token}?v=${Date.now()}`;
   };
 
   const handleCopyLink = async (report: CleaningReport) => {
