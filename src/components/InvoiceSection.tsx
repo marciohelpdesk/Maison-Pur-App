@@ -137,8 +137,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   };
 
   const copyLink = (token: string) => {
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'ebafqcanwdqomqcrifrj';
-    navigator.clipboard.writeText(`https://${projectId}.supabase.co/functions/v1/share-invoice?token=${token}`);
+    navigator.clipboard.writeText(`https://maisonpur.lovable.app/invoice/${token}?v=${Date.now()}`);
     toast.success('Invoice link copied!');
   };
 

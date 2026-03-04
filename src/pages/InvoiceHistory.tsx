@@ -22,7 +22,7 @@ export default function InvoiceHistory() {
   const totalAll = totalPaid + totalPending;
 
   const copyLink = (token: string) => {
-    navigator.clipboard.writeText(`https://maisonpur.lovable.app/invoice/${token}`);
+    navigator.clipboard.writeText(`https://maisonpur.lovable.app/invoice/${token}?v=${Date.now()}`);
     toast.success('Invoice link copied!');
   };
 
