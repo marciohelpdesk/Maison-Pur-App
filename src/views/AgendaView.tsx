@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   ChevronLeft, ChevronRight, Calendar, CalendarDays, CalendarRange, Plus,
-  MapPin, Bed, Bath, Play, Clock, Check, AlertTriangle, Car, ExternalLink
-} from 'lucide-react';
+  MapPin, Bed, Bath, Play, Clock, Check, AlertTriangle, Car, ExternalLink } from
+'lucide-react';
 import { openAddressInMaps } from '@/lib/utils';
 import { Job, JobStatus, Property, Employee } from '@/types';
 import { DayView } from '@/components/calendar/DayView';
@@ -11,14 +11,14 @@ import { WeekView } from '@/components/calendar/WeekView';
 import { MonthView } from '@/components/calendar/MonthView';
 import { AddJobModal } from '@/components/AddJobModal';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { 
-  format, 
-  addDays, 
+import {
+  format,
+  addDays,
   addWeeks,
   addMonths,
-  startOfWeek, 
-  startOfMonth
-} from 'date-fns';
+  startOfWeek,
+  startOfMonth } from
+'date-fns';
 import { toast } from 'sonner';
 
 interface AgendaViewProps {
@@ -53,7 +53,7 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
     setDraggedJob(job);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', job.id);
-    
+
     const dragImage = document.createElement('div');
     dragImage.textContent = job.clientName;
     dragImage.style.cssText = 'position: absolute; top: -1000px; padding: 8px 12px; background: white; border-radius: 8px; font-size: 12px;';
@@ -64,7 +64,7 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
 
   const handleDrop = useCallback((e: React.DragEvent, date: Date, hour?: number) => {
     e.preventDefault();
-    
+
     if (!draggedJob || draggedJob.status !== JobStatus.SCHEDULED) {
       setDraggedJob(null);
       return;
@@ -72,7 +72,7 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
 
     const newDateStr = format(date, 'yyyy-MM-dd');
     let newTime = draggedJob.time;
-    
+
     if (hour !== undefined) {
       newTime = `${hour.toString().padStart(2, '0')}:00`;
     }
@@ -83,22 +83,22 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
     } else {
       toast.info('Drag-to-reschedule is in preview mode');
     }
-    
+
     setDraggedJob(null);
   }, [draggedJob, onRescheduleJob]);
 
   const navigate = (direction: 'prev' | 'next') => {
     const delta = direction === 'next' ? 1 : -1;
-    
+
     switch (calendarView) {
       case 'day':
-        setSelectedDate(prev => addDays(prev, delta));
+        setSelectedDate((prev) => addDays(prev, delta));
         break;
       case 'week':
-        setCurrentWeekStart(prev => addWeeks(prev, delta));
+        setCurrentWeekStart((prev) => addWeeks(prev, delta));
         break;
       case 'month':
-        setCurrentMonth(prev => addMonths(prev, delta));
+        setCurrentMonth((prev) => addMonths(prev, delta));
         break;
     }
   };
@@ -114,17 +114,17 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
     }
   };
 
-  const viewButtons: { view: CalendarView; label: string }[] = [
-    { view: 'day', label: t('agenda.day') },
-    { view: 'week', label: t('agenda.week') },
-    { view: 'month', label: t('agenda.month') },
-  ];
+  const viewButtons: {view: CalendarView;label: string;}[] = [
+  { view: 'day', label: t('agenda.day') },
+  { view: 'week', label: t('agenda.week') },
+  { view: 'month', label: t('agenda.month') }];
+
 
   // Get selected date jobs for the timeline
-  const selectedDateJobs = useMemo(() => 
-    jobs.filter(j => j.date === format(selectedDate, 'yyyy-MM-dd'))
-      .sort((a, b) => a.time.localeCompare(b.time)),
-    [jobs, selectedDate]
+  const selectedDateJobs = useMemo(() =>
+  jobs.filter((j) => j.date === format(selectedDate, 'yyyy-MM-dd')).
+  sort((a, b) => a.time.localeCompare(b.time)),
+  [jobs, selectedDate]
   );
 
   // Day summary
@@ -140,33 +140,33 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
       <header className="sticky top-0 z-20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)' }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{t('agenda.subtitle')}</p>
+            
             <h1 className="font-bold text-foreground text-2xl">{t('agenda.title')}</h1>
           </div>
           <button
             onClick={() => setShowAddJobModal(true)}
-            className="px-4 py-2 bg-cta text-cta-foreground rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg"
-          >
+            className="px-4 py-2 bg-cta text-cta-foreground rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg">
+            
             <Plus size={14} /> {t('agenda.addJob')}
           </button>
         </div>
         
         {/* View Toggle */}
         <div className="bg-muted p-1 rounded-xl flex">
-          {viewButtons.map(({ view, label }) => (
-            <button
-              key={view}
-              onClick={() => setCalendarView(view)}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all
-                ${calendarView === view 
-                  ? 'bg-card text-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-                }
-              `}
-            >
+          {viewButtons.map(({ view, label }) =>
+          <button
+            key={view}
+            onClick={() => setCalendarView(view)}
+            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all
+                ${calendarView === view ?
+            'bg-card text-foreground shadow-sm' :
+            'text-muted-foreground hover:text-foreground'}
+              `
+            }>
+            
               {label}
             </button>
-          ))}
+          )}
         </div>
       </header>
 
@@ -175,24 +175,24 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
         onOpenChange={setShowAddJobModal}
         properties={properties}
         employees={employees}
-        onAddJob={handleAddJob}
-      />
+        onAddJob={handleAddJob} />
+      
       
       <div className="px-6 py-4 space-y-6">
         {/* Calendar Navigation */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
           <div className="flex items-center justify-between mb-4">
-            <button 
+            <button
               onClick={() => navigate('prev')}
-              className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground"
-            >
+              className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground">
+              
               <ChevronLeft size={18} />
             </button>
             <h2 className="font-semibold text-foreground">{getHeaderTitle()}</h2>
-            <button 
+            <button
               onClick={() => navigate('next')}
-              className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground"
-            >
+              className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground">
+              
               <ChevronRight size={18} />
             </button>
           </div>
@@ -203,48 +203,48 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              {calendarView === 'day' && (
-                <DayView
-                  selectedDate={selectedDate}
-                  jobs={jobs}
-                  onViewJob={onViewJob}
-                  onDragStart={handleDragStart}
-                  onDrop={handleDrop}
-                />
-              )}
+              transition={{ duration: 0.2 }}>
               
-              {calendarView === 'week' && (
-                <WeekView
-                  weekStart={currentWeekStart}
-                  selectedDate={selectedDate}
-                  jobs={jobs}
-                  onSelectDate={setSelectedDate}
-                  onViewJob={onViewJob}
-                  onDragStart={handleDragStart}
-                  onDrop={handleDrop}
-                />
-              )}
+              {calendarView === 'day' &&
+              <DayView
+                selectedDate={selectedDate}
+                jobs={jobs}
+                onViewJob={onViewJob}
+                onDragStart={handleDragStart}
+                onDrop={handleDrop} />
+
+              }
               
-              {calendarView === 'month' && (
-                <MonthView
-                  currentMonth={currentMonth}
-                  selectedDate={selectedDate}
-                  jobs={jobs}
-                  onSelectDate={setSelectedDate}
-                  onViewJob={onViewJob}
-                  onDragStart={handleDragStart}
-                  onDrop={handleDrop}
-                />
-              )}
+              {calendarView === 'week' &&
+              <WeekView
+                weekStart={currentWeekStart}
+                selectedDate={selectedDate}
+                jobs={jobs}
+                onSelectDate={setSelectedDate}
+                onViewJob={onViewJob}
+                onDragStart={handleDragStart}
+                onDrop={handleDrop} />
+
+              }
+              
+              {calendarView === 'month' &&
+              <MonthView
+                currentMonth={currentMonth}
+                selectedDate={selectedDate}
+                jobs={jobs}
+                onSelectDate={setSelectedDate}
+                onViewJob={onViewJob}
+                onDragStart={handleDragStart}
+                onDrop={handleDrop} />
+
+              }
             </motion.div>
           </AnimatePresence>
         </div>
 
         {/* Day Timeline */}
-        {calendarView !== 'day' && (
-          <section>
+        {calendarView !== 'day' &&
+        <section>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="font-bold text-foreground text-lg">
@@ -254,39 +254,39 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
                   {daySummary.total} jobs • ${daySummary.totalEarnings} previsto
                 </p>
               </div>
-              {selectedDateJobs.length > 0 && (
-                <span className="text-xs font-medium text-success bg-success/10 px-3 py-1 rounded-full">
+              {selectedDateJobs.length > 0 &&
+            <span className="text-xs font-medium text-success bg-success/10 px-3 py-1 rounded-full">
                   <Check size={10} className="inline mr-1" />
-                  {selectedDateJobs.filter(j => j.status === JobStatus.COMPLETED).length}/{selectedDateJobs.length}
+                  {selectedDateJobs.filter((j) => j.status === JobStatus.COMPLETED).length}/{selectedDateJobs.length}
                 </span>
-              )}
+            }
             </div>
 
             <div className="relative space-y-6">
               {selectedDateJobs.map((job, idx) => {
-                const isInProgress = job.status === JobStatus.IN_PROGRESS;
-                const isCompleted = job.status === JobStatus.COMPLETED;
-                const property = properties.find(p => p.id === job.propertyId);
+              const isInProgress = job.status === JobStatus.IN_PROGRESS;
+              const isCompleted = job.status === JobStatus.COMPLETED;
+              const property = properties.find((p) => p.id === job.propertyId);
 
-                return (
-                  <motion.div
-                    key={job.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.08 }}
-                    className="relative pl-14"
-                  >
+              return (
+                <motion.div
+                  key={job.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.08 }}
+                  className="relative pl-14">
+                  
                     {/* Timeline connector */}
-                    {idx < selectedDateJobs.length - 1 && (
-                      <div className="absolute left-[44px] top-12 bottom-[-24px] w-0.5 bg-gradient-to-b from-primary/40 to-border/30" />
-                    )}
+                    {idx < selectedDateJobs.length - 1 &&
+                  <div className="absolute left-[44px] top-12 bottom-[-24px] w-0.5 bg-gradient-to-b from-primary/40 to-border/30" />
+                  }
 
                     {/* Time label */}
                     <div className="absolute left-0 top-0 w-12 text-center">
                       <p className="text-xs font-bold text-foreground">{job.time}</p>
-                      {job.checkinDeadline && (
-                        <p className="text-[10px] text-muted-foreground">{job.checkinDeadline}</p>
-                      )}
+                      {job.checkinDeadline &&
+                    <p className="text-[10px] text-muted-foreground">{job.checkinDeadline}</p>
+                    }
                     </div>
 
                     {/* Timeline dot */}
@@ -298,32 +298,32 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
                     </div>
 
                     {/* Job Card */}
-                    <div 
-                      className={`bg-card rounded-2xl p-4 shadow-sm cursor-pointer transition-all
-                        ${isInProgress 
-                          ? 'border-2 border-primary shadow-lg' 
-                          : 'border border-border/50'
-                        }
-                        ${isCompleted ? 'opacity-75' : ''}
+                    <div
+                    className={`bg-card rounded-2xl p-4 shadow-sm cursor-pointer transition-all
+                        ${isInProgress ?
+                    'border-2 border-primary shadow-lg' :
+                    'border border-border/50'}
+                        ${
+                    isCompleted ? 'opacity-75' : ''}
                       `}
-                      onClick={() => onViewJob(job.id)}
-                    >
+                    onClick={() => onViewJob(job.id)}>
+                    
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full
-                              ${isCompleted ? 'text-success bg-success/10' : 
-                                isInProgress ? 'text-primary-foreground bg-gradient-to-r from-primary to-primary/80' : 
-                                'text-muted-foreground bg-muted'}
+                              ${isCompleted ? 'text-success bg-success/10' :
+                          isInProgress ? 'text-primary-foreground bg-gradient-to-r from-primary to-primary/80' :
+                          'text-muted-foreground bg-muted'}
                             `}>
                               {isCompleted ? 'CONCLUÍDO' : isInProgress ? 'EM ANDAMENTO' : 'AGENDADO'}
                             </span>
                           </div>
                           <h3 className="font-bold text-foreground text-lg">{job.clientName}</h3>
                           <button
-                            onClick={(e) => { e.stopPropagation(); openAddressInMaps(job.address); }}
-                            className="text-xs text-muted-foreground mt-1 flex items-center gap-1 underline decoration-dotted hover:text-primary transition-colors"
-                          >
+                          onClick={(e) => {e.stopPropagation();openAddressInMaps(job.address);}}
+                          className="text-xs text-muted-foreground mt-1 flex items-center gap-1 underline decoration-dotted hover:text-primary transition-colors">
+                          
                             <MapPin size={10} /> {job.address}
                             <ExternalLink size={9} className="opacity-50" />
                           </button>
@@ -334,15 +334,15 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
                       </div>
 
                       {/* Progress bar for in-progress */}
-                      {isInProgress && (
-                        <div className="mt-3">
+                      {isInProgress &&
+                    <div className="mt-3">
                           <div className="bg-muted rounded-full h-2 mb-1 overflow-hidden">
                             <div className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full relative" style={{ width: '65%' }}>
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
                             </div>
                           </div>
                         </div>
-                      )}
+                    }
 
                       {/* Property details */}
                       <div className="flex items-center justify-between mt-3">
@@ -350,53 +350,53 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
                           {property?.bedrooms && <span className="flex items-center gap-1"><Bed size={12} /> {property.bedrooms}</span>}
                           {property?.bathrooms && <span className="flex items-center gap-1"><Bath size={12} /> {property.bathrooms}</span>}
                         </div>
-                        {isInProgress && onStartJob && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onStartJob(job.id); }}
-                            className="px-4 py-2 bg-cta text-cta-foreground rounded-xl text-sm font-semibold shadow-md"
-                          >
+                        {isInProgress && onStartJob &&
+                      <button
+                        onClick={(e) => {e.stopPropagation();onStartJob(job.id);}}
+                        className="px-4 py-2 bg-cta text-cta-foreground rounded-xl text-sm font-semibold shadow-md">
+                        
                             Continuar
                           </button>
-                        )}
+                      }
                       </div>
 
                       {/* Scheduled actions */}
-                      {job.status === JobStatus.SCHEDULED && (
-                        <div className="mt-3 pt-3 border-t border-border/30 flex gap-2">
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); onStartJob?.(job.id); }}
-                            className="flex-1 py-2 bg-cta text-cta-foreground rounded-lg text-xs font-medium"
-                          >
+                      {job.status === JobStatus.SCHEDULED &&
+                    <div className="mt-3 pt-3 border-t border-border/30 flex gap-2">
+                          <button
+                        onClick={(e) => {e.stopPropagation();onStartJob?.(job.id);}}
+                        className="flex-1 py-2 bg-cta text-cta-foreground rounded-lg text-xs font-medium">
+                        
                             <Play size={10} className="inline mr-1 fill-primary-foreground" /> Iniciar
                           </button>
                         </div>
-                      )}
+                    }
                     </div>
 
                     {/* Travel time between jobs */}
-                    {idx < selectedDateJobs.length - 1 && (
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground ml-4 mt-3">
+                    {idx < selectedDateJobs.length - 1 &&
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground ml-4 mt-3">
                         <Car size={12} />
                         <span>~15 min</span>
                       </div>
-                    )}
-                  </motion.div>
-                );
-              })}
+                  }
+                  </motion.div>);
 
-              {selectedDateJobs.length === 0 && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-card rounded-2xl p-6 text-center shadow-sm border border-border/50"
-                >
+            })}
+
+              {selectedDateJobs.length === 0 &&
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-card rounded-2xl p-6 text-center shadow-sm border border-border/50">
+              
                   <p className="text-muted-foreground text-sm">{t('agenda.noJobs')}</p>
                 </motion.div>
-              )}
+            }
             </div>
           </section>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
