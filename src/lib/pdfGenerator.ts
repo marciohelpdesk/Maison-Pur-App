@@ -87,10 +87,7 @@ class PremiumReportGenerator {
         img.src = url;
       });
 
-    const ok = await tryLoad(BRAND_LOGO_URL);
-    if (!ok) {
-      await tryLoad(`${window.location.origin}/logo-512.png`);
-    }
+    await tryLoad(`${window.location.origin}/logo-512.png`);
   }
 
   private sc(c: RGB) { this.pdf.setTextColor(c[0], c[1], c[2]); }
