@@ -108,24 +108,24 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
   return (
     <div className="flex flex-col h-full relative z-10 pb-8">
       {/* Header */}
-      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'linear-gradient(to bottom, hsl(160 35% 18%) 0%, hsl(160 40% 30%) 60%, transparent 100%)' }}>
+      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Avatar className="w-12 h-12 border-2 border-white/40 shadow-md">
+            <Avatar className="w-12 h-12 border-2 border-border shadow-md">
               <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-              <AvatarFallback className="bg-primary/20 text-white font-bold">
+              <AvatarFallback className="bg-primary/20 text-primary font-bold">
                 {userProfile.name?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-xl font-bold text-white">{greeting} 👋</h1>
-              <p className="text-[11px] font-medium text-white/60 flex items-center gap-1">
+              <h1 className="text-xl font-bold text-foreground">{greeting} 👋</h1>
+              <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
                 <CalendarIcon size={12} />
                 <span className="capitalize">{formattedDate}</span>
               </p>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
             <img src={purLogo} className="w-6 h-6 object-contain" alt="Pur" />
           </div>
         </div>
