@@ -28,14 +28,14 @@ export default function InvoiceHistory() {
 
   return (
     <div className="flex flex-col h-full relative z-10 pb-8">
-      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'linear-gradient(to bottom, hsl(160 35% 18%) 0%, hsl(160 40% 30%) 60%, transparent 100%)' }}>
+      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)' }}>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <p className="text-[10px] text-white/70 font-medium uppercase tracking-wider">Revenue</p>
-            <h1 className="font-bold text-white text-2xl">Invoice History</h1>
+            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Revenue</p>
+            <h1 className="font-bold text-foreground text-2xl">Invoice History</h1>
           </div>
         </div>
       </div>
