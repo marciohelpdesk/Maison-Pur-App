@@ -46,7 +46,7 @@ export const PropertiesView = ({ properties, onViewProperty, onAddProperty }: Pr
   return (
     <div className="flex flex-col h-full relative z-10 pb-8">
       {/* Header */}
-      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(20px)' }}>
         <div className="flex items-center justify-between mb-4">
           <div>
             
