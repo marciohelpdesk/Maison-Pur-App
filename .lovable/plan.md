@@ -1,39 +1,43 @@
 
+Plano aprovado para resolver de forma definitiva o problema do link que aparece como “código” em vez do card + invoice.
 
-## Plan: Fix Link Preview Card Image + Footer Text
+### Diagnóstico objetivo (o que encontrei)
+1. O botão **Copy link** de invoice ainda copia URL da **função de backend** (`.../functions/v1/share-invoice?...`), não a URL pública da invoice.
+2. Essa URL da função está sendo interpretada por alguns apps de mensagem como texto/arquivo, por isso aparece “código”.
+3. O preview de mensageiros (iMessage/WhatsApp) também faz cache agressivo por URL; quando a URL é igual, ele reaproveita preview antigo.
+4. A rota pública `https://maisonpur.lovable.app/invoice/:token` já existe e é a forma mais estável para abrir a invoice no cliente.
 
-### Root Cause
+### Implementação proposta
+1. **Trocar a geração de link compartilhado para URL pública direta (produção)**  
+   - Invoice: `https://maisonpur.lovable.app/invoice/${token}`
+   - Report: `https://maisonpur.lovable.app/r/${token}`
+2. **Adicionar cache-buster no link copiado** (para forçar novo card nos mensageiros):  
+   - Exemplo: `?v=${Date.now()}`
+   - Isso evita que o cliente veja preview antigo em cache.
+3. **Manter branding oficial no card** com a imagem:
+   - `https://i.ibb.co/1Yh2WJjw/Branding.png`
+   - Confirmar nas metas globais e nos pontos dinâmicos já existentes.
+4. **Endurecer as funções de compartilhamento como fallback** (para links antigos que já foram enviados):
+   - Garantir `Content-Type: text/html; charset=utf-8`
+   - Garantir `og:image` com a imagem oficial
+   - Ajustar cache para reduzir respostas antigas
+5. **Publicar e validar ponta a ponta** com link novo (não reutilizar link antigo sem cache-buster).
 
-The screenshot shows iMessage rendering the edge function response as a **"Text Document"** instead of a rich card. This happens because:
+### Arquivos que serão ajustados
+- `src/components/InvoiceSection.tsx` (copyLink)
+- `src/components/InvoiceHistoryContent.tsx` (copyLink)
+- `src/pages/Reports.tsx` (getShareUrl)
+- `supabase/functions/share-invoice/index.ts` (fallback de links antigos)
+- `supabase/functions/share-report/index.ts` (fallback de links antigos)
+- `index.html` (apenas validação final de OG/Twitter image)
 
-1. The current `og:image` points to a Supabase storage URL (`cleaning-photos/brand/og-image.png`) which may not be properly accessible or cached by social crawlers
-2. iMessage and WhatsApp require the OG image to be a **directly accessible, publicly hosted image** with proper headers — Supabase storage URLs with encoded paths (`%2F`) can cause issues with some crawlers
+### Resultado esperado
+- Ao copiar e enviar o link público para o cliente, ele verá **card com a imagem Branding** (em vez de código).
+- Ao abrir o link, cairá direto na **invoice pública**.
+- Links antigos continuarão funcionando via fallback.
 
-The user provided a new branded card image: `https://i.ibb.co/1Yh2WJjw/Branding.png` — this is hosted on imgBB which is well-supported by all social crawlers.
+### Observação importante
+Mesmo após correção, previews antigos em iMessage podem permanecer para a **mesma URL**. Por isso, o `?v=timestamp` no link copiado é parte essencial da solução.
 
-### Changes
-
-#### 1. Update OG image in both edge functions
-Replace the Supabase storage OG image URL with the user's new branded card:
-
-- **`supabase/functions/share-invoice/index.ts`** (line 10): Change `OG_IMAGE` to `https://i.ibb.co/1Yh2WJjw/Branding.png`
-- **`supabase/functions/share-report/index.ts`** (line 10): Same change
-
-#### 2. Update OG image in `index.html`
-- Line 21: Change `og:image` to `https://i.ibb.co/1Yh2WJjw/Branding.png`
-- Line 25: Change `twitter:image` to `https://i.ibb.co/1Yh2WJjw/Branding.png`
-
-#### 3. Update PublicReport.tsx dynamic OG meta
-- Line 82: Change the `ogUrl` variable to `https://i.ibb.co/1Yh2WJjw/Branding.png`
-
-#### 4. Deploy both edge functions
-Re-deploy `share-invoice` and `share-report` so the new image takes effect immediately.
-
-### Files to modify
-- `supabase/functions/share-invoice/index.ts`
-- `supabase/functions/share-report/index.ts`
-- `index.html`
-- `src/pages/PublicReport.tsx`
-
-### No database changes needed.
-
+### Banco de dados
+- **Sem alterações de banco**.
