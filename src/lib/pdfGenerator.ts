@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import { Job, InventoryItem, DamageReport, ChecklistSection, LostAndFoundItem } from '@/types';
-import purLogo from '@/assets/pur-logo.png';
+import { BRAND_LOGO_URL } from '@/lib/brand';
 
 export interface ReportData {
   job: Job;
@@ -80,7 +80,8 @@ class PremiumReportGenerator {
         resolve();
       };
       img.onerror = () => resolve();
-      img.src = purLogo;
+      img.crossOrigin = 'anonymous';
+      img.src = BRAND_LOGO_URL;
     });
   }
 
