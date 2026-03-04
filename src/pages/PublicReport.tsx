@@ -3,7 +3,7 @@ import { usePublicReport, ReportRoom, ReportPhoto } from '@/hooks/useReports';
 import { useState, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
 import { enUS, ptBR, ko, th, es } from 'date-fns/locale';
-const purLogo = 'https://i.ibb.co/LXGHmRYY/Logo-solo.png';
+const purLogo = '/logo-pur.jpeg';
 
 // ─── Translations (matches reference HTML) ───
 const translations: Record<string, Record<string, string>> = {
