@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 import { usePublicInvoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, Loader2, Leaf, Mail, Phone, MapPin, Globe, CreditCard, Droplets } from 'lucide-react';
-const purLogo = '/logo-pur.jpeg';
+import purLogo from '@/assets/pur-logo.png';
 
 export default function PublicInvoice() {
   const { token } = useParams<{ token: string }>();
