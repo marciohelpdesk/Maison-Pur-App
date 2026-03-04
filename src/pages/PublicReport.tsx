@@ -79,7 +79,7 @@ export default function PublicReport() {
   // Dynamic OG meta tags for shared links
   useEffect(() => {
     if (!report) return;
-    const ogUrl = 'https://i.ibb.co/LXGHmRYY/Logo-solo.png';
+    const ogUrl = 'https://i.ibb.co/1Yh2WJjw/Branding.png';
     document.title = `Maison Pur | ${report.property_name}`;
     const setMeta = (attr: string, val: string, content: string) => {
       let el = document.querySelector(`meta[${attr}="${val}"]`) as HTMLMetaElement;
