@@ -64,7 +64,7 @@ export default function PublicInvoice() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Globe size={10} />
-                    <a href="https://maisonpur.com" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">maisonpur.com</a>
+                    <a href="https://maisonpurusa.com" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">maisonpurusa.com</a>
                   </div>
                 </div>
               </div>
@@ -283,7 +283,7 @@ export default function PublicInvoice() {
                   <div className="space-y-1 text-xs" style={{ color: '#6b7280' }}>
                     <div className="flex items-center justify-center gap-2">
                       <CreditCard size={11} />
-                      <span>Credit Card — available at maisonpur.com</span>
+                      <span>Credit Card — available at maisonpurusa.com</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm">🏦</span>
@@ -308,7 +308,7 @@ export default function PublicInvoice() {
                 <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">Cleaning with Integrity and Respect</span>
               </div>
               <span className="text-[10px] text-white/50">
-                Maison Pur LLC · maisonpur.com
+                Maison Pur LLC · maisonpurusa.com
               </span>
             </div>
             <p className="text-[9px] text-white/40 mt-2 text-center">
