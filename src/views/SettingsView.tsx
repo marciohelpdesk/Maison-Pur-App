@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil } from 'lucide-react';
+
+import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil, Receipt } from 'lucide-react';
 import { UserProfile, Employee } from '@/types';
 import { PageHeader } from '@/components/PageHeader';
 import { TeamManagement } from '@/components/TeamManagement';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { CalendarSyncSection } from '@/components/CalendarSyncSection';
-import { InvoiceSection } from '@/components/InvoiceSection';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
 
 interface SettingsViewProps {
@@ -24,6 +25,7 @@ interface SettingsViewProps {
 export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewFinance, onAddEmployee, onDeleteEmployee, onUpdateProfile }: SettingsViewProps) => {
   const { t, language, setLanguage } = useLanguage();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const navigate = useNavigate();
 
   const settingsItems = [
     { icon: Bell, label: t('settings.notifications'), description: t('settings.notificationsDesc') },
@@ -107,8 +109,25 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
           />
         </motion.div>
 
-        {/* Invoice Section */}
-        <InvoiceSection userId={userId} />
+        {/* Invoice Button */}
+        <motion.button 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.16 }}
+          onClick={() => navigate('/invoices')}
+          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Receipt size={20} className="text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium">Invoices</p>
+              <p className="text-xs text-muted-foreground">Create & manage invoices</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-muted-foreground" />
+        </motion.button>
 
         {/* Calendar Sync Section */}
         <CalendarSyncSection userId={userId} />

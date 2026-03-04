@@ -17,7 +17,7 @@ const Execution = lazy(() => import('@/pages/Execution'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Finance = lazy(() => import('@/pages/Finance'));
 const Reports = lazy(() => import('@/pages/Reports'));
-const InvoiceHistory = lazy(() => import('@/pages/InvoiceHistory'));
+const Invoices = lazy(() => import('@/pages/Invoices'));
 const PublicReport = lazy(() => import('@/pages/PublicReport'));
 const PublicInvoice = lazy(() => import('@/pages/PublicInvoice'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -167,7 +167,7 @@ export const routes = [
       },
       {
         path: 'invoices',
-        element: <InvoiceHistory />,
+        element: <Invoices />,
       },
     ],
   },
