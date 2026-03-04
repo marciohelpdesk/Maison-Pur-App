@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const APP_URL = "https://maisonpur.lovable.app";
-const OG_IMAGE = "https://ebafqcanwdqomqcrifrj.supabase.co/storage/v1/object/public/cleaning-photos/brand%2Fog-image.png";
+const OG_IMAGE = "https://i.ibb.co/1Yh2WJjw/Branding.png";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
