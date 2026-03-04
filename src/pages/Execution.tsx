@@ -10,6 +10,7 @@ import { PageLoader } from '@/lib/routes';
 import { generateCleaningReport } from '@/lib/pdfGenerator';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { BackgroundEffects } from '@/components/BackgroundEffects';
 
 export default function Execution() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -172,7 +173,8 @@ export default function Execution() {
     <>
       <div className="bg-florida-sky-fixed" />
       <div className="min-h-screen relative z-10 md:flex md:items-center md:justify-center">
-        <div className="mobile-frame">
+        <div className="mobile-frame relative">
+          <BackgroundEffects />
           <ExecutionContent
             job={job}
             inventory={inventory}
