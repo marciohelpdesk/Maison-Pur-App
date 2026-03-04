@@ -1,25 +1,23 @@
 
 
-## Plano: Headers 100% Transparentes
+## Plano: Substituir logo externo quebrado por asset local
 
 ### Problema
-Os headers ainda têm `rgba(255,255,255,0.3)` + `backdrop-filter: blur(20px)`, criando uma camada branca sutil. O usuário quer **zero** fundo — apenas o texto flutuando sobre os gradientes rosa/índigo do app.
+O logotipo da Maison Pur está hospedado no imgbb (`https://i.ibb.co/LXGHmRYY/Logo-solo.png`) e o link quebrou — aparece "image not found" nas páginas públicas de Invoice e Report.
+
+### Solução
+Copiar o logotipo enviado pelo usuário (`logotipo.jpeg`) para o projeto como asset local e referenciar em todos os lugares onde o logo quebrado é usado.
 
 ### Alterações
 
-Trocar o `style={{ background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(20px)' }}` por `style={{ background: 'transparent' }}` em **7 arquivos**:
+| Ação | Detalhe |
+|------|---------|
+| Copiar `logotipo.jpeg` para `public/logo-pur.jpeg` | Usa `public/` pois as páginas públicas (Invoice/Report) precisam de URL direta, não import ES6 |
+| `src/pages/PublicInvoice.tsx` (linha 5) | Trocar `purLogo` de URL imgbb para `/logo-pur.jpeg` |
+| `src/pages/PublicReport.tsx` (linha 6) | Idem: `/logo-pur.jpeg` |
 
-| Arquivo | Linha |
-|---------|-------|
-| `src/views/DashboardView.tsx` | 111 |
-| `src/views/AgendaView.tsx` | 140 |
-| `src/views/PropertiesView.tsx` | 49 |
-| `src/views/SettingsView.tsx` | 43 |
-| `src/pages/Reports.tsx` | 123 |
-| `src/pages/Invoices.tsx` | 27 |
-| `src/pages/InvoiceHistory.tsx` | 31 |
-
-Cada header mantém `sticky top-0 z-20 px-6 py-4` para posicionamento, mas o fundo fica totalmente transparente — os gradientes rosa/índigo do app ficam 100% visíveis atrás do texto.
+### Nota
+Os OG images (`Branding.png`) no `index.html`, `share-report` e `share-invoice` usam uma URL imgbb diferente que ainda funciona — não serão alterados agora.
 
 ### Sem alterações de banco de dados
 
