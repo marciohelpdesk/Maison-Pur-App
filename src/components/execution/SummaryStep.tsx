@@ -1,13 +1,80 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Clock, Camera, ClipboardCheck, Star, MessageSquare, AlertTriangle, Package, Search, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Job, InventoryItem } from '@/types';
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { generateCleaningReport, downloadPdf } from '@/lib/pdfGenerator';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PdfPreviewModal } from './PdfPreviewModal';
+
+// Confetti colors: lavender, pink, mint, gold (design system palette)
+const CONFETTI_COLORS = [
+  'hsl(270 60% 70%)',   // lavender
+  'hsl(330 100% 86%)',  // pink
+  'hsl(170 80% 70%)',   // mint
+  'hsl(45 100% 60%)',   // gold
+  'hsl(200 80% 70%)',   // cyan accent
+  'hsl(330 80% 65%)',   // rose
+];
+
+const ConfettiExplosion = ({ onComplete }: { onComplete: () => void }) => {
+  const particles = useMemo(() => 
+    Array.from({ length: 35 }, (_, i) => ({
+      id: i,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      angle: (i / 35) * 360 + (Math.random() * 30 - 15),
+      distance: 120 + Math.random() * 180,
+      size: 6 + Math.random() * 6,
+      rotation: Math.random() * 720 - 360,
+      delay: Math.random() * 0.15,
+      shape: i % 3, // 0=square, 1=circle, 2=rectangle
+    })), []
+  );
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onAnimationComplete={onComplete}
+    >
+      {particles.map(p => {
+        const rad = (p.angle * Math.PI) / 180;
+        const x = Math.cos(rad) * p.distance;
+        const y = Math.sin(rad) * p.distance;
+        
+        return (
+          <motion.div
+            key={p.id}
+            initial={{ x: 0, y: 0, scale: 0, rotate: 0, opacity: 1 }}
+            animate={{
+              x,
+              y: y + 200, // gravity pull
+              scale: [0, 1.2, 1, 0.5],
+              rotate: p.rotation,
+              opacity: [1, 1, 1, 0],
+            }}
+            transition={{
+              duration: 1.8,
+              delay: p.delay,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            style={{
+              position: 'absolute',
+              width: p.shape === 2 ? p.size * 1.5 : p.size,
+              height: p.shape === 2 ? p.size * 0.6 : p.size,
+              backgroundColor: p.color,
+              borderRadius: p.shape === 1 ? '50%' : '2px',
+            }}
+          />
+        );
+      })}
+    </motion.div>
+  );
+};
 
 interface SummaryStepProps {
   job: Job;
@@ -24,6 +91,7 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
   const [showPreview, setShowPreview] = useState(false);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [pdfFilename, setPdfFilename] = useState('');
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Calculate stats
   const totalTasks = job.checklist.reduce((acc, s) => acc + s.items.length, 0);
@@ -83,21 +151,24 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
 
   const handleComplete = async () => {
     setIsSubmitting(true);
-    try {
+    setShowConfetti(true);
+    // Wait for confetti animation before completing
+    setTimeout(() => {
       onComplete(note);
-    } catch (error) {
-      console.error('Error completing job:', error);
-      onComplete(note);
-    }
+    }, 2000);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="flex flex-col h-full"
-    >
+    <>
+      <AnimatePresence>
+        {showConfetti && <ConfettiExplosion onComplete={() => setShowConfetti(false)} />}
+      </AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="flex flex-col h-full"
+      >
       {/* Header */}
       <div className="px-4 py-3 text-center">
         <motion.div
@@ -337,6 +408,7 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
         </Button>
       </div>
     </motion.div>
+    </>
   );
 };
 
