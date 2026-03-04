@@ -3,7 +3,7 @@ import { usePublicReport, ReportRoom, ReportPhoto } from '@/hooks/useReports';
 import { useState, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
 import { enUS, ptBR, ko, th, es } from 'date-fns/locale';
-import purLogo from '@/assets/pur-logo.png';
+const purLogo = 'https://i.ibb.co/LXGHmRYY/Logo-solo.png';
 
 // ─── Translations (matches reference HTML) ───
 const translations: Record<string, Record<string, string>> = {
@@ -79,18 +79,18 @@ export default function PublicReport() {
   // Dynamic OG meta tags for shared links
   useEffect(() => {
     if (!report) return;
-    const ogUrl = 'https://storage.googleapis.com/gpt-engineer-file-uploads/LWW1I6T5b8gH99kiEm571PLbSUL2/social-images/social-1772082935113-Design_sem_nome.webp';
-    document.title = `Pur | ${report.property_name}`;
+    const ogUrl = 'https://i.ibb.co/LXGHmRYY/Logo-solo.png';
+    document.title = `Maison Pur | ${report.property_name}`;
     const setMeta = (attr: string, val: string, content: string) => {
       let el = document.querySelector(`meta[${attr}="${val}"]`) as HTMLMetaElement;
       if (!el) { el = document.createElement('meta'); el.setAttribute(attr.split('=')[0], val); document.head.appendChild(el); }
       el.setAttribute('content', content);
     };
-    setMeta('property', 'og:title', `Pur | ${report.property_name}`);
+    setMeta('property', 'og:title', `Maison Pur | ${report.property_name}`);
     setMeta('property', 'og:description', `${t('visitReport')} — ${report.cleaner_name}`);
     setMeta('property', 'og:image', ogUrl);
     setMeta('name', 'twitter:image', ogUrl);
-    return () => { document.title = 'Pur — Cleaning Management'; };
+    return () => { document.title = 'Maison Pur — Cleaning Management'; };
   }, [report, t]);
 
   // Close lang menu on outside click

@@ -108,7 +108,7 @@ export default function InvoiceHistoryContent({ userId }: InvoiceHistoryContentP
                   <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg" onClick={() => copyLink(inv.public_token)}>
                     <Copy size={13} />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg" onClick={() => window.open(`/invoice/${inv.public_token}`, '_blank')}>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg" onClick={() => window.open(`https://maisonpur.lovable.app/invoice/${inv.public_token}`, '_blank')}>
                     <ExternalLink size={13} />
                   </Button>
                   <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-destructive hover:text-destructive" onClick={() => deleteInvoice.mutate(inv.id)}>

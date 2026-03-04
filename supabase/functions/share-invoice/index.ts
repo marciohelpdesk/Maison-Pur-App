@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const APP_URL = "https://maisonpur.lovable.app";
-const OG_IMAGE = "https://storage.googleapis.com/gpt-engineer-file-uploads/LWW1I6T5b8gH99kiEm571PLbSUL2/social-images/social-1772082935113-Design_sem_nome.webp";
+const OG_IMAGE = "https://i.ibb.co/LXGHmRYY/Logo-solo.png";
 
 function isSocialBot(userAgent: string): boolean {
   const bots = [
@@ -60,11 +60,11 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const title = invoice
-      ? `Pur | Invoice ${invoice.invoice_number || ''} — ${invoice.client_name}`
-      : "Pur | Invoice";
+      ? `Maison Pur | Invoice ${invoice.invoice_number || ''} — ${invoice.client_name}`
+      : "Maison Pur | Invoice";
     const description = invoice
       ? `Invoice for ${invoice.client_name} · $${Number(invoice.amount).toFixed(2)} · ${invoice.status === 'paid' ? 'Paid' : 'Payment Pending'}`
-      : "Professional Invoice by Maison Purusa";
+      : "Professional Invoice by Maison Pur";
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:url" content="${redirectUrl}" />
-  <meta property="og:site_name" content="Pur" />
+  <meta property="og:site_name" content="Maison Pur" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
