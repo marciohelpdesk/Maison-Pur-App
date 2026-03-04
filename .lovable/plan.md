@@ -1,38 +1,25 @@
 
 
-## Plano: Headers Transparentes Aero em Todas as Telas Principais
+## Plano: Headers 100% Transparentes
 
 ### Problema
-A página **Reports** (`src/pages/Reports.tsx`) ainda usa o gradiente teal antigo no header (linha 123):
-```
-background: 'linear-gradient(to bottom, hsl(160 35% 18%) 0%, hsl(160 40% 30%) 60%, transparent 100%)'
-```
-com texto `text-white`, criando uma faixa verde escura destacada no topo.
-
-As demais telas (Dashboard, Agenda, Properties, Settings, Invoices, InvoiceHistory) já usam `rgba(255,255,255,0.7)` + `backdropFilter: blur(20px)`, porém essa opacidade de 0.7 cria uma faixa branca semi-opaca que também se destaca sobre o fundo pastel.
-
-O objetivo é tornar **todos os headers mais transparentes**, permitindo que os gradientes rosa/índigo do fundo do app sejam visíveis através deles.
+Os headers ainda têm `rgba(255,255,255,0.3)` + `backdrop-filter: blur(20px)`, criando uma camada branca sutil. O usuário quer **zero** fundo — apenas o texto flutuando sobre os gradientes rosa/índigo do app.
 
 ### Alterações
 
-| Arquivo | Mudança |
-|---------|---------|
-| `src/pages/Reports.tsx` (linha 123) | Substituir gradiente teal por fundo transparente aero. Texto de `text-white` para `text-foreground`. |
-| `src/views/DashboardView.tsx` (linha 111) | Reduzir opacidade do header de `0.7` para `0.3` para maior transparência. |
-| `src/views/AgendaView.tsx` (linha 140) | Idem: opacidade `0.3`. |
-| `src/views/PropertiesView.tsx` (linha 49) | Idem: opacidade `0.3`. |
-| `src/views/SettingsView.tsx` (linha 43) | Idem: opacidade `0.3`. |
-| `src/pages/Invoices.tsx` (linha 27) | Idem: opacidade `0.3`. |
-| `src/pages/InvoiceHistory.tsx` (linha 31) | Idem: opacidade `0.3`. |
+Trocar o `style={{ background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(20px)' }}` por `style={{ background: 'transparent' }}` em **7 arquivos**:
 
-### Estilo unificado aplicado
-```css
-background: rgba(255, 255, 255, 0.3);
-backdrop-filter: blur(20px);
-```
-- Títulos: `text-foreground` (escuro, legível)
-- Subtítulos: `text-muted-foreground`
-- Fundo muito mais transparente, revelando os gradientes rosa/índigo do app
+| Arquivo | Linha |
+|---------|-------|
+| `src/views/DashboardView.tsx` | 111 |
+| `src/views/AgendaView.tsx` | 140 |
+| `src/views/PropertiesView.tsx` | 49 |
+| `src/views/SettingsView.tsx` | 43 |
+| `src/pages/Reports.tsx` | 123 |
+| `src/pages/Invoices.tsx` | 27 |
+| `src/pages/InvoiceHistory.tsx` | 31 |
+
+Cada header mantém `sticky top-0 z-20 px-6 py-4` para posicionamento, mas o fundo fica totalmente transparente — os gradientes rosa/índigo do app ficam 100% visíveis atrás do texto.
 
 ### Sem alterações de banco de dados
 
