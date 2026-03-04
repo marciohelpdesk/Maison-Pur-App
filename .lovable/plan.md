@@ -1,23 +1,19 @@
 
 
-## Correção: Remover o sinal "@" do valor nos line items da invoice pública
+## Correção: Atualizar website para maisonpurusa.com na Invoice Pública
 
 ### Problema
-Na página pública da invoice (`/invoice/:token`), cada line item exibe o preço no formato `@ $220.00`. O usuário quer remover o `@`.
+A página pública da invoice (`PublicInvoice.tsx`) exibe o website como `maisonpur.com` em 3 locais, quando o correto é `maisonpurusa.com`.
 
-### Alteração
-**Arquivo:** `src/pages/PublicInvoice.tsx` (linha 198)
+O relatório público (`PublicReport.tsx`) já usa `maisonpurusa.com` corretamente.
 
-Mudar de:
-```
-<span>@ ${Number(li.rate || li.total).toFixed(2)}</span>
-```
-Para:
-```
-<span>${Number(li.rate || li.total).toFixed(2)}</span>
-```
+### Alterações
 
-Resultado: `Qty: 1  $220.00` em vez de `Qty: 1  @ $220.00`.
+**Arquivo:** `src/pages/PublicInvoice.tsx` — 3 correções:
+
+1. **Header** (linha 67): link e texto `maisonpur.com` → `maisonpurusa.com`
+2. **Pagamento** (linha 286): texto `maisonpur.com` → `maisonpurusa.com`
+3. **Footer** (linha 311): texto `maisonpur.com` → `maisonpurusa.com`
 
 ### Sem alterações de banco de dados.
 
