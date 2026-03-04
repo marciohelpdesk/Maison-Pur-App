@@ -28,10 +28,10 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
   const navigate = useNavigate();
 
   const settingsItems = [
-    { icon: Bell, label: t('settings.notifications'), description: t('settings.notificationsDesc') },
-    { icon: Shield, label: t('settings.privacy'), description: t('settings.privacyDesc') },
-    { icon: HelpCircle, label: t('settings.help'), description: t('settings.helpDesc') },
-  ];
+  { icon: Bell, label: t('settings.notifications'), description: t('settings.notificationsDesc') },
+  { icon: Shield, label: t('settings.privacy'), description: t('settings.privacyDesc') },
+  { icon: HelpCircle, label: t('settings.help'), description: t('settings.helpDesc') }];
+
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'pt' : 'en');
@@ -42,31 +42,31 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
       {/* Header */}
       <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)' }}>
         <div>
-          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{t('settings.subtitle')}</p>
+          
           <h1 className="font-bold text-foreground text-2xl">{t('settings.title')}</h1>
         </div>
       </div>
       
       <div className="px-6 pt-2 relative z-10">
         {/* Profile Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-panel p-8 flex flex-col items-center justify-center mb-6 relative"
-        >
+          className="glass-panel p-8 flex flex-col items-center justify-center mb-6 relative">
+          
           <button
             onClick={() => setIsEditProfileOpen(true)}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
-            aria-label={t('profile.edit')}
-          >
+            aria-label={t('profile.edit')}>
+            
             <Pencil size={14} className="text-muted-foreground" />
           </button>
           <div className="w-28 h-28 rounded-full mb-4 border-4 border-white shadow-lg overflow-hidden">
-            <img 
-              src={userProfile.avatar} 
-              className="w-full h-full object-cover" 
-              alt="Profile" 
-            />
+            <img
+              src={userProfile.avatar}
+              className="w-full h-full object-cover"
+              alt="Profile" />
+            
           </div>
           <h2 className="text-2xl font-light text-foreground mb-1">{userProfile.name}</h2>
           <p className="text-sm text-muted-foreground">{userProfile.email}</p>
@@ -76,13 +76,13 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
         </motion.div>
 
         {/* Earnings Button */}
-        <motion.button 
+        <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           onClick={onViewFinance}
-          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4"
-        >
+          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+          
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
               <Wallet size={20} className="text-success" />
@@ -96,27 +96,27 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
         </motion.button>
         
         {/* Team Management Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="glass-panel p-4 mb-4"
-        >
+          className="glass-panel p-4 mb-4">
+          
           <TeamManagement
             employees={employees}
             onAddEmployee={onAddEmployee}
-            onDeleteEmployee={onDeleteEmployee}
-          />
+            onDeleteEmployee={onDeleteEmployee} />
+          
         </motion.div>
 
         {/* Invoice Button */}
-        <motion.button 
+        <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
           onClick={() => navigate('/invoices')}
-          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4"
-        >
+          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+          
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Receipt size={20} className="text-primary" />
@@ -137,8 +137,8 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.18 }}
-          className="glass-panel w-full p-4 flex items-center justify-between text-foreground mb-4"
-        >
+          className="glass-panel w-full p-4 flex items-center justify-between text-foreground mb-4">
+          
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Globe size={20} className="text-primary" />
@@ -152,22 +152,22 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
             <span className={`text-xs font-medium ${language === 'en' ? 'text-primary' : 'text-muted-foreground'}`}>EN</span>
             <Switch
               checked={language === 'pt'}
-              onCheckedChange={toggleLanguage}
-            />
+              onCheckedChange={toggleLanguage} />
+            
             <span className={`text-xs font-medium ${language === 'pt' ? 'text-primary' : 'text-muted-foreground'}`}>PT</span>
           </div>
         </motion.div>
         
         {/* Settings Items */}
         <div className="space-y-2 mb-6">
-          {settingsItems.map((item, i) => (
-            <motion.button
-              key={item.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.05 }}
-              className="glass-panel w-full p-4 flex items-center justify-between text-foreground active:scale-95 transition-transform"
-            >
+          {settingsItems.map((item, i) =>
+          <motion.button
+            key={item.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 + i * 0.05 }}
+            className="glass-panel w-full p-4 flex items-center justify-between text-foreground active:scale-95 transition-transform">
+            
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
                   <item.icon size={20} className="text-muted-foreground" />
@@ -179,18 +179,18 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
               </div>
               <ChevronRight size={20} className="text-muted-foreground" />
             </motion.button>
-          ))}
+          )}
         </div>
         
         {/* Logout Button */}
-        <motion.button 
+        <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           onClick={onLogout}
-          className="w-full py-4 text-destructive font-bold text-xs uppercase tracking-widest hover:text-destructive/80 transition-colors flex items-center justify-center gap-2"
-        >
-          {t('settings.logout')} <LogOut size={16}/>
+          className="w-full py-4 text-destructive font-bold text-xs uppercase tracking-widest hover:text-destructive/80 transition-colors flex items-center justify-center gap-2">
+          
+          {t('settings.logout')} <LogOut size={16} />
         </motion.button>
       </div>
 
@@ -198,8 +198,8 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
         userProfile={userProfile}
-        onUpdateProfile={onUpdateProfile}
-      />
-    </div>
-  );
+        onUpdateProfile={onUpdateProfile} />
+      
+    </div>);
+
 };
