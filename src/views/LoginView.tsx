@@ -4,7 +4,8 @@ import { Eye, EyeOff, Sparkles } from 'lucide-react';
 import { BackgroundEffects } from '@/components/BackgroundEffects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
-import purLogo from '@/assets/pur-logo.png';
+import { BRAND_LOGO_URL } from '@/lib/brand';
+const purLogo = BRAND_LOGO_URL;
 
 interface LoginViewProps {
   onSignIn: (email: string, password: string) => Promise<void>;

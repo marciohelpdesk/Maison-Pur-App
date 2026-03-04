@@ -6,7 +6,8 @@ import { AuthLayout } from '@/components/layout/AuthLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
-import purLogo from '@/assets/pur-logo.png';
+import { BRAND_LOGO_URL } from '@/lib/brand';
+const purLogo = BRAND_LOGO_URL;
 
 export default function ResetPassword() {
   const { t } = useLanguage();

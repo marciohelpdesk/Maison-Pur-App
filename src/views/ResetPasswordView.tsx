@@ -4,7 +4,8 @@ import { Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { BackgroundEffects } from '@/components/BackgroundEffects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import purLogo from '@/assets/pur-logo.png';
+import { BRAND_LOGO_URL } from '@/lib/brand';
+const purLogo = BRAND_LOGO_URL;
 
 interface ResetPasswordViewProps {
   onPasswordReset: () => void;
