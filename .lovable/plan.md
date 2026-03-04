@@ -1,23 +1,38 @@
 
 
-## Plano: Substituir logo externo quebrado por asset local
+## Plano: Logo da Gota em Todos os Pontos do App
 
-### Problema
-O logotipo da Maison Pur está hospedado no imgbb (`https://i.ibb.co/LXGHmRYY/Logo-solo.png`) e o link quebrou — aparece "image not found" nas páginas públicas de Invoice e Report.
+### Diagnóstico
+O arquivo `public/logo-pur.jpeg` **não está sendo servido** pelo servidor de produção — ao acessar `https://maisonpur.lovable.app/logo-pur.jpeg`, o servidor retorna a página 404 do SPA em vez da imagem. Isso explica a imagem quebrada nas páginas públicas (Invoice e Report).
+
+As telas internas (Login, Dashboard, etc.) usam `import purLogo from '@/assets/pur-logo.png'` — um import ES que o Vite processa e embute no bundle, funcionando de forma confiável. As páginas públicas usam `/logo-pur.jpeg` (caminho direto), que está falhando.
 
 ### Solução
-Copiar o logotipo enviado pelo usuário (`logotipo.jpeg`) para o projeto como asset local e referenciar em todos os lugares onde o logo quebrado é usado.
+Unificar **todos** os pontos do app para usar o mesmo mecanismo confiável: **ES import do asset** em `src/assets/`. O arquivo `image-7.png` enviado será usado como logo oficial.
 
 ### Alterações
 
 | Ação | Detalhe |
 |------|---------|
-| Copiar `logotipo.jpeg` para `public/logo-pur.jpeg` | Usa `public/` pois as páginas públicas (Invoice/Report) precisam de URL direta, não import ES6 |
-| `src/pages/PublicInvoice.tsx` (linha 5) | Trocar `purLogo` de URL imgbb para `/logo-pur.jpeg` |
-| `src/pages/PublicReport.tsx` (linha 6) | Idem: `/logo-pur.jpeg` |
+| Copiar `image-7.png` → `src/assets/pur-logo.png` | Substitui o arquivo antigo pelo novo logo da gota (PNG com transparência) |
+| Copiar `image-7.png` → `public/logo-pur.png` | Backup para acesso direto por URL (edge functions, OG tags) |
+| `src/pages/PublicInvoice.tsx` | Trocar `const purLogo = '/logo-pur.jpeg'` por `import purLogo from '@/assets/pur-logo.png'` |
+| `src/pages/PublicReport.tsx` | Idem: usar ES import em vez de caminho direto |
 
-### Nota
-Os OG images (`Branding.png`) no `index.html`, `share-report` e `share-invoice` usam uma URL imgbb diferente que ainda funciona — não serão alterados agora.
+### Arquivos que já funcionam (sem alteração necessária)
+Estes já usam `import purLogo from '@/assets/pur-logo.png'` e receberão o novo logo automaticamente ao substituir o arquivo:
+- `src/views/DashboardView.tsx`
+- `src/views/LoginView.tsx`
+- `src/views/ResetPasswordView.tsx`
+- `src/pages/auth/Login.tsx`
+- `src/pages/auth/ResetPassword.tsx`
+- `src/lib/pdfGenerator.ts`
+
+### Por que isso resolve
+O ES import (`import x from '@/assets/...'`) faz o Vite processar a imagem e gerar uma URL com hash no bundle final. Isso é 100% confiável — não depende do servidor servir arquivos estáticos de `/public/`.
+
+### Sobre créditos
+Para solicitar reembolso de créditos, entre em contato com o suporte em **support@lovable.dev**.
 
 ### Sem alterações de banco de dados
 
