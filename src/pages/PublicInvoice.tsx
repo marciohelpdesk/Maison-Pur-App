@@ -195,7 +195,7 @@ export default function PublicInvoice() {
                           <span>{format(new Date(li.service_date + 'T12:00:00'), 'MMM dd, yyyy')}</span>
                         )}
                         <span>Qty: {li.quantity || 1}</span>
-                        <span>@ ${Number(li.rate || li.total).toFixed(2)}</span>
+                        <span>${Number(li.rate || li.total).toFixed(2)}</span>
                       </div>
                     </div>
                   ))}
