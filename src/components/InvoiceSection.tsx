@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -46,30 +46,22 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   const [notes, setNotes] = useState('Thank you for choosing Maison Purusa and supporting sustainable practices that care for your home and the planet!');
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
-  const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>([]);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
-  const toggleProperty = (propertyId: string) => {
+  const addPropertyLineItem = (propertyId: string) => {
     const property = properties.find(p => p.id === propertyId);
     if (!property) return;
-
-    if (selectedPropertyIds.includes(propertyId)) {
-      setSelectedPropertyIds(prev => prev.filter(id => id !== propertyId));
-      setLineItems(prev => prev.filter(li => li.property_name !== property.name || li.address !== property.address));
-    } else {
-      setSelectedPropertyIds(prev => [...prev, propertyId]);
-      const rate = property.basePrice || 0;
-      setLineItems(prev => [...prev, {
-        description: `${property.serviceType || 'Standard'} Cleaning — ${property.name}`,
-        property_name: property.name,
-        address: property.address,
-        service_type: property.serviceType || 'Standard',
-        quantity: 1,
-        rate,
-        total: rate,
-        service_date: format(new Date(), 'yyyy-MM-dd'),
-      }]);
-    }
+    const rate = property.basePrice || 0;
+    setLineItems(prev => [...prev, {
+      description: `${property.serviceType || 'Standard'} Cleaning — ${property.name}`,
+      property_name: property.name,
+      address: property.address,
+      service_type: property.serviceType || 'Standard',
+      quantity: 1,
+      rate,
+      total: rate,
+      service_date: format(new Date(), 'yyyy-MM-dd'),
+    }]);
   };
 
   const updateLineItem = (index: number, field: keyof LineItem, value: any) => {
@@ -97,12 +89,6 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   };
 
   const removeLineItem = (index: number) => {
-    const li = lineItems[index];
-    // If it was from a property, also uncheck the property
-    if (li.property_name && li.address) {
-      const prop = properties.find(p => p.name === li.property_name && p.address === li.address);
-      if (prop) setSelectedPropertyIds(prev => prev.filter(id => id !== prop.id));
-    }
     setLineItems(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -113,7 +99,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
     setClientName(''); setClientEmail(''); setClientAddress(''); setClientPhone('');
     setServiceDate(undefined); setDueDate(undefined);
     setNotes('Thank you for choosing Maison Purusa and supporting sustainable practices that care for your home and the planet!');
-    setDiscount(0); setTax(0); setSelectedPropertyIds([]); setLineItems([]);
+    setDiscount(0); setTax(0); setLineItems([]);
     setShowForm(false);
   };
 
@@ -132,7 +118,7 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
         client_phone: clientPhone.trim(),
         description: lineItems.map(li => `${li.description} — ${li.property_name}`).join('; '),
         amount: grandTotal,
-        property_ids: selectedPropertyIds,
+        property_ids: [],
         service_date: (() => {
           const dates = lineItems.map(li => li.service_date).filter(Boolean).sort();
           if (dates.length === 0) return '';
@@ -151,7 +137,8 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
   };
 
   const copyLink = (token: string) => {
-    navigator.clipboard.writeText(`https://maisonpur.lovable.app/invoice/${token}`);
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'ebafqcanwdqomqcrifrj';
+    navigator.clipboard.writeText(`https://${projectId}.supabase.co/functions/v1/share-invoice?token=${token}`);
     toast.success('Invoice link copied!');
   };
 
@@ -246,18 +233,26 @@ export const InvoiceSection = ({ userId }: InvoiceSectionProps) => {
 
               {/* Section: Properties */}
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Select Properties (optional)</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3">Add Properties</p>
                 <div className="max-h-36 overflow-y-auto space-y-1 border border-border/50 rounded-xl p-2.5 bg-card/30">
                   {properties.length === 0 ? (
                     <p className="text-xs text-muted-foreground py-3 text-center">No properties found</p>
                   ) : properties.map(p => (
-                    <label key={p.id} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
-                      <Checkbox checked={selectedPropertyIds.includes(p.id)} onCheckedChange={() => toggleProperty(p.id)} />
+                    <div key={p.id} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-medium text-foreground truncate block">{p.name}</span>
                         <span className="text-[10px] text-muted-foreground truncate block">{p.address} · ${p.basePrice?.toFixed(2) || '0.00'}</span>
                       </div>
-                    </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 rounded-lg text-[11px] gap-1 shrink-0"
+                        onClick={() => addPropertyLineItem(p.id)}
+                      >
+                        <Plus size={12} /> Add
+                      </Button>
+                    </div>
                   ))}
                 </div>
               </div>
