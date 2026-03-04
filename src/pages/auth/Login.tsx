@@ -7,7 +7,8 @@ import { BackgroundEffects } from '@/components/BackgroundEffects';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import purLogo from '@/assets/pur-logo.png';
+import { BRAND_LOGO_URL } from '@/lib/brand';
+const purLogo = BRAND_LOGO_URL;
 
 // Custom easing
 const smoothEase: Easing = [0.25, 0.46, 0.45, 0.94];

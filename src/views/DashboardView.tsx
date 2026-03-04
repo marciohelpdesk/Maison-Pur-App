@@ -8,7 +8,8 @@ import {
   Building2, Sparkles, ClipboardList, Timer, Ruler,
   Calendar as CalendarIcon
 } from 'lucide-react';
-import purLogo from '@/assets/pur-logo.png';
+import { BRAND_LOGO_URL } from '@/lib/brand';
+const purLogo = BRAND_LOGO_URL;
 import { openAddressInMaps } from '@/lib/utils';
 import {
   AIRBNB_CHECKLIST_TEMPLATE,
