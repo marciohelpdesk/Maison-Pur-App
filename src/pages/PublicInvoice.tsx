@@ -44,12 +44,16 @@ export default function PublicInvoice() {
           {/* Green accent top bar */}
           <div style={{ height: 4, background: 'linear-gradient(90deg, #2D5016, #4A7C2E, #6B9B4E)' }} />
 
+          {/* Centered Logo */}
+          <div className="flex justify-center px-4 sm:px-8 pt-6 sm:pt-8 pb-3 sm:pb-4">
+            <img src={purLogo} alt="Maison Purusa" className="h-14 sm:h-16 object-contain" />
+          </div>
+
           {/* Header */}
-          <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6">
+          <div className="px-4 sm:px-8 pb-4 sm:pb-6">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0">
               {/* Company Info */}
               <div>
-                <img src={purLogo} alt="Maison Purusa" className="h-10 sm:h-12 mb-3 sm:mb-4 object-contain" />
                 <p className="text-xs italic mb-2 sm:mb-3" style={{ color: '#4A7C2E' }}>Cleaning with Integrity and Respect</p>
                 <div className="space-y-1 text-xs" style={{ color: '#6b7280' }}>
                   <p>3451 Queens St, Suite 925</p>
