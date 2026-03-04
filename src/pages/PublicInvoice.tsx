@@ -2,8 +2,7 @@ import { useParams } from 'react-router-dom';
 import { usePublicInvoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, Loader2, Leaf, Mail, Phone, MapPin, Globe, CreditCard, Droplets } from 'lucide-react';
-import { BRAND_LOGO_URL } from '@/lib/brand';
-const purLogo = BRAND_LOGO_URL;
+import { BrandLogo } from '@/components/BrandLogo';
 
 export default function PublicInvoice() {
   const { token } = useParams<{ token: string }>();
@@ -47,7 +46,7 @@ export default function PublicInvoice() {
 
           {/* Centered Logo */}
           <div className="flex justify-center px-4 sm:px-8 pt-6 sm:pt-8 pb-3 sm:pb-4">
-            <img src={purLogo} alt="Maison Pur" className="h-14 sm:h-16 object-contain" />
+            <BrandLogo className="h-14 sm:h-16 object-contain" />
           </div>
 
           {/* Header */}

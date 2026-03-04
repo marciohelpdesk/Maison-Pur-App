@@ -8,8 +8,7 @@ import {
   Building2, Sparkles, ClipboardList, Timer, Ruler,
   Calendar as CalendarIcon
 } from 'lucide-react';
-import { BRAND_LOGO_URL } from '@/lib/brand';
-const purLogo = BRAND_LOGO_URL;
+import { BrandLogo } from '@/components/BrandLogo';
 import { openAddressInMaps } from '@/lib/utils';
 import {
   AIRBNB_CHECKLIST_TEMPLATE,
@@ -127,7 +126,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
             </div>
           </div>
           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
-            <img src={purLogo} className="w-6 h-6 object-contain" alt="Pur" />
+            <BrandLogo className="w-6 h-6 object-contain" />
           </div>
         </div>
       </div>

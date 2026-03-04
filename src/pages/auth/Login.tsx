@@ -7,8 +7,7 @@ import { BackgroundEffects } from '@/components/BackgroundEffects';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { BRAND_LOGO_URL } from '@/lib/brand';
-const purLogo = BRAND_LOGO_URL;
+import { BrandLogo } from '@/components/BrandLogo';
 
 // Custom easing
 const smoothEase: Easing = [0.25, 0.46, 0.45, 0.94];
@@ -130,10 +129,7 @@ export default function Login() {
             animate="visible"
             className="relative w-40 h-40 flex items-center justify-center">
 
-            <img
-              src={purLogo}
-              alt="Pur Logo"
-              className="w-full h-full object-contain drop-shadow-2xl" />
+            <BrandLogo className="w-full h-full object-contain drop-shadow-2xl" />
 
             
             <motion.div

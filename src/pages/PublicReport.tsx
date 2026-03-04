@@ -3,8 +3,8 @@ import { usePublicReport, ReportRoom, ReportPhoto } from '@/hooks/useReports';
 import { useState, useCallback, useEffect } from 'react';
 import { format } from 'date-fns';
 import { enUS, ptBR, ko, th, es } from 'date-fns/locale';
-import { BRAND_LOGO_URL } from '@/lib/brand';
-const purLogo = BRAND_LOGO_URL;
+import { BrandLogo } from '@/components/BrandLogo';
+import { BRAND_OG_IMAGE } from '@/lib/brand';
 
 // ─── Translations (matches reference HTML) ───
 const translations: Record<string, Record<string, string>> = {
@@ -80,7 +80,7 @@ export default function PublicReport() {
   // Dynamic OG meta tags for shared links
   useEffect(() => {
     if (!report) return;
-    const ogUrl = 'https://i.ibb.co/1Yh2WJjw/Branding.png';
+    const ogUrl = BRAND_OG_IMAGE;
     document.title = `Maison Pur | ${report.property_name}`;
     const setMeta = (attr: string, val: string, content: string) => {
       let el = document.querySelector(`meta[${attr}="${val}"]`) as HTMLMetaElement;
@@ -149,7 +149,7 @@ export default function PublicReport() {
 
         {/* Logo */}
         <div className="absolute top-6 left-6 z-20">
-          <img src={purLogo} className="h-12 w-auto drop-shadow-md" alt="Logo" />
+          <BrandLogo className="h-12 w-auto drop-shadow-md" />
         </div>
 
         {/* Language Switcher */}
@@ -457,7 +457,7 @@ export default function PublicReport() {
           "{t('footerQuote')}"
         </p>
         <div className="mt-8 flex justify-center">
-          <img src={purLogo} className="h-8 w-auto opacity-50" alt="Logo" />
+          <BrandLogo className="h-8 w-auto opacity-50" />
         </div>
         <p className="text-[10px] text-stone-300 mt-4">
           © {new Date().getFullYear()} Maison Pur • Report ID: {report.public_token.slice(0, 8)}

@@ -6,8 +6,7 @@ import { AuthLayout } from '@/components/layout/AuthLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
-import { BRAND_LOGO_URL } from '@/lib/brand';
-const purLogo = BRAND_LOGO_URL;
+import { BrandLogo } from '@/components/BrandLogo';
 
 export default function ResetPassword() {
   const { t } = useLanguage();
@@ -71,11 +70,7 @@ export default function ResetPassword() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <img 
-            src={purLogo}
-            alt="Pur Logo" 
-            className="w-24 h-24 object-contain" 
-          />
+          <BrandLogo className="w-24 h-24 object-contain" />
         </motion.div>
         
         {/* Reset Password Card */}

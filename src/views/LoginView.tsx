@@ -4,8 +4,7 @@ import { Eye, EyeOff, Sparkles } from 'lucide-react';
 import { BackgroundEffects } from '@/components/BackgroundEffects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
-import { BRAND_LOGO_URL } from '@/lib/brand';
-const purLogo = BRAND_LOGO_URL;
+import { BrandLogo } from '@/components/BrandLogo';
 
 interface LoginViewProps {
   onSignIn: (email: string, password: string) => Promise<void>;
@@ -119,11 +118,7 @@ export const LoginView = ({ onSignIn, onSignUp, isLoading, error }: LoginViewPro
             animate="visible"
             className="relative w-40 h-40 flex items-center justify-center"
           >
-            <img 
-              src={purLogo}
-              alt="Pur Logo" 
-              className="w-full h-full object-contain drop-shadow-2xl" 
-            />
+            <BrandLogo className="w-full h-full object-contain drop-shadow-2xl" />
             
             {/* Sparkle decorations */}
             <motion.div
