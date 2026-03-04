@@ -1,33 +1,34 @@
 
 
-## Plan: Fix Mobile Invoice Links + Remove Lovable Branding
+## Plan: Move Invoices to Dedicated Page + Fix Mobile Responsiveness
 
-### Root Cause Analysis
-The public invoice link is generated using `window.location.origin`, which gives the **preview URL** (e.g., `https://id-preview--13b46a3e...lovable.app`). When copied and opened on a mobile browser, the preview domain may not properly handle SPA routing (returning `index.html` for client-side routes like `/invoice/:token`), resulting in a 404 page.
+### Two Issues
 
-The published production domain (`maisonpur.lovable.app`) handles SPA routing correctly, which is why it works "through the internet" on desktop.
+**1. Invoice section is embedded in Settings** — should be its own dedicated page (like Finance/Invoice History), accessible via a navigation button in Settings instead of the full form inline.
+
+**2. Public invoice is squeezed on mobile** — the screenshot shows text crammed together because the table uses fixed column widths (`w-20`, `w-12`) and padding (`px-8`) that don't adapt to small screens.
+
+---
 
 ### Changes
 
-#### 1. Use production URL for all public links
-**Files:** `src/components/InvoiceSection.tsx`, `src/pages/InvoiceHistory.tsx`
+#### 1. Create dedicated Invoice page (`src/pages/Invoices.tsx`)
+- New page that renders the `InvoiceSection` component within its own full-screen layout (same pattern as Finance/InvoiceHistory pages — back button header, scrollable content).
+- Route already exists at `/invoices` pointing to InvoiceHistory. We'll create a new route `/invoices/new` for the creation flow, or better: merge creation + history into a single `/invoices` page with tabs.
 
-Replace `window.location.origin` with the hardcoded production domain `https://maisonpur.lovable.app` when generating shareable invoice links. This ensures all copied links point to the published app regardless of where the user is (preview, desktop, mobile).
+**Approach**: Replace the current `/invoices` page (InvoiceHistory) with a combined page that has two tabs: **"New Invoice"** (the creation form) and **"History"** (the existing invoice list). This keeps everything in one clean section.
 
-```typescript
-// Before
-navigator.clipboard.writeText(`${window.location.origin}/invoice/${token}`);
+#### 2. Update Settings (`src/views/SettingsView.tsx`)
+- Remove the inline `<InvoiceSection />` component.
+- Replace it with a navigation button (same style as the "Earnings" button) that navigates to `/invoices`.
 
-// After
-const APP_URL = 'https://maisonpur.lovable.app';
-navigator.clipboard.writeText(`${APP_URL}/invoice/${token}`);
-```
-
-#### 2. Apply same fix to report sharing links (if applicable)
-Search for any other `window.location.origin` usages generating public links and update them to use the production domain consistently.
-
-#### 3. Lovable badge
-The Lovable badge can be hidden from project settings (Settings > Hide 'Lovable' Badge). No code change needed — this is a project-level toggle. Your clients will never see Lovable branding on the published app.
+#### 3. Fix Public Invoice mobile responsiveness (`src/pages/PublicInvoice.tsx`)
+From the screenshot, the issues are:
+- `px-8` padding is too wide for small screens — change to `px-4 sm:px-8`
+- Table columns `w-20`, `w-12` are fixed and squeeze the description — use responsive approach
+- On mobile (<640px), switch to a **card-based layout** instead of a table: each line item as a stacked card showing property name, date, rate, and amount
+- Header section needs `flex-col` on mobile instead of side-by-side
+- Font sizes and spacing need mobile breakpoints
 
 ### No database changes needed.
 
