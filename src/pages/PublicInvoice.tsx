@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { usePublicInvoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
-import { CheckCircle, Clock, Loader2, Leaf, Mail, Phone, MapPin, Globe, CreditCard } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, Leaf, Mail, Phone, MapPin, Globe, CreditCard, Droplets } from 'lucide-react';
 const purLogo = 'https://i.ibb.co/LXGHmRYY/Logo-solo.png';
 
 export default function PublicInvoice() {
@@ -46,7 +46,7 @@ export default function PublicInvoice() {
 
           {/* Centered Logo */}
           <div className="flex justify-center px-4 sm:px-8 pt-6 sm:pt-8 pb-3 sm:pb-4">
-            <img src={purLogo} alt="Maison Purusa" className="h-14 sm:h-16 object-contain" />
+            <img src={purLogo} alt="Maison Pur" className="h-14 sm:h-16 object-contain" />
           </div>
 
           {/* Header */}
@@ -64,7 +64,7 @@ export default function PublicInvoice() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Globe size={10} />
-                    <a href="https://maisonpurusa.com" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">maisonpur.com</a>
+                    <a href="https://maisonpur.com" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">maisonpur.com</a>
                   </div>
                 </div>
               </div>
@@ -116,8 +116,8 @@ export default function PublicInvoice() {
           {/* Divider */}
           <div className="mx-4 sm:mx-8" style={{ height: 1, background: 'linear-gradient(90deg, transparent, #d1d5db, transparent)' }} />
 
-          {/* Billed To */}
-          <div className="px-4 sm:px-8 py-4 sm:py-5">
+          {/* Billed To — with green left accent */}
+          <div className="mx-4 sm:mx-8 my-4 sm:my-5 pl-4 py-3 rounded-r-xl" style={{ borderLeft: '3px solid #2D5016', background: 'rgba(45, 80, 22, 0.02)' }}>
             <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#2D5016' }}>Billed To</p>
             <p className="text-base sm:text-lg font-semibold" style={{ color: '#1f2937' }}>{invoice.client_name}</p>
             {invoice.client_address && (
@@ -208,8 +208,11 @@ export default function PublicInvoice() {
               </div>
             ) : null}
 
+            {/* Decorative separator */}
+            <div className="my-4" style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(45, 80, 22, 0.15), transparent)' }} />
+
             {/* Financial Summary */}
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end">
               <div className="w-full sm:w-64 space-y-2">
                 <div className="flex justify-between text-sm" style={{ color: '#6b7280' }}>
                   <span>Subtotal</span>
@@ -235,7 +238,7 @@ export default function PublicInvoice() {
             </div>
           </div>
 
-          {/* Thank you note */}
+          {/* Notes */}
           {invoice.notes && (
             <div className="mx-4 sm:mx-8 mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl" style={{ background: 'rgba(45, 80, 22, 0.04)', border: '1px solid rgba(45, 80, 22, 0.1)' }}>
               <p className="text-sm italic text-center leading-relaxed" style={{ color: '#4A7C2E' }}>
@@ -292,12 +295,17 @@ export default function PublicInvoice() {
             )}
           </div>
 
+          {/* Thank You */}
+          <div className="px-4 sm:px-8 pb-4 sm:pb-5 text-center">
+            <p className="text-sm italic" style={{ color: '#4A7C2E' }}>Thank you for choosing Maison Pur.</p>
+          </div>
+
           {/* Footer */}
           <div className="px-4 sm:px-8 py-4 sm:py-5" style={{ background: '#2D5016' }}>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-1">
               <div className="flex items-center gap-2">
-                <Leaf size={14} className="text-white/70" />
-                <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">Eco-Innovation & Empowerment Ethos</span>
+                <Droplets size={14} className="text-white/70" />
+                <span className="text-[10px] text-white/70 uppercase tracking-wider font-medium">Cleaning with Integrity and Respect</span>
               </div>
               <span className="text-[10px] text-white/50">
                 Maison Pur LLC · maisonpur.com

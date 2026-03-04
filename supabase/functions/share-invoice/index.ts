@@ -7,17 +7,7 @@ const corsHeaders = {
 };
 
 const APP_URL = "https://maisonpur.lovable.app";
-const OG_IMAGE = "https://i.ibb.co/LXGHmRYY/Logo-solo.png";
-
-function isSocialBot(userAgent: string): boolean {
-  const bots = [
-    'facebookexternalhit', 'Facebot', 'Twitterbot', 'WhatsApp',
-    'LinkedInBot', 'Slackbot', 'TelegramBot', 'Discordbot',
-    'Googlebot', 'bingbot', 'iMessageLinkPreviewer',
-    'Applebot', 'Instagram', 'Pinterest',
-  ];
-  return bots.some(bot => userAgent.toLowerCase().includes(bot.toLowerCase()));
-}
+const OG_IMAGE = "https://ebafqcanwdqomqcrifrj.supabase.co/storage/v1/object/public/cleaning-photos/brand%2Fog-image.png";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -32,22 +22,9 @@ Deno.serve(async (req) => {
       return new Response("Missing token", { status: 400, headers: corsHeaders });
     }
 
-    const userAgent = req.headers.get("user-agent") || "";
     const redirectUrl = `${APP_URL}/invoice/${token}`;
 
-    // For regular browsers, just redirect immediately
-    if (!isSocialBot(userAgent)) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          ...corsHeaders,
-          "Location": redirectUrl,
-          "Cache-Control": "public, max-age=300",
-        },
-      });
-    }
-
-    // For social media bots, serve OG tags
+    // Fetch invoice data for OG tags
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -66,6 +43,8 @@ Deno.serve(async (req) => {
       ? `Invoice for ${invoice.client_name} · $${Number(invoice.amount).toFixed(2)} · ${invoice.status === 'paid' ? 'Paid' : 'Payment Pending'}`
       : "Professional Invoice by Maison Pur";
 
+    // Always serve OG HTML for all visitors (bots AND humans)
+    // Humans get redirected via meta refresh + JS after OG tags are parsed
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,7 +60,7 @@ Deno.serve(async (req) => {
   <meta property="og:image:height" content="630" />
   <meta property="og:url" content="${redirectUrl}" />
   <meta property="og:site_name" content="Maison Pur" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${OG_IMAGE}" />

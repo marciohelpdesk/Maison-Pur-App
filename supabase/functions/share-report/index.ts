@@ -7,17 +7,7 @@ const corsHeaders = {
 };
 
 const APP_URL = "https://maisonpur.lovable.app";
-const OG_IMAGE = "https://storage.googleapis.com/gpt-engineer-file-uploads/LWW1I6T5b8gH99kiEm571PLbSUL2/social-images/social-1772082935113-Design_sem_nome.webp";
-
-function isSocialBot(userAgent: string): boolean {
-  const bots = [
-    'facebookexternalhit', 'Facebot', 'Twitterbot', 'WhatsApp',
-    'LinkedInBot', 'Slackbot', 'TelegramBot', 'Discordbot',
-    'Googlebot', 'bingbot', 'iMessageLinkPreviewer',
-    'Applebot', 'Instagram', 'Pinterest',
-  ];
-  return bots.some(bot => userAgent.toLowerCase().includes(bot.toLowerCase()));
-}
+const OG_IMAGE = "https://ebafqcanwdqomqcrifrj.supabase.co/storage/v1/object/public/cleaning-photos/brand%2Fog-image.png";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -32,22 +22,9 @@ Deno.serve(async (req) => {
       return new Response("Missing token", { status: 400, headers: corsHeaders });
     }
 
-    const userAgent = req.headers.get("user-agent") || "";
     const redirectUrl = `${APP_URL}/r/${token}`;
 
-    // For regular browsers, just redirect immediately
-    if (!isSocialBot(userAgent)) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          ...corsHeaders,
-          "Location": redirectUrl,
-          "Cache-Control": "public, max-age=300",
-        },
-      });
-    }
-
-    // For social media bots, serve OG tags
+    // Fetch report data for OG tags
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -60,11 +37,12 @@ Deno.serve(async (req) => {
       .eq("status", "published")
       .maybeSingle();
 
-    const title = report ? `Pur | ${report.property_name}` : "Pur | Visit Report";
+    const title = report ? `Maison Pur | ${report.property_name}` : "Maison Pur | Visit Report";
     const description = report
       ? `Visit Report for ${report.property_name} — ${report.cleaner_name}`
-      : "Cleaning Visit Report by Pur";
+      : "Cleaning Visit Report by Maison Pur";
 
+    // Always serve OG HTML for all visitors
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,8 +57,8 @@ Deno.serve(async (req) => {
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:url" content="${redirectUrl}" />
-  <meta property="og:site_name" content="Pur" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:site_name" content="Maison Pur" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${OG_IMAGE}" />
