@@ -1,19 +1,64 @@
 
 
-## Correção: Atualizar website para maisonpurusa.com na Invoice Pública
+## Plano: Aplicar Design System "Frosted Cloud Geometry"
 
-### Problema
-A página pública da invoice (`PublicInvoice.tsx`) exibe o website como `maisonpur.com` em 3 locais, quando o correto é `maisonpurusa.com`.
+### O que muda
+Apenas a **aparência visual** (cores, bordas, sombras, fundo, navegação). Nenhuma funcionalidade, rota, ou lógica de dados será alterada.
 
-O relatório público (`PublicReport.tsx`) já usa `maisonpurusa.com` corretamente.
+### Resumo das mudanças visuais
 
-### Alterações
+1. **Paleta de cores** — trocar o verde-teal atual por tons pastel (roxo lavanda, rosa, menta, dourado)
+2. **Fundo da app** — trocar gradiente teal por radial gradients suaves rosa/índigo com blobs animados
+3. **Cantos mais arredondados** — de 1.5rem para ~42px (cloud-radius) nos painéis
+4. **Bottom Nav redesenhada** — item ativo "flutua" para cima com destaque roxo (como na referência)
+5. **Headers das páginas** — fundo mais suave/translúcido em vez do gradiente escuro teal
+6. **Cards e painéis** — bordas mais suaves, sombras mais leves, background glass atualizado
 
-**Arquivo:** `src/pages/PublicInvoice.tsx` — 3 correções:
+### Arquivos a serem modificados
 
-1. **Header** (linha 67): link e texto `maisonpur.com` → `maisonpurusa.com`
-2. **Pagamento** (linha 286): texto `maisonpur.com` → `maisonpurusa.com`
-3. **Footer** (linha 311): texto `maisonpur.com` → `maisonpurusa.com`
+| Arquivo | Mudança |
+|---------|---------|
+| `src/index.css` | Atualizar variáveis CSS (--primary, --background, cores), glass-panel, bg-florida-sky, mobile-frame, mercury-drop |
+| `src/components/BackgroundEffects.tsx` | Trocar drops por cloud blobs animados (rosa/menta) |
+| `src/components/layout/BottomNavRouter.tsx` | Item ativo com translateY(-10px), cor roxa, estilo flutuante |
+| `src/views/DashboardView.tsx` | Header: fundo translúcido suave em vez de teal escuro; categorias com cores pastel |
+| `src/views/SettingsView.tsx` | Header com fundo suave/translúcido |
+| `src/views/AgendaView.tsx` | Header com fundo suave/translúcido |
+| `src/views/PropertiesView.tsx` | Header com fundo suave/translúcido |
+| `src/views/LoginView.tsx` | Adaptar glass-panel ao novo tema pastel |
+| `tailwind.config.ts` | Verificar/ajustar se necessário para novas cores |
 
-### Sem alterações de banco de dados.
+### Detalhes técnicos
+
+**Nova paleta CSS (`:root`)**:
+- `--primary`: 252 70% 72% (roxo lavanda ~#9287ff)
+- `--background`: 220 20% 98% (#f9fbfd)
+- `--accent-pink`: 330 100% 86% (#ffb8e0)
+- `--accent-mint`: 170 80% 82% (#b2f5ea)
+- `--accent-gold`: 40 100% 87% (#ffebbc)
+- Manter `--cta` (âmbar) e `--destructive` como estão
+
+**Background** — substituir `bg-florida-sky-fixed` de gradiente linear teal por:
+```css
+background: radial-gradient(circle at 0% 0%, #fdf2f8 0%, transparent 40%),
+            radial-gradient(circle at 100% 100%, #eef2ff 0%, transparent 40%);
+```
+
+**BackgroundEffects** — substituir mercury-drops por 2 cloud blobs:
+- Blob 1: rosa (#ffb8e0), 300px, top-left, blur(60px)
+- Blob 2: menta (#b2f5ea), 250px, bottom-right, blur(60px)
+
+**BottomNav** — item ativo:
+- Background roxo (--primary)
+- `translateY(-10px)` + box-shadow roxo
+- Ícone branco quando ativo
+
+**Headers das views** — trocar `hsl(160 35% 18%)` por fundo translúcido com blur:
+```css
+background: rgba(255,255,255,0.7);
+backdrop-filter: blur(20px);
+```
+Texto dos headers de branco para `var(--text-main)` escuro.
+
+### Sem alterações de banco de dados
 
