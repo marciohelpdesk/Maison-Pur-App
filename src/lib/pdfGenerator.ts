@@ -69,20 +69,28 @@ class PremiumReportGenerator {
   }
 
   private async loadLogo(): Promise<void> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const c = document.createElement('canvas');
-        c.width = img.width; c.height = img.height;
-        const ctx = c.getContext('2d');
-        if (ctx) { ctx.drawImage(img, 0, 0); this.logoDataUrl = c.toDataURL('image/png'); this.logoLoaded = true; }
-        resolve();
-      };
-      img.onerror = () => resolve();
-      img.crossOrigin = 'anonymous';
-      img.src = BRAND_LOGO_URL;
-    });
+    const tryLoad = (url: string): Promise<boolean> =>
+      new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.referrerPolicy = 'no-referrer';
+        img.onload = () => {
+          // Reject tiny placeholder images
+          if (img.naturalWidth < 50 && img.naturalHeight < 50) { resolve(false); return; }
+          const c = document.createElement('canvas');
+          c.width = img.width; c.height = img.height;
+          const ctx = c.getContext('2d');
+          if (ctx) { ctx.drawImage(img, 0, 0); this.logoDataUrl = c.toDataURL('image/png'); this.logoLoaded = true; }
+          resolve(true);
+        };
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+
+    const ok = await tryLoad(BRAND_LOGO_URL);
+    if (!ok) {
+      await tryLoad(`${window.location.origin}/logo-512.png`);
+    }
   }
 
   private sc(c: RGB) { this.pdf.setTextColor(c[0], c[1], c[2]); }

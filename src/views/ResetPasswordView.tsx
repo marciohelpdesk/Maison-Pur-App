@@ -4,8 +4,7 @@ import { Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { BackgroundEffects } from '@/components/BackgroundEffects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { BRAND_LOGO_URL } from '@/lib/brand';
-const purLogo = BRAND_LOGO_URL;
+import { BrandLogo } from '@/components/BrandLogo';
 
 interface ResetPasswordViewProps {
   onPasswordReset: () => void;
@@ -145,11 +144,7 @@ export const ResetPasswordView = ({ onPasswordReset }: ResetPasswordViewProps) =
           className="mb-8 mt-4"
         >
           <div className="relative w-32 h-32 flex items-center justify-center">
-            <img 
-              src={purLogo}
-              alt="Pur Logo" 
-              className="w-full h-full object-contain drop-shadow-2xl" 
-            />
+            <BrandLogo className="w-full h-full object-contain drop-shadow-2xl" />
           </div>
         </motion.div>
         
