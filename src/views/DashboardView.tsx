@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import checklistBg from '@/assets/checklist-bg.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -90,14 +89,14 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
 
   // Checklist templates - computed from real data
   const checklistTemplates = useMemo(() => {
-    const templates: { title: string; border: string; template: ChecklistSection[] }[] = [
-      { title: 'Airbnb Premium', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE },
-      { title: 'Residencial', border: 'border-l-emerald-400', template: STANDARD_CHECKLIST_TEMPLATE },
-      { title: 'Deep Clean', border: 'border-l-blue-400', template: DEEP_CLEAN_CHECKLIST_TEMPLATE },
-      { title: 'Move-in/out', border: 'border-l-purple-400', template: MOVE_IN_OUT_CHECKLIST_TEMPLATE },
-      { title: 'Recorrente', border: 'border-l-teal-400', template: RECURRING_CHECKLIST_TEMPLATE },
-      { title: 'Pós-obra', border: 'border-l-amber-400', template: POST_CONSTRUCTION_CHECKLIST_TEMPLATE },
-      { title: 'Comercial', border: 'border-l-slate-400', template: COMMERCIAL_CHECKLIST_TEMPLATE },
+    const templates: { title: string; icon: string; border: string; template: ChecklistSection[] }[] = [
+      { title: 'Airbnb Premium', icon: '🏠', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE },
+      { title: 'Residencial', icon: '🏡', border: 'border-l-emerald-400', template: STANDARD_CHECKLIST_TEMPLATE },
+      { title: 'Deep Clean', icon: '🧹', border: 'border-l-blue-400', template: DEEP_CLEAN_CHECKLIST_TEMPLATE },
+      { title: 'Move-in/out', icon: '📦', border: 'border-l-purple-400', template: MOVE_IN_OUT_CHECKLIST_TEMPLATE },
+      { title: 'Recorrente', icon: '🔄', border: 'border-l-teal-400', template: RECURRING_CHECKLIST_TEMPLATE },
+      { title: 'Pós-obra', icon: '🔨', border: 'border-l-amber-400', template: POST_CONSTRUCTION_CHECKLIST_TEMPLATE },
+      { title: 'Comercial', icon: '🏢', border: 'border-l-slate-400', template: COMMERCIAL_CHECKLIST_TEMPLATE },
     ];
     return templates.map(t => ({
       ...t,
@@ -256,14 +255,11 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08 }}
                 onClick={() => setSelectedTemplate(idx)}
-                className={`min-w-[160px] rounded-2xl cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95 relative overflow-hidden`}
-                style={{ backgroundImage: `url(${checklistBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                className={`min-w-[160px] glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95`}
               >
-                <div className="absolute inset-0 bg-black/45 rounded-r-2xl" />
-                <div className="relative z-10 p-4">
-                  <h4 className="font-bold text-white text-sm mb-1">{tmpl.title}</h4>
-                  <p className="text-[10px] text-white/80">{tmpl.rooms} seções • {tmpl.tasks} tarefas</p>
-                </div>
+                <span className="text-3xl mb-2 block">{tmpl.icon}</span>
+                <h4 className="font-bold text-foreground text-sm mb-1">{tmpl.title}</h4>
+                <p className="text-[10px] text-muted-foreground">{tmpl.rooms} seções • {tmpl.tasks} tarefas</p>
               </motion.div>
             ))}
           </div>
@@ -494,7 +490,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
               <>
                 <DrawerHeader className="text-left">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-12 h-12 rounded-xl bg-cover bg-center" style={{ backgroundImage: `url(${checklistBg})` }} />
+                    <span className="text-4xl">{tmpl.icon}</span>
                     <div>
                       <DrawerTitle className="text-xl">{tmpl.title}</DrawerTitle>
                       <DrawerDescription>{tmpl.rooms} seções • {tmpl.tasks} tarefas</DrawerDescription>
