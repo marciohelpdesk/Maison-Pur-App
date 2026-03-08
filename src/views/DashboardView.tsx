@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import checklistBg from '@/assets/checklist-bg.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -493,7 +494,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
               <>
                 <DrawerHeader className="text-left">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-4xl">{tmpl.icon}</span>
+                    <div className="w-12 h-12 rounded-xl bg-cover bg-center" style={{ backgroundImage: `url(${checklistBg})` }} />
                     <div>
                       <DrawerTitle className="text-xl">{tmpl.title}</DrawerTitle>
                       <DrawerDescription>{tmpl.rooms} seções • {tmpl.tasks} tarefas</DrawerDescription>
