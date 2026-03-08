@@ -1,25 +1,24 @@
 
 
-## Plano: Imagem de fundo nos cards de Checklist Base
+## Plano: Bolhas flutuantes no Execution + Confetti na finalização
 
-### O que muda
+### 1. Adicionar BackgroundEffects na tela de Execução
 
-**Arquivo:** `src/views/DashboardView.tsx`
+**Arquivo:** `src/pages/Execution.tsx`
 
-1. **Copiar a imagem** do upload para `src/assets/checklist-bg.png`
+O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
 
-2. **Importar a imagem** no componente: `import checklistBg from '@/assets/checklist-bg.png'`
+- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
 
-3. **Alterar os cards de checklist** (linhas 251-264):
-   - Remover o emoji (`tmpl.icon`) — a linha `<span className="text-3xl mb-2 block">{tmpl.icon}</span>` é removida
-   - Adicionar a imagem como `backgroundImage` no card com `bg-cover bg-center`
-   - Adicionar overlay escuro semi-transparente para manter legibilidade do texto
-   - Texto passa a ser branco sobre o overlay
+### 2. Confetti na finalização do checklist
 
-4. **Remover o campo `icon`** da definição dos templates (linhas 92-99), já que não será mais usado
+**Arquivos:** `src/components/execution/SummaryStep.tsx`
 
-### Resultado visual
-Cards com a foto da profissional de limpeza como fundo, overlay escuro, texto branco com título e contagem de tarefas. A borda lateral colorida (`border-l-4`) é mantida para diferenciar os tipos.
+Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
+
+- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
+- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
+- Sem dependências externas — 100% Framer Motion + CSS.
 
 ### Sem alterações de banco de dados
 
