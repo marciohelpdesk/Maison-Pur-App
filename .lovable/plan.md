@@ -1,24 +1,25 @@
 
 
-## Plano: Bolhas flutuantes no Execution + Confetti na finalização
+## Plano: Imagem de fundo nos cards de Checklist Base
 
-### 1. Adicionar BackgroundEffects na tela de Execução
+### O que muda
 
-**Arquivo:** `src/pages/Execution.tsx`
+**Arquivo:** `src/views/DashboardView.tsx`
 
-O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
+1. **Copiar a imagem** do upload para `src/assets/checklist-bg.png`
 
-- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
+2. **Importar a imagem** no componente: `import checklistBg from '@/assets/checklist-bg.png'`
 
-### 2. Confetti na finalização do checklist
+3. **Alterar os cards de checklist** (linhas 251-264):
+   - Remover o emoji (`tmpl.icon`) — a linha `<span className="text-3xl mb-2 block">{tmpl.icon}</span>` é removida
+   - Adicionar a imagem como `backgroundImage` no card com `bg-cover bg-center`
+   - Adicionar overlay escuro semi-transparente para manter legibilidade do texto
+   - Texto passa a ser branco sobre o overlay
 
-**Arquivos:** `src/components/execution/SummaryStep.tsx`
+4. **Remover o campo `icon`** da definição dos templates (linhas 92-99), já que não será mais usado
 
-Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
-
-- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
-- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
-- Sem dependências externas — 100% Framer Motion + CSS.
+### Resultado visual
+Cards com a foto da profissional de limpeza como fundo, overlay escuro, texto branco com título e contagem de tarefas. A borda lateral colorida (`border-l-4`) é mantida para diferenciar os tipos.
 
 ### Sem alterações de banco de dados
 
