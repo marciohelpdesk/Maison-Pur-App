@@ -93,6 +93,157 @@ const translations: Record<string, Record<string, string>> = {
 
 const dateLocales: Record<string, any> = { en: enUS, pt: ptBR, ko, th, es };
 
+// ─── PDF Generator for Public Report ───
+function generatePublicReportPdf(
+  report: CleaningReport,
+  rooms: ReportRoom[],
+  photos: ReportPhoto[],
+  t: (key: string) => string,
+  durationStr: string,
+  completionPct: number,
+) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth();
+  const margin = 18;
+  let y = 20;
+
+  const addPage = () => { doc.addPage(); y = 20; };
+  const checkPage = (needed: number) => { if (y + needed > 275) addPage(); };
+
+  // Header bar
+  doc.setFillColor(40, 40, 40);
+  doc.rect(0, 0, W, 38, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MAISON PUR', margin, 18);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(t('visitReport').toUpperCase(), margin, 28);
+  doc.setTextColor(180, 180, 180);
+  doc.text(`ID: ${report.public_token.slice(0, 8)}`, W - margin, 28, { align: 'right' });
+
+  y = 50;
+
+  // Property info
+  doc.setTextColor(30, 30, 30);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text(report.property_name, margin, y);
+  y += 8;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 100, 100);
+  doc.text(report.property_address, margin, y);
+  y += 6;
+  doc.text(`${t('date')}: ${report.cleaning_date}  •  ${report.cleaner_name}`, margin, y);
+  y += 12;
+
+  // Summary box
+  doc.setFillColor(245, 245, 240);
+  doc.roundedRect(margin, y, W - margin * 2, 22, 3, 3, 'F');
+  doc.setTextColor(50, 50, 50);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  const colW = (W - margin * 2) / 4;
+  const statsY = y + 9;
+  const statsLabelY = y + 16;
+  doc.setFontSize(16);
+  doc.text(`${completionPct}%`, margin + colW * 0.5, statsY, { align: 'center' });
+  doc.text(`${photos.length}`, margin + colW * 1.5, statsY, { align: 'center' });
+  doc.text(durationStr, margin + colW * 2.5, statsY, { align: 'center' });
+  doc.text(`${rooms.length}`, margin + colW * 3.5, statsY, { align: 'center' });
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(130, 130, 130);
+  doc.text(t('completion').toUpperCase(), margin + colW * 0.5, statsLabelY, { align: 'center' });
+  doc.text(t('photos').toUpperCase(), margin + colW * 1.5, statsLabelY, { align: 'center' });
+  doc.text(t('duration').toUpperCase(), margin + colW * 2.5, statsLabelY, { align: 'center' });
+  doc.text(t('rooms').toUpperCase(), margin + colW * 3.5, statsLabelY, { align: 'center' });
+
+  y += 30;
+
+  // Rooms
+  rooms.forEach((room) => {
+    checkPage(30);
+    // Room header
+    doc.setFillColor(113, 125, 98);
+    doc.roundedRect(margin, y, W - margin * 2, 10, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(room.name, margin + 5, y + 7);
+    const pct = room.tasks_total > 0 ? Math.round((room.tasks_completed / room.tasks_total) * 100) : 0;
+    doc.setFontSize(9);
+    doc.text(`${pct}%`, W - margin - 5, y + 7, { align: 'right' });
+    y += 14;
+
+    // Checklist items
+    const items = (room.checklist as any[]) || [];
+    items.forEach((item: any) => {
+      checkPage(6);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      const check = item.completed ? '✓' : '○';
+      doc.setTextColor(item.completed ? 80 : 180, item.completed ? 120 : 180, item.completed ? 80 : 180);
+      doc.text(check, margin + 3, y);
+      doc.setTextColor(60, 60, 60);
+      doc.text(item.label || item.name || '', margin + 10, y);
+      y += 5.5;
+    });
+
+    // Damages
+    const damages = (room.damages as any[]) || [];
+    if (damages.length > 0) {
+      checkPage(10);
+      y += 2;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(200, 80, 60);
+      doc.text(`⚠ ${t('damages')} (${damages.length})`, margin + 3, y);
+      y += 5;
+      damages.forEach((d: any) => {
+        checkPage(6);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(8);
+        doc.text(`• ${d.description || d.type || ''}`, margin + 6, y);
+        y += 4.5;
+      });
+    }
+
+    y += 6;
+  });
+
+  // Notes
+  if (report.notes) {
+    checkPage(20);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(50, 50, 50);
+    doc.text('Notes', margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    const lines = doc.splitTextToSize(report.notes, W - margin * 2);
+    doc.text(lines, margin, y);
+    y += lines.length * 4.5 + 4;
+  }
+
+  // Footer on last page
+  const footerY = 285;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, footerY - 4, W - margin, footerY - 4);
+  doc.setFontSize(7);
+  doc.setTextColor(160, 160, 160);
+  doc.text(`© ${new Date().getFullYear()} Maison Pur • maisonpurusa.com`, W / 2, footerY, { align: 'center' });
+
+  // Download
+  const filename = `Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_${report.cleaning_date}.pdf`;
+  const blobUrl = doc.output('bloburl') as unknown as string;
+  window.open(blobUrl, '_blank');
+}
+
 export default function PublicReport() {
   const { token } = useParams<{ token: string }>();
   const { report, rooms, photos, isLoading } = usePublicReport(token);
