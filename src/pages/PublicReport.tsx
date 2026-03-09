@@ -71,6 +71,7 @@ const translations: Record<string, Record<string, string>> = {
     before: 'ก่อน', after: 'หลัง', noIncidents: 'ไม่มีเหตุการณ์',
     contact: 'ติดต่อ', poweredBy: 'ขับเคลื่อนโดย',
     minutes: 'นาที', overview: 'ภาพรวม',
+    downloadPdf: 'ดาวน์โหลด PDF', generating: 'กำลังสร้าง...',
   },
   es: {
     subtitle: 'SU TIEMPO IMPORTA, NOSOTROS LIMPIAMOS',
