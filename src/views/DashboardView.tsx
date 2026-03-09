@@ -106,7 +106,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
   }, []);
 
   return (
-    <div className="flex flex-col h-full relative z-10 pb-8 lg:pb-0 lg:pb-0">
+    <div className="flex flex-col h-full relative z-10 pb-8 lg:pb-0 lg:pb-0 lg:pb-0">
       {/* Header */}
       <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'transparent' }}>
         <div className="flex items-center justify-between">
@@ -131,12 +131,12 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
         </div>
       </div>
 
-      <div className="px-6 py-4 relative z-10 s lg:px-0pace-y-6">
+      <div className="px-6 py-4 relativ lg:px-0e z-10 s lg:px-0pace-y-6">
 
         {/* Service Categories - Horizontal Scroll */}
         <section>
           <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">{t('dashboard.quickActions') || 'Categorias'}</h2>
-          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+          <div className="flex gap-4 overflow-x-auto hid lg:grid lg:grid-cols-4 lg:overflow-visiblee-scrollbar pb-2">
             {categories.map((cat, idx) => (
               <motion.button
                 key={idx}
