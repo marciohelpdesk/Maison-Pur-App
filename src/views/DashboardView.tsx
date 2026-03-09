@@ -414,15 +414,16 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
           </div>
         </section>
 
-        {/* Weekly Performance */}
-        <WeeklyProgress jobs={jobs} />
+        {/* Weekly Performance + Quick Actions side by side on desktop */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-6 space-y-6 lg:space-y-0">
+          <WeeklyProgress jobs={jobs} />
 
-        {/* Quick Actions - Horizontal Pills */}
-        <section>
-          <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
-            {t('dashboard.quickActions') || 'Ações Rápidas'}
-          </h2>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+          {/* Quick Actions */}
+          <section>
+            <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
+              {t('dashboard.quickActions') || 'Ações Rápidas'}
+            </h2>
+            <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible">
             {[
               { icon: Plus, label: t('dashboard.newJob') || 'Novo Job', action: () => navigate('/agenda') },
               { icon: Home, label: t('dashboard.property') || 'Propriedade', action: () => navigate('/properties') },
