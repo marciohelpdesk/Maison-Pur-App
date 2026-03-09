@@ -184,12 +184,12 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500/20 to-primary/10 flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/20 to-primary/10 flex items-center justify-center">
             <FileText size={22} className="text-primary" />
           </div>
           <div>
             <h3 className="font-bold text-foreground text-base">Estimates</h3>
-            <p className="text-[11px] text-muted-foreground">{estimates.length} total</p>
+            <p className="text-[11px] text-muted-foreground">{estimates.length} total · ${totalEstimated.toFixed(0)} estimated</p>
           </div>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)} className="rounded-xl h-9 gap-1.5">
