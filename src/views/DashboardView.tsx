@@ -247,7 +247,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
           <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
             Checklist Base
           </h2>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-4 xl:grid-cols-7 lg:overflow-visible">
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:overflow-visible">
             {checklistTemplates.map((tmpl, idx) => (
               <motion.div
                 key={idx}
