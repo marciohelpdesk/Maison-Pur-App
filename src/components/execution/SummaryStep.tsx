@@ -3,8 +3,7 @@ import { Check, Clock, Camera, ClipboardCheck, Star, MessageSquare, AlertTriangl
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Job, InventoryItem } from '@/types';
-import { useState, useCallback, useMemo } from 'react';
-import { generateCleaningReport, downloadPdf } from '@/lib/pdfGenerator';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PdfPreviewModal } from './PdfPreviewModal';
