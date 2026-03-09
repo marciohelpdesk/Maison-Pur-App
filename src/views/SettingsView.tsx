@@ -64,7 +64,7 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
           <div className="w-28 h-28 rounded-full mb-4 border-4 border-white shadow-lg overflow-hidden">
             <img
               src={userProfile.avatar}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-top"
               alt="Profile" />
             
           </div>
