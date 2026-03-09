@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useReports, CleaningReport } from '@/hooks/useReports';
 import { useJobs } from '@/hooks/useJobs';
+import { useProperties } from '@/hooks/useProperties';
 import { useProfile } from '@/hooks/useProfile';
 import { PageLoader } from '@/lib/routes';
 
