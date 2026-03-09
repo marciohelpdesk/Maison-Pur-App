@@ -23,6 +23,7 @@ const translations: Record<string, Record<string, string>> = {
     before: 'Before', after: 'After', noIncidents: 'No incidents',
     contact: 'Contact', poweredBy: 'Powered by',
     minutes: 'min', overview: 'Overview',
+    downloadPdf: 'Download PDF', generating: 'Generating...',
   },
   pt: {
     subtitle: 'SEU TEMPO IMPORTA, NÓS CUIDAMOS DA LIMPEZA',
