@@ -165,12 +165,14 @@ export const FinanceView = ({ jobs, onBack }: FinanceViewProps) => {
           </motion.div>
         </div>
 
+        {/* Chart + Stats side by side on desktop */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4 space-y-6 lg:space-y-0 mb-6">
         {/* Earnings Chart */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="glass-panel p-4 mb-6"
+          className="glass-panel p-4"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
