@@ -204,6 +204,10 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
         onClose={() => setIsEditProfileOpen(false)}
         userProfile={userProfile}
         onUpdateProfile={onUpdateProfile} />
+
+      <NotificationsSheet isOpen={activeSheet === 'notifications'} onClose={() => setActiveSheet(null)} />
+      <PrivacySheet isOpen={activeSheet === 'privacy'} onClose={() => setActiveSheet(null)} />
+      <HelpSheet isOpen={activeSheet === 'help'} onClose={() => setActiveSheet(null)} />
       
     </div>);
 
