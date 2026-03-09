@@ -178,6 +178,9 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
   };
 
   const recentEstimates = estimates.slice(0, 3);
+  const totalEstimated = estimates.reduce((s, e) => s + Number(e.amount), 0);
+  const acceptedTotal = estimates.filter(e => e.status === 'accepted').reduce((s, e) => s + Number(e.amount), 0);
+  const pendingTotal = estimates.filter(e => e.status === 'sent').reduce((s, e) => s + Number(e.amount), 0);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-panel p-5 mb-4">
