@@ -105,11 +105,14 @@ export default function Execution() {
       const totalTasks = finalJob.checklist.reduce((acc, s) => acc + s.items.length, 0);
       const completedTasks = finalJob.checklist.reduce((acc, s) => acc + s.items.filter(it => it.completed).length, 0);
 
+      const matchedProperty = properties.find(p => p.id === finalJob.propertyId);
+
       const newReport = await createReport({
         job_id: finalJob.id,
         property_id: finalJob.propertyId || null,
         property_name: finalJob.clientName,
         property_address: finalJob.address,
+        property_photo_url: matchedProperty?.photo || null,
         service_type: finalJob.type,
         cleaner_name: 'Kamila Petters',
         cleaning_date: finalJob.date,
