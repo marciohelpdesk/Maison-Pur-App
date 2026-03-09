@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { usePublicReport, ReportRoom, ReportPhoto } from '@/hooks/useReports';
+import { usePublicReport, ReportRoom, ReportPhoto, CleaningReport } from '@/hooks/useReports';
+import jsPDF from 'jspdf';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { enUS, ptBR, ko, th, es } from 'date-fns/locale';
@@ -22,6 +23,7 @@ const translations: Record<string, Record<string, string>> = {
     before: 'Before', after: 'After', noIncidents: 'No incidents',
     contact: 'Contact', poweredBy: 'Powered by',
     minutes: 'min', overview: 'Overview',
+    downloadPdf: 'Download PDF', generating: 'Generating...',
   },
   pt: {
     subtitle: 'SEU TEMPO IMPORTA, NÓS CUIDAMOS DA LIMPEZA',
@@ -37,6 +39,7 @@ const translations: Record<string, Record<string, string>> = {
     before: 'Antes', after: 'Depois', noIncidents: 'Sem incidentes',
     contact: 'Contato', poweredBy: 'Desenvolvido por',
     minutes: 'min', overview: 'Resumo',
+    downloadPdf: 'Baixar PDF', generating: 'Gerando...',
   },
   ko: {
     subtitle: '당신의 시간은 소중합니다',
@@ -52,6 +55,7 @@ const translations: Record<string, Record<string, string>> = {
     before: '전', after: '후', noIncidents: '사건 없음',
     contact: '연락처', poweredBy: '제공',
     minutes: '분', overview: '개요',
+    downloadPdf: 'PDF 다운로드', generating: '생성 중...',
   },
   th: {
     subtitle: 'เวลาของคุณมีค่า',
@@ -67,6 +71,7 @@ const translations: Record<string, Record<string, string>> = {
     before: 'ก่อน', after: 'หลัง', noIncidents: 'ไม่มีเหตุการณ์',
     contact: 'ติดต่อ', poweredBy: 'ขับเคลื่อนโดย',
     minutes: 'นาที', overview: 'ภาพรวม',
+    downloadPdf: 'ดาวน์โหลด PDF', generating: 'กำลังสร้าง...',
   },
   es: {
     subtitle: 'SU TIEMPO IMPORTA, NOSOTROS LIMPIAMOS',
@@ -82,10 +87,162 @@ const translations: Record<string, Record<string, string>> = {
     before: 'Antes', after: 'Después', noIncidents: 'Sin incidentes',
     contact: 'Contacto', poweredBy: 'Desarrollado por',
     minutes: 'min', overview: 'Resumen',
+    downloadPdf: 'Descargar PDF', generating: 'Generando...',
   },
 };
 
 const dateLocales: Record<string, any> = { en: enUS, pt: ptBR, ko, th, es };
+
+// ─── PDF Generator for Public Report ───
+function generatePublicReportPdf(
+  report: CleaningReport,
+  rooms: ReportRoom[],
+  photos: ReportPhoto[],
+  t: (key: string) => string,
+  durationStr: string,
+  completionPct: number,
+) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth();
+  const margin = 18;
+  let y = 20;
+
+  const addPage = () => { doc.addPage(); y = 20; };
+  const checkPage = (needed: number) => { if (y + needed > 275) addPage(); };
+
+  // Header bar
+  doc.setFillColor(40, 40, 40);
+  doc.rect(0, 0, W, 38, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MAISON PUR', margin, 18);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(t('visitReport').toUpperCase(), margin, 28);
+  doc.setTextColor(180, 180, 180);
+  doc.text(`ID: ${report.public_token.slice(0, 8)}`, W - margin, 28, { align: 'right' });
+
+  y = 50;
+
+  // Property info
+  doc.setTextColor(30, 30, 30);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text(report.property_name, margin, y);
+  y += 8;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 100, 100);
+  doc.text(report.property_address, margin, y);
+  y += 6;
+  doc.text(`${t('date')}: ${report.cleaning_date}  •  ${report.cleaner_name}`, margin, y);
+  y += 12;
+
+  // Summary box
+  doc.setFillColor(245, 245, 240);
+  doc.roundedRect(margin, y, W - margin * 2, 22, 3, 3, 'F');
+  doc.setTextColor(50, 50, 50);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  const colW = (W - margin * 2) / 4;
+  const statsY = y + 9;
+  const statsLabelY = y + 16;
+  doc.setFontSize(16);
+  doc.text(`${completionPct}%`, margin + colW * 0.5, statsY, { align: 'center' });
+  doc.text(`${photos.length}`, margin + colW * 1.5, statsY, { align: 'center' });
+  doc.text(durationStr, margin + colW * 2.5, statsY, { align: 'center' });
+  doc.text(`${rooms.length}`, margin + colW * 3.5, statsY, { align: 'center' });
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(130, 130, 130);
+  doc.text(t('completion').toUpperCase(), margin + colW * 0.5, statsLabelY, { align: 'center' });
+  doc.text(t('photos').toUpperCase(), margin + colW * 1.5, statsLabelY, { align: 'center' });
+  doc.text(t('duration').toUpperCase(), margin + colW * 2.5, statsLabelY, { align: 'center' });
+  doc.text(t('rooms').toUpperCase(), margin + colW * 3.5, statsLabelY, { align: 'center' });
+
+  y += 30;
+
+  // Rooms
+  rooms.forEach((room) => {
+    checkPage(30);
+    // Room header
+    doc.setFillColor(113, 125, 98);
+    doc.roundedRect(margin, y, W - margin * 2, 10, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(room.name, margin + 5, y + 7);
+    const pct = room.tasks_total > 0 ? Math.round((room.tasks_completed / room.tasks_total) * 100) : 0;
+    doc.setFontSize(9);
+    doc.text(`${pct}%`, W - margin - 5, y + 7, { align: 'right' });
+    y += 14;
+
+    // Checklist items
+    const items = (room.checklist as any[]) || [];
+    items.forEach((item: any) => {
+      checkPage(6);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      const check = item.completed ? '✓' : '○';
+      doc.setTextColor(item.completed ? 80 : 180, item.completed ? 120 : 180, item.completed ? 80 : 180);
+      doc.text(check, margin + 3, y);
+      doc.setTextColor(60, 60, 60);
+      doc.text(item.label || item.name || '', margin + 10, y);
+      y += 5.5;
+    });
+
+    // Damages
+    const damages = (room.damages as any[]) || [];
+    if (damages.length > 0) {
+      checkPage(10);
+      y += 2;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(200, 80, 60);
+      doc.text(`⚠ ${t('damages')} (${damages.length})`, margin + 3, y);
+      y += 5;
+      damages.forEach((d: any) => {
+        checkPage(6);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(8);
+        doc.text(`• ${d.description || d.type || ''}`, margin + 6, y);
+        y += 4.5;
+      });
+    }
+
+    y += 6;
+  });
+
+  // Notes
+  if (report.notes) {
+    checkPage(20);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(50, 50, 50);
+    doc.text('Notes', margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    const lines = doc.splitTextToSize(report.notes, W - margin * 2);
+    doc.text(lines, margin, y);
+    y += lines.length * 4.5 + 4;
+  }
+
+  // Footer on last page
+  const footerY = 285;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, footerY - 4, W - margin, footerY - 4);
+  doc.setFontSize(7);
+  doc.setTextColor(160, 160, 160);
+  doc.text(`© ${new Date().getFullYear()} Maison Pur • maisonpurusa.com`, W / 2, footerY, { align: 'center' });
+
+  // Download
+  const filename = `Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_${report.cleaning_date}.pdf`;
+  const blobUrl = doc.output('bloburl') as unknown as string;
+  window.open(blobUrl, '_blank');
+}
 
 export default function PublicReport() {
   const { token } = useParams<{ token: string }>();
@@ -95,6 +252,7 @@ export default function PublicReport() {
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const roomRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const t = useCallback((key: string) => {
     return translations[lang]?.[key] || translations.en?.[key] || key;
@@ -354,6 +512,33 @@ export default function PublicReport() {
                 {totalIncidents > 0 ? t('incidents') : t('noIncidents')}
               </span>
             </div>
+           </div>
+
+          {/* Download PDF button */}
+          <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/30">
+            <button
+              onClick={() => {
+                setIsGeneratingPdf(true);
+                setTimeout(() => {
+                  generatePublicReportPdf(report, rooms, photos, t, durationStr, completionPct);
+                  setIsGeneratingPdf(false);
+                }, 100);
+              }}
+              disabled={isGeneratingPdf}
+              className="w-full flex justify-center items-center gap-2.5 bg-stone-800 hover:bg-stone-700 disabled:bg-stone-400 text-white px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
+            >
+              {isGeneratingPdf ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  {t('generating')}
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  {t('downloadPdf')}
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
