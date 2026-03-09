@@ -252,6 +252,7 @@ export default function PublicReport() {
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const roomRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const t = useCallback((key: string) => {
     return translations[lang]?.[key] || translations.en?.[key] || key;
