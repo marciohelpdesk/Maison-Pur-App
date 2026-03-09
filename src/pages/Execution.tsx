@@ -23,7 +23,6 @@ export default function Execution() {
   const { profile } = useProfile(user?.id);
 
   const isLoading = jobsLoading || inventoryLoading;
-  const job = jobs.find(j => j.id === jobId);
 
   const handleUpdateJob = (updatedJob: Job) => {
     updateJob(updatedJob);
