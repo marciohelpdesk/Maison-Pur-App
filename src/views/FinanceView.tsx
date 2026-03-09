@@ -255,7 +255,7 @@ export const FinanceView = ({ jobs, onBack }: FinanceViewProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="glass-panel p-4 mb-6"
+          className="glass-panel p-4"
         >
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
