@@ -89,11 +89,11 @@ export const PublicOnly = ({ children }: { children: ReactNode }) => {
 // Protected layout shell - keeps background/nav mounted across route changes
 export const ProtectedLayout = () => (
   <RequireAuth>
-    <MobileLayout>
+    <ResponsiveLayout>
       <Suspense fallback={<PageLoader />}>
         <Outlet />
       </Suspense>
-    </MobileLayout>
+    </ResponsiveLayout>
   </RequireAuth>
 );
 
