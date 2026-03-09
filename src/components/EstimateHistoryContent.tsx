@@ -25,6 +25,9 @@ export default function EstimateHistoryContent({ userId }: EstimateHistoryConten
   const [filter, setFilter] = useState<'all' | 'draft' | 'sent' | 'accepted' | 'declined'>('all');
 
   const filtered = filter === 'all' ? estimates : estimates.filter(e => e.status === filter);
+  const totalEstimated = estimates.reduce((s, e) => s + Number(e.amount), 0);
+  const acceptedTotal = estimates.filter(e => e.status === 'accepted').reduce((s, e) => s + Number(e.amount), 0);
+  const pendingTotal = estimates.filter(e => e.status === 'sent').reduce((s, e) => s + Number(e.amount), 0);
 
   const copyLink = (token: string) => {
     navigator.clipboard.writeText(`https://maisonpur.lovable.app/estimate/${token}?v=${Date.now()}`);
