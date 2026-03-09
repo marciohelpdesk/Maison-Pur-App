@@ -78,10 +78,10 @@ export function usePushNotifications() {
         throw new Error('Failed to get VAPID key');
       }
 
-      // Subscribe to push
+      const applicationServerKey = urlBase64ToUint8Array(vapidData.publicKey);
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidData.publicKey),
+        applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
       });
 
       // Send subscription to backend
