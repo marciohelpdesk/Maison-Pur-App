@@ -832,7 +832,7 @@ export default function PublicReport() {
             "{t('footerQuote')}"
           </p>
           <div className="flex justify-center mb-6">
-            <BrandLogo className="h-12 w-auto brightness-0 invert opacity-70" />
+            <BrandLogo className="h-14 w-auto opacity-90" />
           </div>
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-xs text-stone-400 mb-6">
             <a href="mailto:contact@maisonpurusa.com" className="flex items-center gap-2 hover:text-white transition-colors">
