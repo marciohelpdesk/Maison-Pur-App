@@ -1,24 +1,23 @@
 
 
-## Plano: Bolhas flutuantes no Execution + Confetti na finalização
+## Plano: Safe Area no Header do Relatório Público (Mobile)
 
-### 1. Adicionar BackgroundEffects na tela de Execução
+### Problema
+No celular, a barra de status/notch do iPhone sobrepõe o logotipo e o seletor de idioma no topo do relatório público, pois o posicionamento atual usa apenas `top-6` (24px) sem considerar o safe-area do dispositivo.
 
-**Arquivo:** `src/pages/Execution.tsx`
+### Solução
+Adicionar `padding-top` com safe-area inset no container do header hero do `PublicReport.tsx`, para que o logo e o language switcher fiquem abaixo da barra de status/notch.
 
-O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
+### Mudanças
 
-- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
+**Arquivo**: `src/pages/PublicReport.tsx`
 
-### 2. Confetti na finalização do checklist
+1. **Logo** (linha ~465): Trocar `top-6` por `top-[max(1.5rem,env(safe-area-inset-top,0px)_+_1rem)]` ou usar uma abordagem mais simples com classe adicional de padding
+2. **Language Switcher** (linha ~470): Mesmo ajuste de `top-6` para incluir safe-area
+3. Abordagem prática: Envolver logo + language switcher num container absoluto com `pt-[env(safe-area-inset-top)]` + padding extra, ou simplesmente aumentar o `top` para `top-12 sm:top-6` com fallback CSS de safe-area
 
-**Arquivos:** `src/components/execution/SummaryStep.tsx`
+A forma mais limpa: adicionar um wrapper div posicionado no topo do hero com `padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem)` via style inline, contendo logo à esquerda e language switcher à direita.
 
-Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
-
-- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
-- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
-- Sem dependências externas — 100% Framer Motion + CSS.
-
-### Sem alterações de banco de dados
+### Arquivos
+- `src/pages/PublicReport.tsx` — ajustar posicionamento do logo e language switcher no header hero
 
