@@ -5,6 +5,7 @@ import { InventoryItem } from '@/types';
 interface DbInventory {
   id: string;
   user_id: string;
+  property_id: string | null;
   name: string;
   quantity: number;
   unit: string;
@@ -23,22 +24,28 @@ const mapDbToInventory = (db: DbInventory): InventoryItem => ({
   threshold: db.threshold,
   category: db.category,
   reorderPhoto: db.reorder_photo || undefined,
+  propertyId: db.property_id || undefined,
 });
 
-export const useInventory = (userId: string | undefined) => {
+export const useInventory = (userId: string | undefined, propertyId?: string) => {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ['inventory', userId],
+    queryKey: ['inventory', userId, propertyId],
     queryFn: async (): Promise<InventoryItem[]> => {
       if (!userId) return [];
       
-      const { data, error } = await supabase
+      let q = supabase
         .from('inventory')
         .select('*')
         .eq('user_id', userId)
         .order('category', { ascending: true });
       
+      if (propertyId) {
+        q = q.eq('property_id', propertyId);
+      }
+      
+      const { data, error } = await q;
       if (error) throw error;
       return (data as DbInventory[]).map(mapDbToInventory);
     },
@@ -53,6 +60,7 @@ export const useInventory = (userId: string | undefined) => {
         .from('inventory')
         .insert({
           user_id: userId,
+          property_id: item.propertyId || propertyId || null,
           name: item.name,
           quantity: item.quantity,
           unit: item.unit,
@@ -112,6 +120,41 @@ export const useInventory = (userId: string | undefined) => {
     },
   });
 
+  const copyFromProperty = useMutation({
+    mutationFn: async (sourcePropertyId: string) => {
+      if (!userId || !propertyId) throw new Error('No user/property ID');
+      
+      const { data: sourceItems, error: fetchError } = await supabase
+        .from('inventory')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('property_id', sourcePropertyId);
+      
+      if (fetchError) throw fetchError;
+      if (!sourceItems || sourceItems.length === 0) throw new Error('No items to copy');
+      
+      const newItems = (sourceItems as DbInventory[]).map(item => ({
+        user_id: userId,
+        property_id: propertyId,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        threshold: item.threshold,
+        category: item.category,
+        reorder_photo: item.reorder_photo,
+      }));
+      
+      const { error: insertError } = await supabase
+        .from('inventory')
+        .insert(newItems);
+      
+      if (insertError) throw insertError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory', userId] });
+    },
+  });
+
   return {
     inventory: query.data || [],
     isLoading: query.isLoading,
@@ -119,8 +162,10 @@ export const useInventory = (userId: string | undefined) => {
     addItem: addItem.mutate,
     updateItem: updateItem.mutate,
     deleteItem: deleteItem.mutate,
+    copyFromProperty: copyFromProperty.mutate,
     isAdding: addItem.isPending,
     isUpdating: updateItem.isPending,
     isDeleting: deleteItem.isPending,
+    isCopying: copyFromProperty.isPending,
   };
 };

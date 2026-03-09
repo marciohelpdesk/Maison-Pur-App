@@ -17,12 +17,12 @@ export default function Execution() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { jobs, updateJob, isLoading: jobsLoading } = useJobs(user?.id);
-  const { inventory, isLoading: inventoryLoading } = useInventory(user?.id);
+  const job = jobs.find(j => j.id === jobId);
+  const { inventory, isLoading: inventoryLoading } = useInventory(user?.id, job?.propertyId);
   const { createReport } = useReports(user?.id);
   const { profile } = useProfile(user?.id);
 
   const isLoading = jobsLoading || inventoryLoading;
-  const job = jobs.find(j => j.id === jobId);
 
   const handleUpdateJob = (updatedJob: Job) => {
     updateJob(updatedJob);

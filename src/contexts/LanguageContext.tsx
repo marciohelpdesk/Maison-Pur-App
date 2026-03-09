@@ -447,6 +447,22 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.continue': 'Continue',
     'dashboard.progress': 'Progress',
     'jobs.startChecklist': 'Start Checklist',
+
+    // Inventory (Property)
+    'inventory.title': 'Supplies & Inventory',
+    'inventory.subtitle': 'Items available at this property',
+    'inventory.copyFrom': 'Copy From',
+    'inventory.selectProperty': 'Copy inventory from:',
+    'inventory.itemName': 'Item name',
+    'inventory.qty': 'Qty',
+    'inventory.unit': 'Unit',
+    'inventory.threshold': 'Min',
+    'inventory.category': 'Category',
+    'inventory.lowStock': 'Low Stock',
+    'inventory.empty': 'No supplies registered for this property',
+    'inventory.itemAdded': 'Item added',
+    'inventory.itemDeleted': 'Item removed',
+    'inventory.copied': 'Inventory copied successfully',
   },
   pt: {
     // Navigation
@@ -886,6 +902,22 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.continue': 'Continuar',
     'dashboard.progress': 'Progresso',
     'jobs.startChecklist': 'Iniciar',
+
+    // Inventory (Property)
+    'inventory.title': 'Suprimentos & Estoque',
+    'inventory.subtitle': 'Itens disponíveis nesta propriedade',
+    'inventory.copyFrom': 'Copiar De',
+    'inventory.selectProperty': 'Copiar inventário de:',
+    'inventory.itemName': 'Nome do item',
+    'inventory.qty': 'Qtd',
+    'inventory.unit': 'Unidade',
+    'inventory.threshold': 'Mín',
+    'inventory.category': 'Categoria',
+    'inventory.lowStock': 'Estoque Baixo',
+    'inventory.empty': 'Nenhum suprimento cadastrado para esta propriedade',
+    'inventory.itemAdded': 'Item adicionado',
+    'inventory.itemDeleted': 'Item removido',
+    'inventory.copied': 'Inventário copiado com sucesso',
   },
 };
 

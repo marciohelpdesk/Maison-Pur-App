@@ -149,6 +149,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          property_id: string | null
           quantity: number
           reorder_photo: string | null
           threshold: number
@@ -161,6 +162,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          property_id?: string | null
           quantity?: number
           reorder_photo?: string | null
           threshold?: number
@@ -173,6 +175,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          property_id?: string | null
           quantity?: number
           reorder_photo?: string | null
           threshold?: number
@@ -180,7 +183,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inventory_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {

@@ -21,7 +21,8 @@ export interface InventoryItem {
   unit: string;
   threshold: number;
   category: string;
-  reorderPhoto?: string; 
+  reorderPhoto?: string;
+  propertyId?: string;
 }
 
 export interface InventoryUsage {
