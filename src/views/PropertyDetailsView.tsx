@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Property, Room, ChecklistSection } from '@/types';
+import { PropertyInventory } from '@/components/PropertyInventory';
 import { RoomManagement } from '@/components/RoomManagement';
 import { ChecklistTemplateEditor } from '@/components/ChecklistTemplateEditor';
 import { openAddressInMaps } from '@/lib/utils';
