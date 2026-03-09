@@ -213,6 +213,9 @@ const translations: Record<Language, Record<string, string>> = {
     'exec.summary.noPdfAvailable': 'No PDF available',
     'exec.summary.previewNote': 'Review the report before downloading',
     'exec.summary.previewPdf': 'Preview PDF',
+    'exec.summary.completion': 'Completion',
+    'exec.summary.cleaningReport': 'Cleaning Report',
+    'exec.summary.responsible': 'Responsible',
     
     // Execution - Lost and Found
     'exec.step.lostFound': 'Found',
