@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
 
 // Lazy loading for performance
 const Login = lazy(() => import('@/pages/auth/Login'));
@@ -89,11 +89,11 @@ export const PublicOnly = ({ children }: { children: ReactNode }) => {
 // Protected layout shell - keeps background/nav mounted across route changes
 export const ProtectedLayout = () => (
   <RequireAuth>
-    <MobileLayout>
+    <ResponsiveLayout>
       <Suspense fallback={<PageLoader />}>
         <Outlet />
       </Suspense>
-    </MobileLayout>
+    </ResponsiveLayout>
   </RequireAuth>
 );
 

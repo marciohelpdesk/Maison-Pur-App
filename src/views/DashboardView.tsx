@@ -106,9 +106,9 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
   }, []);
 
   return (
-    <div className="flex flex-col h-full relative z-10 pb-8">
+    <div className="flex flex-col h-full relative z-10 pb-8 lg:pb-0 lg:pb-0 lg:pb-0">
       {/* Header */}
-      <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'transparent' }}>
+      <div className="sticky top-0 z-20 px-6 py-4 lg:px-0 lg:static" style={{ background: 'transparent' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="w-12 h-12 border-2 border-border shadow-md">
@@ -131,12 +131,12 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
         </div>
       </div>
 
-      <div className="px-6 py-4 relative z-10 space-y-6">
+      <div className="px-6 py-4 relativ lg:px-0e z-10 s lg:px-0pace-y-6">
 
         {/* Service Categories - Horizontal Scroll */}
         <section>
           <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">{t('dashboard.quickActions') || 'Categorias'}</h2>
-          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+          <div className="flex gap-4 overflow-x-auto hid lg:grid lg:grid-cols-4 lg:overflow-visiblee-scrollbar pb-2">
             {categories.map((cat, idx) => (
               <motion.button
                 key={idx}
@@ -247,7 +247,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
           <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
             Checklist Base
           </h2>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-4 xl:grid-cols-7 lg:overflow-visible">
             {checklistTemplates.map((tmpl, idx) => (
               <motion.div
                 key={idx}
@@ -255,7 +255,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08 }}
                 onClick={() => setSelectedTemplate(idx)}
-                className={`min-w-[160px] glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95`}
+                className={`min-w-[160px] lg:min-w-0 glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95`}
               >
                 <span className="text-3xl mb-2 block">{tmpl.icon}</span>
                 <h4 className="font-bold text-foreground text-sm mb-1">{tmpl.title}</h4>
