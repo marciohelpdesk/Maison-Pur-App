@@ -327,7 +327,6 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
         <Button
           variant="outline"
           onClick={handlePreviewPdf}
-          disabled={isGeneratingPdf}
           className="w-full mb-4 h-12 rounded-xl gap-2"
         >
           <Eye className="w-5 h-5" />
@@ -339,10 +338,10 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
       <PdfPreviewModal
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
-        pdfBlob={pdfBlob}
-        filename={pdfFilename}
-        isLoading={isGeneratingPdf}
-        onDownload={handleDownloadPdf}
+        job={job}
+        inventory={inventory}
+        responsibleName="Kamila Petters"
+        note={note}
       />
 
       {/* Actions */}
