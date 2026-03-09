@@ -50,8 +50,8 @@
     --accent: 250 30% 96%;
     --accent-foreground: 252 30% 40%;
 
-    /* CTA - Amber/Gold for action buttons */
-    --cta: 38 90% 50%;
+    /* CTA - Lavender Primary for action buttons */
+    --cta: 252 70% 72%;
     --cta-foreground: 0 0% 100%;
 
     /* Status Colors */
@@ -133,7 +133,7 @@
     --accent: 252 15% 18%;
     --accent-foreground: 220 10% 70%;
 
-    --cta: 38 90% 55%;
+    --cta: 252 60% 65%;
     --cta-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
