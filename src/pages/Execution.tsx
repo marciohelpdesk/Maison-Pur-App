@@ -3,6 +3,7 @@ import { ExecutionView as ExecutionContent } from '@/views/ExecutionView';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobs } from '@/hooks/useJobs';
 import { useInventory } from '@/hooks/useInventory';
+import { useProperties } from '@/hooks/useProperties';
 import { useReports } from '@/hooks/useReports';
 import { useProfile } from '@/hooks/useProfile';
 import { Job, JobStatus } from '@/types';
