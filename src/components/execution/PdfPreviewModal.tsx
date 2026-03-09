@@ -41,6 +41,28 @@ export const PdfPreviewModal = ({
   const damagesCount = job.damages?.length || 0;
   const lostFoundCount = job.lostAndFound?.length || 0;
 
+  const handleShareWhatsApp = () => {
+    const lines = [
+      `✨ *Maison Pur — ${t('exec.summary.cleaningReport')}*`,
+      ``,
+      `🏠 *${job.clientName}*`,
+      `📍 ${job.address}`,
+      `📅 ${new Date(job.date).toLocaleDateString('pt-BR')}`,
+      ``,
+      `⏱ ${t('exec.summary.duration')}: ${durationStr}`,
+      `✅ ${t('exec.summary.tasks')}: ${completedTasks}/${totalTasks} (${completionPct}%)`,
+      `📷 ${t('exec.summary.photos')}: ${totalPhotos}`,
+      damagesCount > 0 ? `⚠️ ${t('exec.summary.damagesRecorded')}: ${damagesCount}` : '',
+      lostFoundCount > 0 ? `🔍 ${t('exec.summary.lostFoundRecorded')}: ${lostFoundCount}` : '',
+      note ? `\n💬 ${note}` : '',
+      ``,
+      `👤 ${responsibleName}`,
+    ].filter(Boolean).join('\n');
+
+    const url = `https://wa.me/?text=${encodeURIComponent(lines)}`;
+    window.open(url, '_blank');
+  };
+
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
