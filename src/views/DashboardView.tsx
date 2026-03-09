@@ -255,7 +255,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08 }}
                 onClick={() => setSelectedTemplate(idx)}
-                className={`min-w-[160px] glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95`}
+                className={`min-w-[160px] lg:min-w-0 glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95`}
               >
                 <span className="text-3xl mb-2 block">{tmpl.icon}</span>
                 <h4 className="font-bold text-foreground text-sm mb-1">{tmpl.title}</h4>
