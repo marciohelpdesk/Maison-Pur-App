@@ -146,6 +146,78 @@ export type Database = {
         }
         Relationships: []
       }
+      estimates: {
+        Row: {
+          amount: number
+          client_address: string | null
+          client_email: string
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          description: string
+          discount: number | null
+          due_date: string | null
+          estimate_number: string | null
+          id: string
+          line_items: Json | null
+          notes: string | null
+          property_ids: string[] | null
+          public_token: string
+          service_date: string | null
+          status: string
+          tax: number | null
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          amount?: number
+          client_address?: string | null
+          client_email?: string
+          client_name: string
+          client_phone?: string | null
+          created_at?: string
+          description?: string
+          discount?: number | null
+          due_date?: string | null
+          estimate_number?: string | null
+          id?: string
+          line_items?: Json | null
+          notes?: string | null
+          property_ids?: string[] | null
+          public_token?: string
+          service_date?: string | null
+          status?: string
+          tax?: number | null
+          updated_at?: string
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          amount?: number
+          client_address?: string | null
+          client_email?: string
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          description?: string
+          discount?: number | null
+          due_date?: string | null
+          estimate_number?: string | null
+          id?: string
+          line_items?: Json | null
+          notes?: string | null
+          property_ids?: string[] | null
+          public_token?: string
+          service_date?: string | null
+          status?: string
+          tax?: number | null
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       inventory: {
         Row: {
           category: string

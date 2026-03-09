@@ -18,8 +18,10 @@ const Settings = lazy(() => import('@/pages/Settings'));
 const Finance = lazy(() => import('@/pages/Finance'));
 const Reports = lazy(() => import('@/pages/Reports'));
 const Invoices = lazy(() => import('@/pages/Invoices'));
+const Estimates = lazy(() => import('@/pages/Estimates'));
 const PublicReport = lazy(() => import('@/pages/PublicReport'));
 const PublicInvoice = lazy(() => import('@/pages/PublicInvoice'));
+const PublicEstimate = lazy(() => import('@/pages/PublicEstimate'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Animated Loading component
@@ -169,6 +171,10 @@ export const routes = [
         path: 'invoices',
         element: <Invoices />,
       },
+      {
+        path: 'estimates',
+        element: <Estimates />,
+      },
     ],
   },
 
@@ -203,8 +209,17 @@ export const routes = [
       </SuspenseWrapper>
     ),
   },
-  
-  
+
+  // Public estimate viewer (no auth)
+  {
+    path: '/estimate/:token',
+    element: (
+      <SuspenseWrapper>
+        <PublicEstimate />
+      </SuspenseWrapper>
+    ),
+  },
+
   // 404 catch-all
   {
     path: '*',
