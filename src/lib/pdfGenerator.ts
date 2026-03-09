@@ -101,7 +101,7 @@ class PremiumReportGenerator {
   private pageBreak(need: number) {
     if (this.y + need > this.H - 30) {
       this.pdf.addPage();
-      this.y = 18;
+      this.y = 20;
       this.drawPageHeader();
     }
   }
@@ -111,6 +111,15 @@ class PremiumReportGenerator {
     this.pdf.rect(0, 0, this.W, 2.5, 'F');
     this.sf(P.cyanDark);
     this.pdf.rect(0, 2.5, this.W, 0.5, 'F');
+
+    // Logo + brand name in page header
+    if (this.logoLoaded && this.logoDataUrl) {
+      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.M, 5, 8, 8); } catch {}
+    }
+    this.sc(P.gray400);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setFontSize(7);
+    this.pdf.text('MAISON PUR — Relatório de Inspeção e Limpeza', this.M + 11, 10.5);
   }
 
   // ─── Design Components ─────────────────────────
@@ -234,10 +243,10 @@ class PremiumReportGenerator {
     this.pdf.setGState(new (this.pdf as any).GState({ opacity: 1 }));
 
     // Logo
-    let logoY = 45;
+    let logoY = 42;
     if (this.logoLoaded && this.logoDataUrl) {
-      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.W / 2 - 18, logoY, 36, 36); } catch {}
-      logoY += 44;
+      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.W / 2 - 21, logoY, 42, 42); } catch {}
+      logoY += 50;
     } else {
       logoY += 10;
     }
@@ -773,7 +782,7 @@ class PremiumReportGenerator {
     this.pdf.rect(0, fy, this.W, 1, 'F');
 
     if (this.logoLoaded && this.logoDataUrl) {
-      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.M, fy + 5, 10, 10); } catch {}
+      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.M, fy + 4, 12, 12); } catch {}
     }
 
     this.sc(P.white);
@@ -827,7 +836,7 @@ class PremiumReportGenerator {
 
     // Page 2+: Content
     this.pdf.addPage();
-    this.y = 18;
+    this.y = 20;
     this.drawPageHeader();
 
     // Executive summary
