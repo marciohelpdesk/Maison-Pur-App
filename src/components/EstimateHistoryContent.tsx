@@ -4,7 +4,7 @@ import { useEstimates } from '@/hooks/useEstimates';
 import { useInvoices } from '@/hooks/useInvoices';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Trash2, ExternalLink, FileText, Send, CheckCircle, XCircle, FileEdit, Receipt } from 'lucide-react';
+import { Copy, Trash2, ExternalLink, FileText, Send, CheckCircle, XCircle, FileEdit, Receipt, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -25,6 +25,9 @@ export default function EstimateHistoryContent({ userId }: EstimateHistoryConten
   const [filter, setFilter] = useState<'all' | 'draft' | 'sent' | 'accepted' | 'declined'>('all');
 
   const filtered = filter === 'all' ? estimates : estimates.filter(e => e.status === filter);
+  const totalEstimated = estimates.reduce((s, e) => s + Number(e.amount), 0);
+  const acceptedTotal = estimates.filter(e => e.status === 'accepted').reduce((s, e) => s + Number(e.amount), 0);
+  const pendingTotal = estimates.filter(e => e.status === 'sent').reduce((s, e) => s + Number(e.amount), 0);
 
   const copyLink = (token: string) => {
     navigator.clipboard.writeText(`https://maisonpur.lovable.app/estimate/${token}?v=${Date.now()}`);
@@ -61,19 +64,23 @@ export default function EstimateHistoryContent({ userId }: EstimateHistoryConten
 
   return (
     <>
-      {/* Summary */}
-      <div className="grid grid-cols-4 gap-2 mb-5">
-        {(['draft', 'sent', 'accepted', 'declined'] as const).map((s, idx) => {
-          const count = estimates.filter(e => e.status === s).length;
-          const cfg = STATUS_CONFIG[s];
-          return (
-            <motion.div key={s} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className={`glass-panel p-3 text-center`}>
-              <cfg.icon size={16} className={`mx-auto ${cfg.color} mb-1`} />
-              <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">{s}</p>
-              <p className={`text-base font-bold ${cfg.color}`}>{count}</p>
-            </motion.div>
-          );
-        })}
+      {/* Revenue Cards — matching InvoiceHistoryContent */}
+      <div className="grid grid-cols-3 gap-2 mb-5">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel p-3 text-center">
+          <FileText size={16} className="mx-auto text-primary mb-1" />
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Total</p>
+          <p className="text-base font-bold text-foreground">${totalEstimated.toFixed(0)}</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="glass-panel p-3 text-center">
+          <CheckCircle size={16} className="mx-auto text-emerald-500 mb-1" />
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Accepted</p>
+          <p className="text-base font-bold text-emerald-600">${acceptedTotal.toFixed(0)}</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-panel p-3 text-center">
+          <Send size={16} className="mx-auto text-amber-500 mb-1" />
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">Pending</p>
+          <p className="text-base font-bold text-amber-600">${pendingTotal.toFixed(0)}</p>
+        </motion.div>
       </div>
 
       {/* Filters */}

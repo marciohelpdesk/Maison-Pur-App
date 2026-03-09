@@ -178,18 +178,21 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
   };
 
   const recentEstimates = estimates.slice(0, 3);
+  const totalEstimated = estimates.reduce((s, e) => s + Number(e.amount), 0);
+  const acceptedTotal = estimates.filter(e => e.status === 'accepted').reduce((s, e) => s + Number(e.amount), 0);
+  const pendingTotal = estimates.filter(e => e.status === 'sent').reduce((s, e) => s + Number(e.amount), 0);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-panel p-5 mb-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500/20 to-primary/10 flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/20 to-primary/10 flex items-center justify-center">
             <FileText size={22} className="text-primary" />
           </div>
           <div>
             <h3 className="font-bold text-foreground text-base">Estimates</h3>
-            <p className="text-[11px] text-muted-foreground">{estimates.length} total</p>
+            <p className="text-[11px] text-muted-foreground">{estimates.length} total · ${totalEstimated.toFixed(0)} estimated</p>
           </div>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)} className="rounded-xl h-9 gap-1.5">
@@ -198,19 +201,21 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
         </Button>
       </div>
 
-      {/* Status Summary */}
+      {/* Revenue Summary */}
       {!showForm && estimates.length > 0 && (
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          {(['draft', 'sent', 'accepted', 'declined'] as const).map(s => {
-            const count = estimates.filter(e => e.status === s).length;
-            const cfg = STATUS_CONFIG[s];
-            return (
-              <div key={s} className={`rounded-xl ${cfg.bg} border ${cfg.border} p-2.5 text-center`}>
-                <p className={`text-[9px] uppercase tracking-wider font-semibold ${cfg.color}`}>{s}</p>
-                <p className={`text-base font-bold ${cfg.color}`}>{count}</p>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-primary font-semibold">Total</p>
+            <p className="text-lg font-bold text-primary">${totalEstimated.toFixed(0)}</p>
+          </div>
+          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Accepted</p>
+            <p className="text-lg font-bold text-emerald-600">${acceptedTotal.toFixed(0)}</p>
+          </div>
+          <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-amber-600 font-semibold">Pending</p>
+            <p className="text-lg font-bold text-amber-600">${pendingTotal.toFixed(0)}</p>
+          </div>
         </div>
       )}
 
