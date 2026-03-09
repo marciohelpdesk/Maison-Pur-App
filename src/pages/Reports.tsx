@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useReports, CleaningReport } from '@/hooks/useReports';
 import { useJobs } from '@/hooks/useJobs';
+import { useProperties } from '@/hooks/useProperties';
 import { useProfile } from '@/hooks/useProfile';
 import { PageLoader } from '@/lib/routes';
 
@@ -20,6 +21,7 @@ export default function Reports() {
   const { profile } = useProfile(user?.id);
   const { reports, isLoading, createReport, updateReport, deleteReport, isCreating } = useReports(user?.id);
   const { jobs } = useJobs(user?.id);
+  const { properties } = useProperties(user?.id);
   const [generatingForJob, setGeneratingForJob] = useState<string | null>(null);
 
   const completedJobs = jobs.filter((j) => j.status === JobStatus.COMPLETED);
@@ -64,11 +66,14 @@ export default function Reports() {
       const totalTasks = job.checklist.reduce((acc, s) => acc + s.items.length, 0);
       const completedTasks = job.checklist.reduce((acc, s) => acc + s.items.filter((i) => i.completed).length, 0);
 
+      const matchedProperty = properties.find(p => p.id === job.propertyId);
+
       await createReport({
         job_id: job.id,
         property_id: job.propertyId || null,
         property_name: job.clientName,
         property_address: job.address,
+        property_photo_url: matchedProperty?.photo || null,
         service_type: job.type,
         cleaner_name: 'Kamila Petters',
         cleaning_date: job.date,

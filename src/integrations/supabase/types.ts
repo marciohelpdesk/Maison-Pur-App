@@ -49,6 +49,7 @@ export type Database = {
           property_address: string
           property_id: string | null
           property_name: string
+          property_photo_url: string | null
           public_token: string
           service_type: string
           start_time: number | null
@@ -71,6 +72,7 @@ export type Database = {
           property_address: string
           property_id?: string | null
           property_name: string
+          property_photo_url?: string | null
           public_token?: string
           service_type?: string
           start_time?: number | null
@@ -93,6 +95,7 @@ export type Database = {
           property_address?: string
           property_id?: string | null
           property_name?: string
+          property_photo_url?: string | null
           public_token?: string
           service_type?: string
           start_time?: number | null
