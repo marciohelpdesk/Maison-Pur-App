@@ -819,6 +819,44 @@ const translations: Record<Language, Record<string, string>> = {
     // Purification
     'dashboard.purification': 'PURIFICAÇÃO',
     
+    // Notifications Sheet
+    'notif.subtitle': 'Escolha quais alertas deseja receber',
+    'notif.push': 'Notificações Push',
+    'notif.pushDesc': 'Receba alertas no seu dispositivo',
+    'notif.reminders': 'Lembretes de Trabalhos',
+    'notif.remindersDesc': 'Seja lembrado antes de cada trabalho',
+    'notif.bookings': 'Novos Agendamentos',
+    'notif.bookingsDesc': 'Alerta quando novos trabalhos são agendados',
+    'notif.team': 'Atualizações da Equipe',
+    'notif.teamDesc': 'Notificações sobre atividade da equipe',
+    
+    // Privacy Sheet
+    'privacy.subtitle': 'Gerencie a segurança da sua conta',
+    'privacy.profileVisibility': 'Perfil Visível',
+    'privacy.profileVisibilityDesc': 'Permitir que clientes vejam seu perfil',
+    'privacy.changePassword': 'Alterar Senha',
+    'privacy.newPasswordPlaceholder': 'Nova senha (mín. 6 caracteres)',
+    'privacy.passwordMin': 'A senha deve ter pelo menos 6 caracteres',
+    'privacy.passwordChanged': 'Senha atualizada com sucesso',
+    'privacy.deleteAccount': 'Excluir Conta',
+    'privacy.deleteConfirmTitle': 'Excluir sua conta?',
+    'privacy.deleteConfirmDesc': 'Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos.',
+    'privacy.deleteRequested': 'Exclusão de conta solicitada. Entraremos em contato para confirmar.',
+    
+    // Help Sheet
+    'help.subtitle': 'Encontre respostas e obtenha suporte',
+    'help.faqTitle': 'Perguntas Frequentes',
+    'help.faq1q': 'Como adiciono uma nova propriedade?',
+    'help.faq1a': 'Vá para a aba Propriedades e toque em "Adicionar Propriedade". Preencha os detalhes e salve.',
+    'help.faq2q': 'Como sincronizo meu calendário?',
+    'help.faq2a': 'Em Configurações, encontre Sincronizar Calendário e gere um link. Adicione este link ao Google Calendar, Apple Calendar ou Outlook.',
+    'help.faq3q': 'Como gero um relatório de limpeza?',
+    'help.faq3a': 'Após concluir um trabalho, um relatório é gerado automaticamente. Você pode encontrá-lo na seção Relatórios.',
+    'help.faq4q': 'Como gerencio minha equipe?',
+    'help.faq4a': 'Vá para Configurações e encontre a seção Equipe. Você pode adicionar ou remover membros lá.',
+    'help.contact': 'Contato de Suporte',
+    'help.emailDesc': 'Normalmente respondemos em 24 horas',
+    
     // Dashboard KPI & Actions
     'dashboard.thisMonth': 'Mês',
     'dashboard.totalJobs': 'Jobs',
