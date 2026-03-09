@@ -387,6 +387,44 @@ const translations: Record<Language, Record<string, string>> = {
     // Purification
     'dashboard.purification': 'PURIFICATION',
     
+    // Notifications Sheet
+    'notif.subtitle': 'Choose which alerts you want to receive',
+    'notif.push': 'Push Notifications',
+    'notif.pushDesc': 'Receive alerts on your device',
+    'notif.reminders': 'Job Reminders',
+    'notif.remindersDesc': 'Get reminded before each job',
+    'notif.bookings': 'New Bookings',
+    'notif.bookingsDesc': 'Alert when new jobs are scheduled',
+    'notif.team': 'Team Updates',
+    'notif.teamDesc': 'Notifications about team activity',
+    
+    // Privacy Sheet
+    'privacy.subtitle': 'Manage your account security',
+    'privacy.profileVisibility': 'Profile Visible',
+    'privacy.profileVisibilityDesc': 'Allow clients to see your profile',
+    'privacy.changePassword': 'Change Password',
+    'privacy.newPasswordPlaceholder': 'New password (min 6 chars)',
+    'privacy.passwordMin': 'Password must be at least 6 characters',
+    'privacy.passwordChanged': 'Password updated successfully',
+    'privacy.deleteAccount': 'Delete Account',
+    'privacy.deleteConfirmTitle': 'Delete your account?',
+    'privacy.deleteConfirmDesc': 'This action is irreversible. All your data will be permanently deleted.',
+    'privacy.deleteRequested': 'Account deletion requested. We will contact you to confirm.',
+    
+    // Help Sheet
+    'help.subtitle': 'Find answers and get support',
+    'help.faqTitle': 'Frequently Asked Questions',
+    'help.faq1q': 'How do I add a new property?',
+    'help.faq1a': 'Go to the Properties tab and tap the "Add Property" button. Fill in the details and save.',
+    'help.faq2q': 'How do I sync my calendar?',
+    'help.faq2a': 'In Settings, find Calendar Sync and generate a link. Add this link to Google Calendar, Apple Calendar, or Outlook.',
+    'help.faq3q': 'How do I generate a cleaning report?',
+    'help.faq3a': 'After completing a job, a report is automatically generated. You can find it in the Reports section.',
+    'help.faq4q': 'How do I manage my team?',
+    'help.faq4a': 'Go to Settings and find the Team section. You can add or remove team members there.',
+    'help.contact': 'Contact Support',
+    'help.emailDesc': 'We usually reply within 24 hours',
+    
     // Dashboard KPI & Actions
     'dashboard.thisMonth': 'This Month',
     'dashboard.totalJobs': 'Jobs',
