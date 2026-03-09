@@ -111,6 +111,15 @@ class PremiumReportGenerator {
     this.pdf.rect(0, 0, this.W, 2.5, 'F');
     this.sf(P.cyanDark);
     this.pdf.rect(0, 2.5, this.W, 0.5, 'F');
+
+    // Logo + brand name in page header
+    if (this.logoLoaded && this.logoDataUrl) {
+      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.M, 5, 8, 8); } catch {}
+    }
+    this.sc(P.gray400);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setFontSize(7);
+    this.pdf.text('MAISON PUR — Relatório de Inspeção e Limpeza', this.M + 11, 10.5);
   }
 
   // ─── Design Components ─────────────────────────
