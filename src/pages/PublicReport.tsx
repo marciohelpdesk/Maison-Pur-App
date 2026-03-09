@@ -39,6 +39,7 @@ const translations: Record<string, Record<string, string>> = {
     before: 'Antes', after: 'Depois', noIncidents: 'Sem incidentes',
     contact: 'Contato', poweredBy: 'Desenvolvido por',
     minutes: 'min', overview: 'Resumo',
+    downloadPdf: 'Baixar PDF', generating: 'Gerando...',
   },
   ko: {
     subtitle: '당신의 시간은 소중합니다',
