@@ -512,6 +512,33 @@ export default function PublicReport() {
                 {totalIncidents > 0 ? t('incidents') : t('noIncidents')}
               </span>
             </div>
+           </div>
+
+          {/* Download PDF button */}
+          <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/30">
+            <button
+              onClick={() => {
+                setIsGeneratingPdf(true);
+                setTimeout(() => {
+                  generatePublicReportPdf(report, rooms, photos, t, durationStr, completionPct);
+                  setIsGeneratingPdf(false);
+                }, 100);
+              }}
+              disabled={isGeneratingPdf}
+              className="w-full flex justify-center items-center gap-2.5 bg-stone-800 hover:bg-stone-700 disabled:bg-stone-400 text-white px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
+            >
+              {isGeneratingPdf ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  {t('generating')}
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  {t('downloadPdf')}
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
