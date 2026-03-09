@@ -113,36 +113,8 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
     return remaining <= item.threshold;
   });
 
-  const handlePreviewPdf = async () => {
+  const handlePreviewPdf = () => {
     setShowPreview(true);
-    setIsGeneratingPdf(true);
-    setPdfBlob(null);
-    
-    try {
-      const blob = await generateCleaningReport({
-        job: { ...job, reportNote: note, endTime: Date.now() },
-        inventory,
-        responsibleName: 'Kamila Petters',
-        lostAndFound: job.lostAndFound || [],
-      });
-      
-      const filename = `relatorio-${job.clientName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
-      setPdfBlob(blob);
-      setPdfFilename(filename);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Erro ao gerar pré-visualização do PDF');
-      setShowPreview(false);
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
-
-  const handleDownloadPdf = () => {
-    if (pdfBlob && pdfFilename) {
-      downloadPdf(pdfBlob, pdfFilename);
-      toast.success('Relatório PDF baixado com sucesso!');
-    }
   };
 
   const handleComplete = async () => {
