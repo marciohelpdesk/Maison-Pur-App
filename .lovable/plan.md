@@ -1,26 +1,24 @@
 
 
-## Plano: Indicadores visuais de scroll na navegação de cômodos (mobile)
+## Plano: Bolhas flutuantes no Execution + Confetti na finalização
 
-### Problema
-No mobile, a barra de navegação por cômodos é scrollável horizontalmente, mas não há nenhuma dica visual informando o cliente que existem mais opções à direita. O usuário pode não perceber que pode deslizar.
+### 1. Adicionar BackgroundEffects na tela de Execução
 
-### Solução
-Adicionar ao componente de navegação sticky (linhas ~546-580 de `PublicReport.tsx`):
+**Arquivo:** `src/pages/Execution.tsx`
 
-1. **Seta animada à direita** — Um indicador com ícone de chevron (`›`) que pulsa suavemente com animação CSS, posicionado no lado direito da barra. Ele aparece apenas quando há conteúdo para scrollar à direita e desaparece automaticamente quando o usuário atinge o final.
+O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
 
-2. **Gradiente de fade** — Um gradiente semi-transparente (fade-out) no lado direito da barra, reforçando visualmente que há mais conteúdo oculto. O gradiente esquerdo aparece quando há scroll para a esquerda.
+- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
 
-3. **Lógica de detecção de scroll** — Um `useEffect` + `onScroll` listener no container `overflow-x-auto` para detectar:
-   - `canScrollRight`: mostra seta + gradiente direito
-   - `canScrollLeft`: mostra gradiente esquerdo
-   - Atualiza ao scroll e ao resize
+### 2. Confetti na finalização do checklist
 
-4. **Auto-hide após interação** — A seta some depois que o usuário faz o primeiro swipe, para não poluir a interface.
+**Arquivos:** `src/components/execution/SummaryStep.tsx`
 
-### Arquivo a modificar
-- `src/pages/PublicReport.tsx` — seção "Sticky Room Navigation" (linhas 546-580)
+Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
+
+- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
+- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
+- Sem dependências externas — 100% Framer Motion + CSS.
 
 ### Sem alterações de banco de dados
 
