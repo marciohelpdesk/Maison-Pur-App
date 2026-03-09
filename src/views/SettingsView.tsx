@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil, Receipt } from 'lucide-react';
+import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil, Receipt, ClipboardList } from 'lucide-react';
 import { UserProfile, Employee } from '@/types';
 import { PageHeader } from '@/components/PageHeader';
 import { TeamManagement } from '@/components/TeamManagement';
