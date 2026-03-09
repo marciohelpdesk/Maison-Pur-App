@@ -106,12 +106,12 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
   }, []);
 
   return (
-    <div className="flex flex-col h-full relative z-10 pb-8 lg:pb-0 lg:pb-0 lg:pb-0">
+    <div className="flex flex-col h-full relative z-10 pb-8 lg:pb-0">
       {/* Header */}
       <div className="sticky top-0 z-20 px-6 py-4 lg:px-0 lg:static" style={{ background: 'transparent' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Avatar className="w-12 h-12 border-2 border-border shadow-md">
+            <Avatar className="w-12 h-12 border-2 border-border shadow-md lg:hidden">
               <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
               <AvatarFallback className="bg-primary/20 text-primary font-bold">
                 {userProfile.name?.charAt(0)?.toUpperCase() || 'U'}
@@ -125,18 +125,18 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
               </p>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
+          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border lg:hidden">
             <BrandLogo className="w-6 h-6 object-contain" />
           </div>
         </div>
       </div>
 
-      <div className="px-6 py-4 relativ lg:px-0e z-10 s lg:px-0pace-y-6">
+      <div className="px-6 py-4 relative z-10 space-y-6 lg:px-0">
 
         {/* Service Categories - Horizontal Scroll */}
         <section>
           <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">{t('dashboard.quickActions') || 'Categorias'}</h2>
-          <div className="flex gap-4 overflow-x-auto hid lg:grid lg:grid-cols-4 lg:overflow-visiblee-scrollbar pb-2">
+          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-4 lg:overflow-visible">
             {categories.map((cat, idx) => (
               <motion.button
                 key={idx}
@@ -247,7 +247,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
           <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
             Checklist Base
           </h2>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-4 xl:grid-cols-7 lg:overflow-visible">
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:overflow-visible">
             {checklistTemplates.map((tmpl, idx) => (
               <motion.div
                 key={idx}
@@ -279,9 +279,9 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
             </button>
           </div>
 
-          <div className="relative space-y-4">
+          <div className="relative space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
             {todayJobs.length > 1 && (
-              <div className="absolute left-6 top-10 bottom-4 w-0.5 bg-gradient-to-b from-primary/40 to-transparent" />
+              <div className="absolute left-6 top-10 bottom-4 w-0.5 bg-gradient-to-b from-primary/40 to-transparent lg:hidden" />
             )}
 
             <AnimatePresence>
@@ -414,15 +414,16 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
           </div>
         </section>
 
-        {/* Weekly Performance */}
-        <WeeklyProgress jobs={jobs} />
+        {/* Weekly Performance + Quick Actions side by side on desktop */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-6 space-y-6 lg:space-y-0">
+          <WeeklyProgress jobs={jobs} />
 
-        {/* Quick Actions - Horizontal Pills */}
-        <section>
-          <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
-            {t('dashboard.quickActions') || 'Ações Rápidas'}
-          </h2>
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+          {/* Quick Actions */}
+          <section>
+            <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
+              {t('dashboard.quickActions') || 'Ações Rápidas'}
+            </h2>
+            <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-2 lg:overflow-visible">
             {[
               { icon: Plus, label: t('dashboard.newJob') || 'Novo Job', action: () => navigate('/agenda') },
               { icon: Home, label: t('dashboard.property') || 'Propriedade', action: () => navigate('/properties') },
@@ -443,8 +444,9 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 <span className="text-xs font-medium text-foreground">{action.label}</span>
               </motion.button>
             ))}
-          </div>
-        </section>
+            </div>
+          </section>
+        </div>
       </div>
 
       {/* Category Info Drawer */}

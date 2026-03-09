@@ -133,7 +133,7 @@ export const PropertiesView = ({ properties, onViewProperty, onAddProperty }: Pr
       </div>
 
       {/* Properties Grid */}
-      <div className="px-6 space-y-4">
+      <div className="px-6 space-y-4 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4 lg:space-y-0">
         <AnimatePresence>
           {filteredProperties.map((property) =>
           <PropertyCard

@@ -18,7 +18,7 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
 
       {/* Main Content */}
       <main className="ml-[260px] relative z-10 min-h-screen">
-        <div className="max-w-6xl mx-auto px-8 py-6">
+        <div className="max-w-5xl mx-auto px-8 py-6">
           {children}
         </div>
       </main>

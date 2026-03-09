@@ -178,7 +178,7 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
         onAddJob={handleAddJob} />
       
       
-      <div className="px-6 py-4 space-y-6">
+      <div className="px-6 py-4 space-y-6 lg:px-0 lg:grid lg:grid-cols-[1fr_1fr] lg:gap-6 lg:items-start">
         {/* Calendar Navigation */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
           <div className="flex items-center justify-between mb-4">
