@@ -101,7 +101,7 @@ class PremiumReportGenerator {
   private pageBreak(need: number) {
     if (this.y + need > this.H - 30) {
       this.pdf.addPage();
-      this.y = 18;
+      this.y = 20;
       this.drawPageHeader();
     }
   }
