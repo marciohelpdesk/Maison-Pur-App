@@ -22,6 +22,7 @@ export default function Execution() {
   const { inventory, isLoading: inventoryLoading } = useInventory(user?.id, job?.propertyId);
   const { createReport } = useReports(user?.id);
   const { profile } = useProfile(user?.id);
+  const { properties } = useProperties(user?.id);
 
   const isLoading = jobsLoading || inventoryLoading;
 
