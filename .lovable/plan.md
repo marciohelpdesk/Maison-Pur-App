@@ -1,24 +1,44 @@
 
 
-## Plano: Bolhas flutuantes no Execution + Confetti na finalização
+## Plano: Melhorias de Design no Dossiê Digital
 
-### 1. Adicionar BackgroundEffects na tela de Execução
+### 1. Adicionar Resumo Executivo (novo bloco após info card)
+- Card com estatísticas gerais: total de tarefas completas (%), total de fotos, damages count, duração
+- Barra de progresso visual mostrando completion rate
+- Posição: entre o info card e o primeiro cômodo
 
-**Arquivo:** `src/pages/Execution.tsx`
+### 2. Navegação Rápida por Cômodos
+- Barra sticky horizontal com pills/chips dos nomes dos cômodos
+- Click scroll suave para a seção correspondente
+- Indicador visual do cômodo ativo (scroll spy)
+- Posição: abaixo do info card, sticky no topo ao scrollar
 
-O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
+### 3. Corrigir ordem mobile (fotos vs checklist)
+- No mobile, mostrar checklist ANTES das fotos (inverter order)
+- Manter layout desktop: checklist esquerda, fotos direita
 
-- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
+### 4. Eliminar "No photos" vazio
+- Quando não há fotos, expandir checklist para largura total (12 cols)
+- Remover o placeholder cinza "No photos"
 
-### 2. Confetti na finalização do checklist
+### 5. Melhorar cards de Damages
+- Fotos de damages maiores (80px em vez de 48px)
+- Adicionar badge de severidade mais destacado
+- Border colorida mais visível
 
-**Arquivos:** `src/components/execution/SummaryStep.tsx`
+### 6. Traduzir "Before & After"
+- Adicionar chave de tradução para o título da seção
+- Substituir emoji 📸 por ícone SVG no badge circular
+- Traduzir labels "Before"/"After" nos badges das fotos
 
-Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
+### 7. Footer enriquecido
+- Adicionar linha de contato (email, telefone)
+- Logo maior e mais visível
+- Powered by Maison Pur com link
 
-- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
-- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
-- Sem dependências externas — 100% Framer Motion + CSS.
+### Arquivos a modificar
+- `src/pages/PublicReport.tsx` — todas as alterações de layout e novos componentes inline
 
-### Sem alterações de banco de dados
+### Nenhuma alteração de banco de dados necessária
+Todas as mudanças são puramente visuais/frontend.
 
