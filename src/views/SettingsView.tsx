@@ -166,10 +166,11 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
         <div className="space-y-2 mb-6">
           {settingsItems.map((item, i) =>
           <motion.button
-            key={item.label}
+            key={item.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.05 }}
+            onClick={() => setActiveSheet(item.id)}
             className="glass-panel w-full p-4 flex items-center justify-between text-foreground active:scale-95 transition-transform">
             
               <div className="flex items-center gap-4">
