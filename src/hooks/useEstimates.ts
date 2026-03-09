@@ -27,6 +27,9 @@ export interface Estimate {
   updated_at: string;
 }
 
+// Use 'as any' for table name since types are auto-generated and may not yet include 'estimates'
+const ESTIMATES_TABLE = 'estimates' as any;
+
 export function useEstimates(userId?: string) {
   const queryClient = useQueryClient();
 
@@ -34,12 +37,12 @@ export function useEstimates(userId?: string) {
     queryKey: ['estimates', userId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('estimates')
+        .from(ESTIMATES_TABLE)
         .select('*')
         .eq('user_id', userId!)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data as any[]).map((d) => ({
+      return ((data || []) as any[]).map((d) => ({
         ...d,
         property_ids: d.property_ids || [],
         line_items: d.line_items || [],
@@ -69,12 +72,12 @@ export function useEstimates(userId?: string) {
       tax: number;
     }) => {
       const { data, error } = await supabase
-        .from('estimates')
+        .from(ESTIMATES_TABLE)
         .insert({
           ...estimate,
           user_id: userId!,
           line_items: estimate.line_items as any,
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
@@ -90,8 +93,8 @@ export function useEstimates(userId?: string) {
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase
-        .from('estimates')
-        .update({ status })
+        .from(ESTIMATES_TABLE)
+        .update({ status } as any)
         .eq('id', id);
       if (error) throw error;
     },
@@ -104,7 +107,7 @@ export function useEstimates(userId?: string) {
 
   const deleteEstimate = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('estimates').delete().eq('id', id);
+      const { error } = await supabase.from(ESTIMATES_TABLE).delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -122,7 +125,7 @@ export function usePublicEstimate(token?: string) {
     queryKey: ['public-estimate', token],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('estimates')
+        .from(ESTIMATES_TABLE)
         .select('*')
         .eq('public_token', token!)
         .single();
