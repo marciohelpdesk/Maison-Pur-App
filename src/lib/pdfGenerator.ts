@@ -234,10 +234,10 @@ class PremiumReportGenerator {
     this.pdf.setGState(new (this.pdf as any).GState({ opacity: 1 }));
 
     // Logo
-    let logoY = 45;
+    let logoY = 42;
     if (this.logoLoaded && this.logoDataUrl) {
-      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.W / 2 - 18, logoY, 36, 36); } catch {}
-      logoY += 44;
+      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.W / 2 - 21, logoY, 42, 42); } catch {}
+      logoY += 50;
     } else {
       logoY += 10;
     }
