@@ -28,12 +28,13 @@ interface SettingsViewProps {
 export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewFinance, onAddEmployee, onDeleteEmployee, onUpdateProfile }: SettingsViewProps) => {
   const { t, language, setLanguage } = useLanguage();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [activeSheet, setActiveSheet] = useState<'notifications' | 'privacy' | 'help' | null>(null);
   const navigate = useNavigate();
 
   const settingsItems = [
-  { icon: Bell, label: t('settings.notifications'), description: t('settings.notificationsDesc') },
-  { icon: Shield, label: t('settings.privacy'), description: t('settings.privacyDesc') },
-  { icon: HelpCircle, label: t('settings.help'), description: t('settings.helpDesc') }];
+  { id: 'notifications' as const, icon: Bell, label: t('settings.notifications'), description: t('settings.notificationsDesc') },
+  { id: 'privacy' as const, icon: Shield, label: t('settings.privacy'), description: t('settings.privacyDesc') },
+  { id: 'help' as const, icon: HelpCircle, label: t('settings.help'), description: t('settings.helpDesc') }];
 
 
   const toggleLanguage = () => {
