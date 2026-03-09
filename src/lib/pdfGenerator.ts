@@ -782,7 +782,7 @@ class PremiumReportGenerator {
     this.pdf.rect(0, fy, this.W, 1, 'F');
 
     if (this.logoLoaded && this.logoDataUrl) {
-      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.M, fy + 5, 10, 10); } catch {}
+      try { this.pdf.addImage(this.logoDataUrl, 'PNG', this.M, fy + 4, 12, 12); } catch {}
     }
 
     this.sc(P.white);

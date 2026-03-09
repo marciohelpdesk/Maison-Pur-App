@@ -75,16 +75,13 @@ export const PdfPreviewModal = ({
       const filename = `relatorio-${job.clientName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
       
       const url = URL.createObjectURL(blob);
-      const newWindow = window.open(url, '_blank');
-      if (!newWindow) {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+      // Primary: use <a download> (works reliably on desktop)
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(url), 5000);
       toast.success('PDF gerado com sucesso!');
     } catch (err) {
