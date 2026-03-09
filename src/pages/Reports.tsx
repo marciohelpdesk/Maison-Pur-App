@@ -21,6 +21,7 @@ export default function Reports() {
   const { profile } = useProfile(user?.id);
   const { reports, isLoading, createReport, updateReport, deleteReport, isCreating } = useReports(user?.id);
   const { jobs } = useJobs(user?.id);
+  const { properties } = useProperties(user?.id);
   const [generatingForJob, setGeneratingForJob] = useState<string | null>(null);
 
   const completedJobs = jobs.filter((j) => j.status === JobStatus.COMPLETED);
