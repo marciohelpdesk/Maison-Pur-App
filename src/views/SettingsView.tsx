@@ -10,6 +10,9 @@ import { CalendarSyncSection } from '@/components/CalendarSyncSection';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
+import { NotificationsSheet } from '@/components/settings/NotificationsSheet';
+import { PrivacySheet } from '@/components/settings/PrivacySheet';
+import { HelpSheet } from '@/components/settings/HelpSheet';
 
 interface SettingsViewProps {
   userId?: string;
