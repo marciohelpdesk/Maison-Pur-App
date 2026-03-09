@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { usePublicReport, ReportRoom, ReportPhoto } from '@/hooks/useReports';
+import { usePublicReport, ReportRoom, ReportPhoto, CleaningReport } from '@/hooks/useReports';
+import jsPDF from 'jspdf';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { enUS, ptBR, ko, th, es } from 'date-fns/locale';
