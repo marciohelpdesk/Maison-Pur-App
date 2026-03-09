@@ -902,6 +902,22 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.continue': 'Continuar',
     'dashboard.progress': 'Progresso',
     'jobs.startChecklist': 'Iniciar',
+
+    // Inventory (Property)
+    'inventory.title': 'Suprimentos & Estoque',
+    'inventory.subtitle': 'Itens disponíveis nesta propriedade',
+    'inventory.copyFrom': 'Copiar De',
+    'inventory.selectProperty': 'Copiar inventário de:',
+    'inventory.itemName': 'Nome do item',
+    'inventory.qty': 'Qtd',
+    'inventory.unit': 'Unidade',
+    'inventory.threshold': 'Mín',
+    'inventory.category': 'Categoria',
+    'inventory.lowStock': 'Estoque Baixo',
+    'inventory.empty': 'Nenhum suprimento cadastrado para esta propriedade',
+    'inventory.itemAdded': 'Item adicionado',
+    'inventory.itemDeleted': 'Item removido',
+    'inventory.copied': 'Inventário copiado com sucesso',
   },
 };
 

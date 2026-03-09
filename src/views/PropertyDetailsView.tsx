@@ -459,6 +459,21 @@ export const PropertyDetailsView = ({ property, onBack, onUpdate, onDelete }: Pr
           )}
         </motion.div>
         
+        {/* Property Inventory */}
+        {user?.id && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.21 }}
+          >
+            <PropertyInventory
+              propertyId={property.id}
+              userId={user.id}
+              isEditing={isEditing}
+            />
+          </motion.div>
+        )}
+
         {/* Room Management */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
