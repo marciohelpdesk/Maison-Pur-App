@@ -1,24 +1,24 @@
 
 
-## Plano: Bolhas flutuantes no Execution + Confetti na finalização
+## Plano: Reforçar as bolhas flutuantes
 
-### 1. Adicionar BackgroundEffects na tela de Execução
+As bolhas existem no `BackgroundEffects`, mas são apenas 2 blobs grandes com `blur(60px)` e `opacity: 0.5` — praticamente invisíveis. A ideia é torná-las mais presentes sem poluir a interface.
 
-**Arquivo:** `src/pages/Execution.tsx`
+### Alteração
 
-O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
+**Arquivo:** `src/components/BackgroundEffects.tsx`
 
-- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
+1. **Adicionar mais blobs** — passar de 2 para 5 bolhas em posições variadas (cantos e centro), com tamanhos entre 120px e 300px, usando as cores do design system (rosa, menta, lavanda, dourado)
 
-### 2. Confetti na finalização do checklist
+2. **Aumentar visibilidade** — subir opacidade de 0.5 para 0.6–0.7 e reduzir blur de 60px para 40px nos blobs menores para ficarem mais perceptíveis
 
-**Arquivos:** `src/components/execution/SummaryStep.tsx`
+3. **Adicionar micro-bolhas decorativas** — 3-4 círculos pequenos (30-50px) semi-transparentes com blur menor (~20px) que flutuam com delays diferentes, criando sensação de profundidade
 
-Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
+4. **Variar as animações** — usar durações diferentes (8s–14s) e delays escalonados para que as bolhas não se movam todas juntas
 
-- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
-- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
-- Sem dependências externas — 100% Framer Motion + CSS.
+### Resultado
+
+Fundo mais vivo e orgânico com bolhas visíveis mas não intrusivas, mantendo a estética "Frosted Cloud" da marca. Zero impacto no restante do código — tudo contido no `BackgroundEffects.tsx`.
 
 ### Sem alterações de banco de dados
 
