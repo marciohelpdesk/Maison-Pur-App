@@ -3,8 +3,7 @@ import { Check, Clock, Camera, ClipboardCheck, Star, MessageSquare, AlertTriangl
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Job, InventoryItem } from '@/types';
-import { useState, useCallback, useMemo } from 'react';
-import { generateCleaningReport, downloadPdf } from '@/lib/pdfGenerator';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PdfPreviewModal } from './PdfPreviewModal';
@@ -87,10 +86,7 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
   const { t } = useLanguage();
   const [note, setNote] = useState(job.reportNote || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-  const [pdfFilename, setPdfFilename] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Calculate stats
@@ -117,36 +113,8 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
     return remaining <= item.threshold;
   });
 
-  const handlePreviewPdf = async () => {
+  const handlePreviewPdf = () => {
     setShowPreview(true);
-    setIsGeneratingPdf(true);
-    setPdfBlob(null);
-    
-    try {
-      const blob = await generateCleaningReport({
-        job: { ...job, reportNote: note, endTime: Date.now() },
-        inventory,
-        responsibleName: 'Kamila Petters',
-        lostAndFound: job.lostAndFound || [],
-      });
-      
-      const filename = `relatorio-${job.clientName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
-      setPdfBlob(blob);
-      setPdfFilename(filename);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Erro ao gerar pré-visualização do PDF');
-      setShowPreview(false);
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
-
-  const handleDownloadPdf = () => {
-    if (pdfBlob && pdfFilename) {
-      downloadPdf(pdfBlob, pdfFilename);
-      toast.success('Relatório PDF baixado com sucesso!');
-    }
   };
 
   const handleComplete = async () => {
@@ -359,7 +327,6 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
         <Button
           variant="outline"
           onClick={handlePreviewPdf}
-          disabled={isGeneratingPdf}
           className="w-full mb-4 h-12 rounded-xl gap-2"
         >
           <Eye className="w-5 h-5" />
@@ -371,10 +338,10 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
       <PdfPreviewModal
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
-        pdfBlob={pdfBlob}
-        filename={pdfFilename}
-        isLoading={isGeneratingPdf}
-        onDownload={handleDownloadPdf}
+        job={job}
+        inventory={inventory}
+        responsibleName="Kamila Petters"
+        note={note}
       />
 
       {/* Actions */}
