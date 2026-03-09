@@ -1,24 +1,17 @@
 
 
-## Plano: Bolhas flutuantes no Execution + Confetti na finalização
+## Plano: Reduzir arredondamento dos cards de Reports
 
-### 1. Adicionar BackgroundEffects na tela de Execução
+O `glass-panel` usa `--cloud-radius: 42px` globalmente — alterar isso afetaria toda a aplicação. Em vez disso, vou aplicar um `border-radius` mais moderado especificamente nos cards da página Reports.
 
-**Arquivo:** `src/pages/Execution.tsx`
+### Alteração
 
-O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
+**Arquivo:** `src/pages/Reports.tsx`
 
-- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
+- Nos `motion.div` dos report cards (linha ~178 e ~142), adicionar classe `!rounded-2xl` para sobrescrever o `glass-panel` de 42px para 16px (`rounded-2xl`).
+- O mesmo ajuste nos cards de "unreported jobs".
 
-### 2. Confetti na finalização do checklist
-
-**Arquivos:** `src/components/execution/SummaryStep.tsx`
-
-Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
-
-- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
-- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
-- Sem dependências externas — 100% Framer Motion + CSS.
+Resultado: cantos arredondados suaves (16px) em vez dos 42px atuais, mantendo o glassmorphism intacto. O restante da app continua com o cloud-radius padrão.
 
 ### Sem alterações de banco de dados
 
