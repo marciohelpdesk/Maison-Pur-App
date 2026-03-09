@@ -119,6 +119,22 @@ export const useJobs = (userId: string | undefined) => {
         .single();
       
       if (error) throw error;
+      
+      // Send push notification for new job
+      try {
+        await supabase.functions.invoke('push-notifications', {
+          body: {
+            action: 'send',
+            title: '📋 New Job Scheduled',
+            message: `${job.clientName} - ${job.address} on ${job.date} at ${job.time}`,
+            url: '/agenda',
+          },
+        });
+      } catch (e) {
+        // Don't block job creation if push fails
+        console.warn('Push notification failed:', e);
+      }
+      
       return mapDbToJob(data as DbJob);
     },
     onSuccess: () => {
