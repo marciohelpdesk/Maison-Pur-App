@@ -143,7 +143,7 @@ export default function Reports() {
               key={job.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-panel p-3 flex items-center justify-between">
+              className="glass-panel !rounded-2xl !rounded-2xl p-3 flex items-center justify-between">
               
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{job.clientName}</p>
@@ -181,7 +181,7 @@ export default function Reports() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -100 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-panel p-4">
+              className="glass-panel !rounded-2xl p-4">
               
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
