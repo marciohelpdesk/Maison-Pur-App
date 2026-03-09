@@ -200,9 +200,9 @@ export default function PublicReport() {
       {/* 1. Header */}
       <div className="relative w-full h-[350px] md:h-[500px] overflow-hidden bg-stone-100">
         <img
-          src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1920&auto=format&fit=crop"
+          src={report.property_photo_url || "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1920&auto=format&fit=crop"}
           className="w-full h-full object-cover object-center"
-          alt="Background"
+          alt={report.property_name}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-stone-50/90 md:to-stone-50/50" />
 

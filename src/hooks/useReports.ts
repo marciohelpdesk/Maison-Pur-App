@@ -9,6 +9,7 @@ export interface CleaningReport {
   public_token: string;
   property_name: string;
   property_address: string;
+  property_photo_url: string | null;
   service_type: string;
   cleaner_name: string;
   cleaning_date: string;
