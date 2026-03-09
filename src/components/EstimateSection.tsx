@@ -201,19 +201,21 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
         </Button>
       </div>
 
-      {/* Status Summary */}
+      {/* Revenue Summary */}
       {!showForm && estimates.length > 0 && (
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          {(['draft', 'sent', 'accepted', 'declined'] as const).map(s => {
-            const count = estimates.filter(e => e.status === s).length;
-            const cfg = STATUS_CONFIG[s];
-            return (
-              <div key={s} className={`rounded-xl ${cfg.bg} border ${cfg.border} p-2.5 text-center`}>
-                <p className={`text-[9px] uppercase tracking-wider font-semibold ${cfg.color}`}>{s}</p>
-                <p className={`text-base font-bold ${cfg.color}`}>{count}</p>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-primary font-semibold">Total</p>
+            <p className="text-lg font-bold text-primary">${totalEstimated.toFixed(0)}</p>
+          </div>
+          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Accepted</p>
+            <p className="text-lg font-bold text-emerald-600">${acceptedTotal.toFixed(0)}</p>
+          </div>
+          <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-amber-600 font-semibold">Pending</p>
+            <p className="text-lg font-bold text-amber-600">${pendingTotal.toFixed(0)}</p>
+          </div>
         </div>
       )}
 

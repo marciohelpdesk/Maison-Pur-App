@@ -4,7 +4,7 @@ import { useEstimates } from '@/hooks/useEstimates';
 import { useInvoices } from '@/hooks/useInvoices';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Trash2, ExternalLink, FileText, Send, CheckCircle, XCircle, FileEdit, Receipt } from 'lucide-react';
+import { Copy, Trash2, ExternalLink, FileText, Send, CheckCircle, XCircle, FileEdit, Receipt, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
