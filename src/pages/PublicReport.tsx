@@ -462,12 +462,12 @@ export default function PublicReport() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-stone-50/90 md:to-stone-50/50" />
 
         {/* Logo */}
-        <div className="absolute top-6 left-6 z-20">
+        <div className="absolute left-6 z-20" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}>
           <BrandLogo className="h-12 w-auto drop-shadow-md" />
         </div>
 
         {/* Language Switcher */}
-        <div className="absolute top-6 right-6 z-20">
+        <div className="absolute right-6 z-20" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}>
           <button
             onClick={(e) => { e.stopPropagation(); setLangMenuOpen(!langMenuOpen); }}
             className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-sm hover:bg-white transition-all text-xs font-bold text-stone-800 uppercase tracking-wider"
