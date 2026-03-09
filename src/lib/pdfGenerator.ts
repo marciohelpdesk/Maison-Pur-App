@@ -836,7 +836,7 @@ class PremiumReportGenerator {
 
     // Page 2+: Content
     this.pdf.addPage();
-    this.y = 18;
+    this.y = 20;
     this.drawPageHeader();
 
     // Executive summary
