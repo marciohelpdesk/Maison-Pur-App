@@ -244,6 +244,103 @@ function generatePublicReportPdf(
   window.open(blobUrl, '_blank');
 }
 
+// ─── Sticky Room Nav with scroll indicators ───
+function StickyRoomNav({
+  rooms, activeRoom, scrollToRoom, generalPhotos, t
+}: {
+  rooms: ReportRoom[];
+  activeRoom: string | null;
+  scrollToRoom: (id: string) => void;
+  generalPhotos: ReportPhoto[];
+  t: (key: string) => string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const checkScroll = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll(el);
+    const observer = new ResizeObserver(() => checkScroll(el));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [checkScroll, rooms.length]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    checkScroll(e.currentTarget);
+    if (!hasInteracted) setHasInteracted(true);
+  };
+
+  return (
+    <div className="sticky top-0 z-30 bg-stone-50/95 backdrop-blur-md border-b border-stone-200/60 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 relative">
+        {/* Left fade gradient */}
+        {canScrollLeft && (
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-50/95 to-transparent z-10 pointer-events-none" />
+        )}
+
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex gap-2 py-3 overflow-x-auto scrollbar-hide"
+        >
+          {rooms.map((room, idx) => (
+            <button
+              key={room.id}
+              onClick={() => scrollToRoom(room.id)}
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+                activeRoom === room.id
+                  ? 'bg-stone-900 text-white shadow-md'
+                  : 'bg-white text-stone-500 border border-stone-200 hover:bg-stone-100 hover:text-stone-700'
+              }`}
+            >
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                activeRoom === room.id ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'
+              }`}>
+                {idx + 1}
+              </span>
+              {room.name}
+            </button>
+          ))}
+          {generalPhotos.length > 0 && (
+            <button
+              onClick={() => document.getElementById('before-after-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all bg-white text-stone-500 border border-stone-200 hover:bg-stone-100 hover:text-stone-700"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              {t('beforeAfter')}
+            </button>
+          )}
+        </div>
+
+        {/* Right fade gradient + animated arrow */}
+        {canScrollRight && (
+          <>
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-stone-50/95 to-transparent z-10 pointer-events-none" />
+            {!hasInteracted && (
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none flex items-center gap-1 animate-pulse">
+                <span className="text-stone-400 text-xs font-medium hidden sm:inline">›››</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-stone-500">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PublicReport() {
   const { token } = useParams<{ token: string }>();
   const { report, rooms, photos, isLoading } = usePublicReport(token);
