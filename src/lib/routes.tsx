@@ -209,8 +209,17 @@ export const routes = [
       </SuspenseWrapper>
     ),
   },
-  
-  
+
+  // Public estimate viewer (no auth)
+  {
+    path: '/estimate/:token',
+    element: (
+      <SuspenseWrapper>
+        <PublicEstimate />
+      </SuspenseWrapper>
+    ),
+  },
+
   // 404 catch-all
   {
     path: '*',

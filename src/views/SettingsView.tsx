@@ -133,6 +133,26 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
           <ChevronRight size={20} className="text-muted-foreground" />
         </motion.button>
 
+        {/* Estimates Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.17 }}
+          onClick={() => navigate('/estimates')}
+          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+          
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <ClipboardList size={20} className="text-blue-600" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium">Estimates</p>
+              <p className="text-xs text-muted-foreground">Create & send quotes</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-muted-foreground" />
+        </motion.button>
+
         {/* Calendar Sync Section */}
         <CalendarSyncSection userId={userId} />
 
