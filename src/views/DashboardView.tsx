@@ -106,7 +106,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
   }, []);
 
   return (
-    <div className="flex flex-col h-full relative z-10 pb-8 lg:pb-0">
+    <div className="flex flex-col h-full relative z-10 pb-8 lg:pb-0 lg:pb-0">
       {/* Header */}
       <div className="sticky top-0 z-20 px-6 py-4" style={{ background: 'transparent' }}>
         <div className="flex items-center justify-between">
@@ -131,7 +131,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
         </div>
       </div>
 
-      <div className="px-6 py-4 relative z-10 space-y-6">
+      <div className="px-6 py-4 relative z-10 s lg:px-0pace-y-6">
 
         {/* Service Categories - Horizontal Scroll */}
         <section>
