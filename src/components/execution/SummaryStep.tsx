@@ -87,10 +87,7 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
   const { t } = useLanguage();
   const [note, setNote] = useState(job.reportNote || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-  const [pdfFilename, setPdfFilename] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Calculate stats
