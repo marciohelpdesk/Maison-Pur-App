@@ -675,6 +675,7 @@ const translations: Record<Language, Record<string, string>> = {
     'exec.summary.completion': 'Conclusão',
     'exec.summary.cleaningReport': 'Relatório de Limpeza',
     'exec.summary.responsible': 'Responsável',
+    'exec.summary.shareWhatsApp': 'Compartilhar no WhatsApp',
     
     // Execution - Lost and Found
     'exec.step.lostFound': 'Achados',
