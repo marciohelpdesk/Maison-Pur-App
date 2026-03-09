@@ -10,6 +10,9 @@ import { CalendarSyncSection } from '@/components/CalendarSyncSection';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
+import { NotificationsSheet } from '@/components/settings/NotificationsSheet';
+import { PrivacySheet } from '@/components/settings/PrivacySheet';
+import { HelpSheet } from '@/components/settings/HelpSheet';
 
 interface SettingsViewProps {
   userId?: string;
@@ -25,12 +28,13 @@ interface SettingsViewProps {
 export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewFinance, onAddEmployee, onDeleteEmployee, onUpdateProfile }: SettingsViewProps) => {
   const { t, language, setLanguage } = useLanguage();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [activeSheet, setActiveSheet] = useState<'notifications' | 'privacy' | 'help' | null>(null);
   const navigate = useNavigate();
 
   const settingsItems = [
-  { icon: Bell, label: t('settings.notifications'), description: t('settings.notificationsDesc') },
-  { icon: Shield, label: t('settings.privacy'), description: t('settings.privacyDesc') },
-  { icon: HelpCircle, label: t('settings.help'), description: t('settings.helpDesc') }];
+  { id: 'notifications' as const, icon: Bell, label: t('settings.notifications'), description: t('settings.notificationsDesc') },
+  { id: 'privacy' as const, icon: Shield, label: t('settings.privacy'), description: t('settings.privacyDesc') },
+  { id: 'help' as const, icon: HelpCircle, label: t('settings.help'), description: t('settings.helpDesc') }];
 
 
   const toggleLanguage = () => {
@@ -162,10 +166,11 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
         <div className="space-y-2 mb-6">
           {settingsItems.map((item, i) =>
           <motion.button
-            key={item.label}
+            key={item.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.05 }}
+            onClick={() => setActiveSheet(item.id)}
             className="glass-panel w-full p-4 flex items-center justify-between text-foreground active:scale-95 transition-transform">
             
               <div className="flex items-center gap-4">
@@ -199,6 +204,10 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
         onClose={() => setIsEditProfileOpen(false)}
         userProfile={userProfile}
         onUpdateProfile={onUpdateProfile} />
+
+      <NotificationsSheet isOpen={activeSheet === 'notifications'} onClose={() => setActiveSheet(null)} />
+      <PrivacySheet isOpen={activeSheet === 'privacy'} onClose={() => setActiveSheet(null)} />
+      <HelpSheet isOpen={activeSheet === 'help'} onClose={() => setActiveSheet(null)} />
       
     </div>);
 

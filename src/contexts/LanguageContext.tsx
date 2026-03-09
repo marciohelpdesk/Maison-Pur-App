@@ -387,6 +387,44 @@ const translations: Record<Language, Record<string, string>> = {
     // Purification
     'dashboard.purification': 'PURIFICATION',
     
+    // Notifications Sheet
+    'notif.subtitle': 'Choose which alerts you want to receive',
+    'notif.push': 'Push Notifications',
+    'notif.pushDesc': 'Receive alerts on your device',
+    'notif.reminders': 'Job Reminders',
+    'notif.remindersDesc': 'Get reminded before each job',
+    'notif.bookings': 'New Bookings',
+    'notif.bookingsDesc': 'Alert when new jobs are scheduled',
+    'notif.team': 'Team Updates',
+    'notif.teamDesc': 'Notifications about team activity',
+    
+    // Privacy Sheet
+    'privacy.subtitle': 'Manage your account security',
+    'privacy.profileVisibility': 'Profile Visible',
+    'privacy.profileVisibilityDesc': 'Allow clients to see your profile',
+    'privacy.changePassword': 'Change Password',
+    'privacy.newPasswordPlaceholder': 'New password (min 6 chars)',
+    'privacy.passwordMin': 'Password must be at least 6 characters',
+    'privacy.passwordChanged': 'Password updated successfully',
+    'privacy.deleteAccount': 'Delete Account',
+    'privacy.deleteConfirmTitle': 'Delete your account?',
+    'privacy.deleteConfirmDesc': 'This action is irreversible. All your data will be permanently deleted.',
+    'privacy.deleteRequested': 'Account deletion requested. We will contact you to confirm.',
+    
+    // Help Sheet
+    'help.subtitle': 'Find answers and get support',
+    'help.faqTitle': 'Frequently Asked Questions',
+    'help.faq1q': 'How do I add a new property?',
+    'help.faq1a': 'Go to the Properties tab and tap the "Add Property" button. Fill in the details and save.',
+    'help.faq2q': 'How do I sync my calendar?',
+    'help.faq2a': 'In Settings, find Calendar Sync and generate a link. Add this link to Google Calendar, Apple Calendar, or Outlook.',
+    'help.faq3q': 'How do I generate a cleaning report?',
+    'help.faq3a': 'After completing a job, a report is automatically generated. You can find it in the Reports section.',
+    'help.faq4q': 'How do I manage my team?',
+    'help.faq4a': 'Go to Settings and find the Team section. You can add or remove team members there.',
+    'help.contact': 'Contact Support',
+    'help.emailDesc': 'We usually reply within 24 hours',
+    
     // Dashboard KPI & Actions
     'dashboard.thisMonth': 'This Month',
     'dashboard.totalJobs': 'Jobs',
@@ -780,6 +818,44 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Purification
     'dashboard.purification': 'PURIFICAÇÃO',
+    
+    // Notifications Sheet
+    'notif.subtitle': 'Escolha quais alertas deseja receber',
+    'notif.push': 'Notificações Push',
+    'notif.pushDesc': 'Receba alertas no seu dispositivo',
+    'notif.reminders': 'Lembretes de Trabalhos',
+    'notif.remindersDesc': 'Seja lembrado antes de cada trabalho',
+    'notif.bookings': 'Novos Agendamentos',
+    'notif.bookingsDesc': 'Alerta quando novos trabalhos são agendados',
+    'notif.team': 'Atualizações da Equipe',
+    'notif.teamDesc': 'Notificações sobre atividade da equipe',
+    
+    // Privacy Sheet
+    'privacy.subtitle': 'Gerencie a segurança da sua conta',
+    'privacy.profileVisibility': 'Perfil Visível',
+    'privacy.profileVisibilityDesc': 'Permitir que clientes vejam seu perfil',
+    'privacy.changePassword': 'Alterar Senha',
+    'privacy.newPasswordPlaceholder': 'Nova senha (mín. 6 caracteres)',
+    'privacy.passwordMin': 'A senha deve ter pelo menos 6 caracteres',
+    'privacy.passwordChanged': 'Senha atualizada com sucesso',
+    'privacy.deleteAccount': 'Excluir Conta',
+    'privacy.deleteConfirmTitle': 'Excluir sua conta?',
+    'privacy.deleteConfirmDesc': 'Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos.',
+    'privacy.deleteRequested': 'Exclusão de conta solicitada. Entraremos em contato para confirmar.',
+    
+    // Help Sheet
+    'help.subtitle': 'Encontre respostas e obtenha suporte',
+    'help.faqTitle': 'Perguntas Frequentes',
+    'help.faq1q': 'Como adiciono uma nova propriedade?',
+    'help.faq1a': 'Vá para a aba Propriedades e toque em "Adicionar Propriedade". Preencha os detalhes e salve.',
+    'help.faq2q': 'Como sincronizo meu calendário?',
+    'help.faq2a': 'Em Configurações, encontre Sincronizar Calendário e gere um link. Adicione este link ao Google Calendar, Apple Calendar ou Outlook.',
+    'help.faq3q': 'Como gero um relatório de limpeza?',
+    'help.faq3a': 'Após concluir um trabalho, um relatório é gerado automaticamente. Você pode encontrá-lo na seção Relatórios.',
+    'help.faq4q': 'Como gerencio minha equipe?',
+    'help.faq4a': 'Vá para Configurações e encontre a seção Equipe. Você pode adicionar ou remover membros lá.',
+    'help.contact': 'Contato de Suporte',
+    'help.emailDesc': 'Normalmente respondemos em 24 horas',
     
     // Dashboard KPI & Actions
     'dashboard.thisMonth': 'Mês',

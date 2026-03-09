@@ -1,33 +1,24 @@
 
 
-## Plano: Ativar botões de Notificações, Privacidade e Ajuda
+## Plano: Bolhas flutuantes no Execution + Confetti na finalização
 
-Os três botões (Notifications, Privacy, Help) no Settings não têm `onClick` — são puramente visuais. Vou criar modais/sheets para cada um com conteúdo funcional.
+### 1. Adicionar BackgroundEffects na tela de Execução
 
-### Alterações
+**Arquivo:** `src/pages/Execution.tsx`
 
-**1. Criar `src/components/settings/NotificationsSheet.tsx`**
-- Sheet/drawer com toggles para: notificações push, lembretes de jobs, alertas de novos agendamentos
-- Switches usando o componente `Switch` já existente
-- Estado salvo em `localStorage` (sem necessidade de backend para preferências simples)
+O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
 
-**2. Criar `src/components/settings/PrivacySheet.tsx`**
-- Sheet com opções: visibilidade do perfil, compartilhamento de dados
-- Botão para alterar senha (chama `supabase.auth.updateUser`)
-- Botão para solicitar exclusão de conta (com confirmação via AlertDialog)
+- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
 
-**3. Criar `src/components/settings/HelpSheet.tsx`**
-- Sheet com FAQ accordion (usando o componente Accordion existente)
-- Link para email de suporte
-- Versão do app
+### 2. Confetti na finalização do checklist
 
-**4. Atualizar `src/views/SettingsView.tsx`**
-- Adicionar estado para controlar abertura de cada sheet
-- Associar `onClick` a cada item do `settingsItems`
-- Renderizar os 3 novos componentes
+**Arquivos:** `src/components/execution/SummaryStep.tsx`
 
-### Traduções
-- Adicionar chaves necessárias em `src/contexts/LanguageContext.tsx` (PT e EN)
+Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
 
-### Zero alterações de banco de dados
+- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
+- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
+- Sem dependências externas — 100% Framer Motion + CSS.
+
+### Sem alterações de banco de dados
 
