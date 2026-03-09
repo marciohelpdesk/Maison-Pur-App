@@ -444,8 +444,9 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 <span className="text-xs font-medium text-foreground">{action.label}</span>
               </motion.button>
             ))}
-          </div>
-        </section>
+            </div>
+          </section>
+        </div>
       </div>
 
       {/* Category Info Drawer */}
