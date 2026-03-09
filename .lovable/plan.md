@@ -1,24 +1,35 @@
 
 
-## Plano: Bolhas flutuantes no Execution + Confetti na finalização
+## Problema
 
-### 1. Adicionar BackgroundEffects na tela de Execução
+O PDF Preview Modal usa um `<iframe>` com blob URL para exibir o PDF. Em navegadores móveis e dentro do iframe do Lovable, isso não funciona — o iframe fica em branco como mostra a screenshot.
 
-**Arquivo:** `src/pages/Execution.tsx`
+## Solução
 
-O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
+Substituir o iframe por uma **prévia HTML estilizada** do relatório diretamente no modal. Em vez de tentar renderizar o PDF dentro de um iframe (que falha em mobile), mostramos um resumo visual bonito com as mesmas informações do relatório: capa, estatísticas, checklist resumido, fotos, etc. O botão de download continua gerando e baixando o PDF real.
 
-- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
+### Alterações
 
-### 2. Confetti na finalização do checklist
+**1. `src/components/execution/PdfPreviewModal.tsx`**
+- Remover o iframe e a lógica de blob URL para preview
+- Aceitar os dados do relatório como props (`job`, `responsibleName`)
+- Renderizar um preview HTML estilizado com:
+  - Header com logo e nome da propriedade
+  - Cards de estatísticas (duração, tarefas, fotos)
+  - Resumo do checklist por seção (progresso)
+  - Contagem de damages e lost & found
+  - Thumbnails das fotos (antes/depois)
+  - Nota do responsável
+- Manter o botão "Download PDF" que gera e baixa o PDF real
+- Remover controles de zoom (não necessários para HTML)
 
-**Arquivos:** `src/components/execution/SummaryStep.tsx`
+**2. `src/components/execution/SummaryStep.tsx`**
+- Passar `job` e dados necessários para o `PdfPreviewModal` em vez de gerar o blob antecipadamente
+- Mover a geração do PDF para o momento do download (não do preview)
+- Simplificar o fluxo: abrir modal mostra preview HTML instantâneo, download gera PDF on-demand
 
-Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
-
-- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
-- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
-- Sem dependências externas — 100% Framer Motion + CSS.
-
-### Sem alterações de banco de dados
+### Resultado
+- Preview aparece instantaneamente (sem loading de PDF)
+- Funciona em qualquer navegador/dispositivo
+- Download continua gerando o PDF profissional completo
 
