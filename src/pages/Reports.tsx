@@ -181,7 +181,7 @@ export default function Reports() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -100 }}
               transition={{ delay: i * 0.05 }}
-              className=!rounded-2xl "glass-panel p-4">
+              className="glass-panel !rounded-2xl p-4">
               
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
