@@ -279,9 +279,9 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
             </button>
           </div>
 
-          <div className="relative space-y-4">
+          <div className="relative space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
             {todayJobs.length > 1 && (
-              <div className="absolute left-6 top-10 bottom-4 w-0.5 bg-gradient-to-b from-primary/40 to-transparent" />
+              <div className="absolute left-6 top-10 bottom-4 w-0.5 bg-gradient-to-b from-primary/40 to-transparent lg:hidden" />
             )}
 
             <AnimatePresence>

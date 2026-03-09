@@ -272,6 +272,7 @@ export const FinanceView = ({ jobs, onBack }: FinanceViewProps) => {
             </div>
           </div>
         </motion.div>
+        </div>
 
         {/* Job History */}
         <div className="mb-6">
