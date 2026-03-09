@@ -87,6 +87,7 @@ const translations: Record<string, Record<string, string>> = {
     before: 'Antes', after: 'Después', noIncidents: 'Sin incidentes',
     contact: 'Contacto', poweredBy: 'Desarrollado por',
     minutes: 'min', overview: 'Resumen',
+    downloadPdf: 'Descargar PDF', generating: 'Generando...',
   },
 };
 
