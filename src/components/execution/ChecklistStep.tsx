@@ -1,4 +1,4 @@
-import { useState, useCallback, memo, useRef } from 'react';
+import { useState, useCallback, memo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Camera, ArrowRight, AlertTriangle, Utensils, Sofa, BedDouble, Bath as BathIcon, X, Upload, Loader2, Sparkles, Plus, Trash2, ChevronRight } from 'lucide-react';
 import { ChecklistSection, ChecklistItem } from '@/types';
@@ -49,37 +49,75 @@ export const ChecklistStep = ({
   const [newRoomName, setNewRoomName] = useState('');
   const { toast } = useToast();
 
-  const totalItems = checklist.reduce((acc, s) => acc + s.items.length, 0);
-  const completedItems = checklist.reduce(
+  // ─── Local state + debounce ───
+  const [localChecklist, setLocalChecklist] = useState<ChecklistSection[]>(checklist);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Sync from parent when external changes arrive (e.g. after save)
+  useEffect(() => {
+    setLocalChecklist(checklist);
+  }, [checklist]);
+
+  const propagate = useCallback((updated: ChecklistSection[]) => {
+    setLocalChecklist(updated);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onChecklistChange(updated);
+    }, 800);
+  }, [onChecklistChange]);
+
+  // Flush on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  // Immediate propagation for structural changes (add/remove room/item, photos)
+  const propagateImmediate = useCallback((updated: ChecklistSection[]) => {
+    setLocalChecklist(updated);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    onChecklistChange(updated);
+  }, [onChecklistChange]);
+
+  const totalItems = localChecklist.reduce((acc, s) => acc + s.items.length, 0);
+  const completedItems = localChecklist.reduce(
     (acc, s) => acc + s.items.filter(i => i.completed).length, 0
   );
   const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   const allCompleted = completedItems === totalItems && totalItems > 0;
 
-  const activeSection = checklist[activeRoomIdx] || checklist[0];
+  const activeSection = localChecklist[activeRoomIdx] || localChecklist[0];
   const sectionDone = activeSection?.items.filter(i => i.completed).length || 0;
   const sectionTotal = activeSection?.items.length || 0;
 
   const toggleItem = useCallback((sectionId: string, itemId: string) => {
-    const updated = checklist.map(section => {
-      if (section.id !== sectionId) return section;
-      return {
-        ...section,
-        items: section.items.map(item => {
-          if (item.id !== itemId) return item;
-          if (item.photoRequired && !item.completed && !item.photoUrl) {
-            setCapturingPhoto(itemId);
-            return item;
-          }
-          return { ...item, completed: !item.completed };
-        }),
-      };
+    setLocalChecklist(prev => {
+      const updated = prev.map(section => {
+        if (section.id !== sectionId) return section;
+        return {
+          ...section,
+          items: section.items.map(item => {
+            if (item.id !== itemId) return item;
+            if (item.photoRequired && !item.completed && !item.photoUrl) {
+              setCapturingPhoto(itemId);
+              return item;
+            }
+            return { ...item, completed: !item.completed };
+          }),
+        };
+      });
+      // Debounced save
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onChecklistChange(updated);
+      }, 800);
+      return updated;
     });
-    onChecklistChange(updated);
-  }, [checklist, onChecklistChange]);
+  }, [onChecklistChange]);
 
   const handlePhotoCapture = useCallback((sectionId: string, itemId: string, photoUrl?: string) => {
-    const updated = checklist.map(section => {
+    const updated = localChecklist.map(section => {
       if (section.id !== sectionId) return section;
       return {
         ...section,
@@ -89,11 +127,10 @@ export const ChecklistStep = ({
         }),
       };
     });
-    onChecklistChange(updated);
+    propagateImmediate(updated);
     setCapturingPhoto(null);
-  }, [checklist, onChecklistChange]);
+  }, [localChecklist, propagateImmediate]);
 
-  // Add new item to active section
   const handleAddItem = useCallback(() => {
     if (!newItemLabel.trim()) return;
     const newItem: ChecklistItem = {
@@ -102,26 +139,24 @@ export const ChecklistStep = ({
       completed: false,
       photoRequired: false,
     };
-    const updated = checklist.map((s, idx) => {
+    const updated = localChecklist.map((s, idx) => {
       if (idx !== activeRoomIdx) return s;
       return { ...s, items: [...s.items, newItem] };
     });
-    onChecklistChange(updated);
+    propagateImmediate(updated);
     setNewItemLabel('');
     setAddingItem(false);
     toast({ title: 'Item adicionado', description: newItem.label });
-  }, [newItemLabel, checklist, activeRoomIdx, onChecklistChange, toast]);
+  }, [newItemLabel, localChecklist, activeRoomIdx, propagateImmediate, toast]);
 
-  // Remove item from active section
   const handleRemoveItem = useCallback((itemId: string) => {
-    const updated = checklist.map((s, idx) => {
+    const updated = localChecklist.map((s, idx) => {
       if (idx !== activeRoomIdx) return s;
       return { ...s, items: s.items.filter(i => i.id !== itemId) };
     });
-    onChecklistChange(updated);
-  }, [checklist, activeRoomIdx, onChecklistChange]);
+    propagateImmediate(updated);
+  }, [localChecklist, activeRoomIdx, propagateImmediate]);
 
-  // Add new room/section
   const handleAddRoom = useCallback(() => {
     if (!newRoomName.trim()) return;
     const newSection: ChecklistSection = {
@@ -129,24 +164,23 @@ export const ChecklistStep = ({
       title: newRoomName.trim(),
       items: [],
     };
-    onChecklistChange([...checklist, newSection]);
+    propagateImmediate([...localChecklist, newSection]);
     setNewRoomName('');
     setAddingRoom(false);
-    setActiveRoomIdx(checklist.length);
+    setActiveRoomIdx(localChecklist.length);
     toast({ title: 'Ambiente adicionado', description: newSection.title });
-  }, [newRoomName, checklist, onChecklistChange, toast]);
+  }, [newRoomName, localChecklist, propagateImmediate, toast]);
 
-  // Remove room/section
   const handleRemoveRoom = useCallback((idx: number) => {
-    if (checklist.length <= 1) return;
-    const updated = checklist.filter((_, i) => i !== idx);
-    onChecklistChange(updated);
+    if (localChecklist.length <= 1) return;
+    const updated = localChecklist.filter((_, i) => i !== idx);
+    propagateImmediate(updated);
     if (activeRoomIdx >= updated.length) setActiveRoomIdx(updated.length - 1);
     else if (idx < activeRoomIdx) setActiveRoomIdx(prev => prev - 1);
-  }, [checklist, activeRoomIdx, onChecklistChange]);
+  }, [localChecklist, activeRoomIdx, propagateImmediate]);
 
-  const canGoNextRoom = activeRoomIdx < checklist.length - 1;
-  const isLastRoom = activeRoomIdx === checklist.length - 1;
+  const canGoNextRoom = activeRoomIdx < localChecklist.length - 1;
+  const isLastRoom = activeRoomIdx === localChecklist.length - 1;
 
   return (
     <motion.div
@@ -190,7 +224,7 @@ export const ChecklistStep = ({
       {/* Room Tabs */}
       <div className="sticky top-0 z-40 backdrop-blur-xl bg-card/80 border-b border-border/20">
         <div className="flex gap-2 p-3 overflow-x-auto hide-scrollbar items-center">
-          {checklist.map((section, idx) => {
+          {localChecklist.map((section, idx) => {
             const done = section.items.filter(i => i.completed).length;
             const total = section.items.length;
             const isActive = idx === activeRoomIdx;
@@ -283,7 +317,7 @@ export const ChecklistStep = ({
                   <span className="text-xs text-muted-foreground font-semibold bg-muted/60 px-3 py-1 rounded-full">
                     {sectionDone}/{sectionTotal}
                   </span>
-                  {checklist.length > 1 && (
+                  {localChecklist.length > 1 && (
                     <button
                       onClick={() => handleRemoveRoom(activeRoomIdx)}
                       className="w-7 h-7 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 transition-colors"
@@ -294,33 +328,27 @@ export const ChecklistStep = ({
                 </div>
               </div>
 
-              {/* Checklist items */}
+              {/* Checklist items — no AnimatePresence wrapper for perf */}
               <div className="space-y-3">
-                <AnimatePresence>
-                  {activeSection.items.map((item, idx) => (
-                    <ChecklistItemCard
-                      key={item.id}
-                      item={item}
-                      index={idx}
-                      sectionId={activeSection.id}
-                      isCapturing={capturingPhoto === item.id}
-                      onToggle={() => toggleItem(activeSection.id, item.id)}
-                      onCapturePhoto={() => handlePhotoCapture(activeSection.id, item.id)}
-                      onRemove={() => handleRemoveItem(item.id)}
-                      userId={userId}
-                      jobId={jobId}
-                      onPhotoUploaded={(url) => handlePhotoCapture(activeSection.id, item.id, url)}
-                    />
-                  ))}
-                </AnimatePresence>
+                {activeSection.items.map((item, idx) => (
+                  <ChecklistItemCard
+                    key={item.id}
+                    item={item}
+                    index={idx}
+                    sectionId={activeSection.id}
+                    isCapturing={capturingPhoto === item.id}
+                    onToggle={toggleItem}
+                    onCapturePhoto={() => handlePhotoCapture(activeSection.id, item.id)}
+                    onRemove={handleRemoveItem}
+                    userId={userId}
+                    jobId={jobId}
+                    onPhotoUploaded={(url) => handlePhotoCapture(activeSection.id, item.id, url)}
+                  />
+                ))}
 
                 {/* Add Item */}
                 {addingItem ? (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="flex items-center gap-2 p-3 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5"
-                  >
+                  <div className="flex items-center gap-2 p-3 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5">
                     <Input
                       value={newItemLabel}
                       onChange={e => setNewItemLabel(e.target.value)}
@@ -335,16 +363,15 @@ export const ChecklistStep = ({
                     <button onClick={() => { setAddingItem(false); setNewItemLabel(''); }} className="w-8 h-8 rounded-xl bg-muted text-muted-foreground flex items-center justify-center shrink-0">
                       <X size={14} />
                     </button>
-                  </motion.div>
+                  </div>
                 ) : (
-                  <motion.button
+                  <button
                     onClick={() => setAddingItem(true)}
-                    className="w-full py-3 rounded-2xl border-2 border-dashed border-muted-foreground/15 text-muted-foreground hover:border-primary/30 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 text-sm font-medium"
-                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-3 rounded-2xl border-2 border-dashed border-muted-foreground/15 text-muted-foreground hover:border-primary/30 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 text-sm font-medium active:scale-[0.98]"
                   >
                     <Plus size={16} />
                     Adicionar tarefa
-                  </motion.button>
+                  </button>
                 )}
               </div>
 
@@ -354,8 +381,8 @@ export const ChecklistStep = ({
                 sectionTitle={activeSection.title}
                 userId={userId}
                 jobId={jobId}
-                checklist={checklist}
-                onChecklistChange={onChecklistChange}
+                checklist={localChecklist}
+                onChecklistChange={propagateImmediate}
                 activeRoomIdx={activeRoomIdx}
               />
             </motion.div>
@@ -445,7 +472,6 @@ const RoomPhotosSection = ({ sectionId, sectionTitle, userId, jobId, checklist, 
     const fileArray = Array.from(files);
     setUploadingCount(fileArray.length);
 
-    // Parallel uploads
     const results = await Promise.all(fileArray.map(f => processAndUpload(f)));
     const newUrls = results.filter((u): u is string => !!u);
 
@@ -477,7 +503,7 @@ const RoomPhotosSection = ({ sectionId, sectionTitle, userId, jobId, checklist, 
   return (
     <div className="mt-8">
       <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" disabled={isLoading} />
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" disabled={isLoading} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" multiple onChange={handleFileSelect} className="hidden" disabled={isLoading} />
 
       <div className="glass-panel p-4 rounded-2xl">
         <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
@@ -491,11 +517,8 @@ const RoomPhotosSection = ({ sectionId, sectionTitle, userId, jobId, checklist, 
         </h3>
         <div className="grid grid-cols-3 gap-3">
           {roomPhotos.map((photo, idx) => (
-            <motion.div
+            <div
               key={`${photo}-${idx}`}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: idx * 0.05 }}
               className="aspect-square rounded-2xl bg-muted overflow-hidden relative group shadow-sm border border-border/30"
             >
               <img src={photo} alt={`${sectionTitle} ${idx + 1}`} className="w-full h-full object-cover" />
@@ -505,7 +528,7 @@ const RoomPhotosSection = ({ sectionId, sectionTitle, userId, jobId, checklist, 
               >
                 <X size={12} />
               </button>
-            </motion.div>
+            </div>
           ))}
 
           {isLoading ? (
@@ -544,9 +567,9 @@ interface ChecklistItemCardProps {
   index: number;
   sectionId: string;
   isCapturing: boolean;
-  onToggle: () => void;
+  onToggle: (sectionId: string, itemId: string) => void;
   onCapturePhoto: () => void;
-  onRemove: () => void;
+  onRemove: (itemId: string) => void;
   userId?: string;
   jobId?: string;
   onPhotoUploaded?: (url: string) => void;
@@ -581,6 +604,14 @@ const ChecklistItemCard = memo(({ item, index, sectionId, isCapturing, onToggle,
     if (e.target) e.target.value = '';
   }, [userId, jobId, uploadPhoto, onPhotoUploaded]);
 
+  const handleToggle = useCallback(() => {
+    onToggle(sectionId, item.id);
+  }, [onToggle, sectionId, item.id]);
+
+  const handleRemove = useCallback(() => {
+    onRemove(item.id);
+  }, [onRemove, item.id]);
+
   const isLoading = isUploading || isProcessing;
 
   return (
@@ -593,14 +624,9 @@ const ChecklistItemCard = memo(({ item, index, sectionId, isCapturing, onToggle,
         onChange={handlePhotoFile}
         className="hidden"
       />
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, x: -100, height: 0 }}
-        transition={{ duration: 0.15 }}
-        layout
+      <div
         className={`
-          flex items-center gap-4 p-4 rounded-2xl transition-all duration-200 border-2 shadow-sm group
+          flex items-center gap-4 p-4 rounded-2xl transition-colors duration-150 border-2 shadow-sm
           ${item.completed
             ? 'glass-panel border-success/30 bg-success/5 shadow-success/5'
             : item.photoRequired
@@ -617,16 +643,14 @@ const ChecklistItemCard = memo(({ item, index, sectionId, isCapturing, onToggle,
               if (userId && jobId) fileInputRef.current?.click();
               else onCapturePhoto();
             } else {
-              onToggle();
+              handleToggle();
             }
           }}
           className="shrink-0"
         >
-          <motion.div
-            animate={item.completed ? { scale: [1, 1.2, 1] } : {}}
-            transition={{ duration: 0.3 }}
+          <div
             className={`
-              w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200
+              w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-150
               ${item.completed
                 ? 'bg-gradient-to-br from-success to-success/80 shadow-md shadow-success/30'
                 : 'border-2 border-muted-foreground/20 bg-card/50 hover:border-primary/40'
@@ -634,16 +658,14 @@ const ChecklistItemCard = memo(({ item, index, sectionId, isCapturing, onToggle,
             `}
           >
             {item.completed && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-                <Check className="w-4 h-4 text-success-foreground" strokeWidth={3} />
-              </motion.div>
+              <Check className="w-4 h-4 text-success-foreground" strokeWidth={3} />
             )}
-          </motion.div>
+          </div>
         </button>
 
         {/* Label */}
         <div className="flex-1 min-w-0">
-          <p className={`font-medium text-sm transition-colors duration-200 truncate
+          <p className={`font-medium text-sm transition-colors duration-150 truncate
             ${item.completed ? 'line-through text-muted-foreground/50' : 'text-foreground'}
           `}>
             {item.label}
@@ -684,13 +706,13 @@ const ChecklistItemCard = memo(({ item, index, sectionId, isCapturing, onToggle,
         {/* Remove button */}
         {!item.completed && (
           <button
-            onClick={e => { e.stopPropagation(); onRemove(); }}
+            onClick={e => { e.stopPropagation(); handleRemove(); }}
             className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
           >
             <X size={14} />
           </button>
         )}
-      </motion.div>
+      </div>
     </>
   );
 });
