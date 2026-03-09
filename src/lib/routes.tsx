@@ -171,6 +171,10 @@ export const routes = [
         path: 'invoices',
         element: <Invoices />,
       },
+      {
+        path: 'estimates',
+        element: <Estimates />,
+      },
     ],
   },
 
