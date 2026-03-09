@@ -447,6 +447,22 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.continue': 'Continue',
     'dashboard.progress': 'Progress',
     'jobs.startChecklist': 'Start Checklist',
+
+    // Inventory (Property)
+    'inventory.title': 'Supplies & Inventory',
+    'inventory.subtitle': 'Items available at this property',
+    'inventory.copyFrom': 'Copy From',
+    'inventory.selectProperty': 'Copy inventory from:',
+    'inventory.itemName': 'Item name',
+    'inventory.qty': 'Qty',
+    'inventory.unit': 'Unit',
+    'inventory.threshold': 'Min',
+    'inventory.category': 'Category',
+    'inventory.lowStock': 'Low Stock',
+    'inventory.empty': 'No supplies registered for this property',
+    'inventory.itemAdded': 'Item added',
+    'inventory.itemDeleted': 'Item removed',
+    'inventory.copied': 'Inventory copied successfully',
   },
   pt: {
     // Navigation
