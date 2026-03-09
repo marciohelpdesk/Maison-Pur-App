@@ -55,6 +55,7 @@ const translations: Record<string, Record<string, string>> = {
     before: '전', after: '후', noIncidents: '사건 없음',
     contact: '연락처', poweredBy: '제공',
     minutes: '분', overview: '개요',
+    downloadPdf: 'PDF 다운로드', generating: '생성 중...',
   },
   th: {
     subtitle: 'เวลาของคุณมีค่า',
