@@ -1,24 +1,45 @@
 
 
-## Plano: Bolhas flutuantes no Execution + Confetti na finalização
+## Plano: Módulo de Estimates (Orçamentos)
 
-### 1. Adicionar BackgroundEffects na tela de Execução
+### Objetivo
+Criar um sistema de orçamentos (Estimates) seguindo exatamente o padrão do módulo de Invoices — com tabela dedicada, hook, componentes de criação/listagem, página pública e rota.
 
-**Arquivo:** `src/pages/Execution.tsx`
+### Estrutura
 
-O `MobileLayout` já inclui as bolhas flutuantes (cloud blobs) em todas as páginas principais. Porém, a tela de Execução (`/execution/:jobId`) usa um layout próprio que não passa pelo `MobileLayout`, então as bolhas não aparecem lá.
+#### 1. Tabela `estimates` no banco de dados
+Mesma estrutura da tabela `invoices`, com campos adicionais específicos:
+- `client_name`, `client_email`, `client_address`, `client_phone`
+- `amount`, `status` (default: `draft`, opções: `draft`, `sent`, `accepted`, `declined`)
+- `public_token` (hex 16 bytes, como invoices)
+- `estimate_number` (ex: `EST-2026-001`)
+- `line_items` (JSONB — mesma estrutura do invoice)
+- `notes`, `discount`, `tax`, `due_date`, `valid_until` (data de validade do orçamento)
+- `user_id`, `created_at`, `updated_at`
+- RLS: owner gerencia tudo, público lê via token
 
-- Importar e renderizar `<BackgroundEffects />` dentro do `mobile-frame` div, antes do `<ExecutionContent>`.
+#### 2. Arquivos novos
+- `src/hooks/useEstimates.ts` — hook CRUD (clone de `useInvoices` adaptado)
+- `src/components/EstimateSection.tsx` — formulário + listagem (clone de `InvoiceSection` adaptado)
+- `src/pages/Estimates.tsx` — página dedicada com abas "New Estimate" / "History"
+- `src/components/EstimateHistoryContent.tsx` — listagem completa com filtros
+- `src/pages/PublicEstimate.tsx` — visualização pública do orçamento (clone de `PublicInvoice` com status visual diferente: Draft/Sent/Accepted/Declined)
 
-### 2. Confetti na finalização do checklist
+#### 3. Rotas
+- `/estimates` — página protegida (dentro do ProtectedLayout)
+- `/estimate/:token` — página pública (sem auth)
 
-**Arquivos:** `src/components/execution/SummaryStep.tsx`
+#### 4. Integração
+- Adicionar link para Estimates na página de Settings (ao lado de Invoices)
+- Presets de serviço específicos para estimates: Sofa Cleaning, Carpet Cleaning, Commercial, Post-construction, Deep Clean, Move-in/out
+- Botão "Convert to Invoice" nos estimates aceitos — copia os dados para criar uma invoice
 
-Quando o usuário clica em "Finalizar", disparar uma animação de confetti para celebrar a conclusão:
+#### 5. Página pública do Estimate
+- Layout similar ao PublicInvoice (branding Maison Pur)
+- Status badge visual (Draft=cinza, Sent=azul, Accepted=verde, Declined=vermelho)
+- Texto "This is an estimate, not an invoice" no topo
+- Validade do orçamento exibida
+- Sem seção de pagamento (diferente da invoice)
 
-- Criar um componente `ConfettiExplosion` inline usando Framer Motion: ~30 partículas coloridas (lavanda, rosa, menta, dourado — cores do design system) que disparam do centro em direções aleatórias com rotação e gravidade.
-- O confetti é ativado no momento do clique em "Finalizar" (antes de chamar `onComplete`), fica visível por ~2 segundos, e então a navegação prossegue.
-- Sem dependências externas — 100% Framer Motion + CSS.
-
-### Sem alterações de banco de dados
+### Sem dependências externas — apenas banco de dados + componentes React
 
