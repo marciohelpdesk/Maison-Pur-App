@@ -376,6 +376,8 @@ const translations: Record<Language, Record<string, string>> = {
     'checklist.preset.recurring': 'Recurring Clean',
     'checklist.preset.postConstruction': 'Post Construction',
     'checklist.preset.commercial': 'Commercial Clean',
+    'checklist.preset.guestSupplies3_4br': 'Guest Supplies (3-4 BR)',
+    'checklist.preset.guestSupplies5_6br': 'Guest Supplies (5-6 BR)',
     
     // Profile
     'profile.edit': 'Edit Profile',
@@ -835,6 +837,8 @@ const translations: Record<Language, Record<string, string>> = {
     'checklist.preset.recurring': 'Limpeza Recorrente',
     'checklist.preset.postConstruction': 'Pós Construção',
     'checklist.preset.commercial': 'Limpeza Comercial',
+    'checklist.preset.guestSupplies3_4br': 'Suprimentos (3-4 Quartos)',
+    'checklist.preset.guestSupplies5_6br': 'Suprimentos (5-6 Quartos)',
     
     // Profile
     'profile.edit': 'Editar Perfil',

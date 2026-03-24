@@ -524,6 +524,187 @@ export const COMMERCIAL_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
+export const GUEST_SUPPLIES_3_4BR_TEMPLATE: ChecklistSection[] = [
+  {
+    id: 'gs34-bath',
+    title: 'Bathrooms Supplies',
+    items: [
+      { id: 'gs34-b1', label: '3 rolls of toilet paper per bathroom (partial + 3 full). Do not remove partial roll', completed: false, photoRequired: false },
+      { id: 'gs34-b2', label: '1 trash bag for each bathroom can (+ leave extra)', completed: false, photoRequired: false },
+      { id: 'gs34-b3', label: 'Refill shampoo, conditioner, body wash and hand soap dispensers (at least half filled)', completed: false, photoRequired: true },
+      { id: 'gs34-b4', label: '1 bottle of hand soap per sink (at least half full)', completed: false, photoRequired: false },
+      { id: 'gs34-b5', label: '1-2 bath rugs for guest bathrooms (depending on shower/tub)', completed: false, photoRequired: false },
+      { id: 'gs34-b6', label: 'Q-Tips for each bathroom', completed: false, photoRequired: false },
+      { id: 'gs34-b7', label: 'Toilet brush in each bathroom', completed: false, photoRequired: false },
+      { id: 'gs34-b8', label: 'Plunger in each bathroom', completed: false, photoRequired: false },
+      { id: 'gs34-b9', label: 'Wash shower curtain and shower liner routinely', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs34-kitchen',
+    title: 'Kitchen Supplies',
+    items: [
+      { id: 'gs34-k1', label: '2 rolls of paper towels (+ partial roll)', completed: false, photoRequired: false },
+      { id: 'gs34-k2', label: '1 roll of trash bags under the sink (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs34-k3', label: '1 bottle multi-purpose cleaning solution under the sink (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs34-k4', label: '1 bottle of dish soap to hand wash dishes', completed: false, photoRequired: false },
+      { id: 'gs34-k5', label: '1 bottle of hand soap (at least half full)', completed: false, photoRequired: false },
+      { id: 'gs34-k6', label: '1 bottle of dishwasher detergent (1 full + partial)', completed: false, photoRequired: false },
+      { id: 'gs34-k7', label: '1 NEW dishwashing sponge', completed: false, photoRequired: false },
+      { id: 'gs34-k8', label: '4 kitchen towels (no less than four!)', completed: false, photoRequired: true },
+      { id: 'gs34-k9', label: 'Coffee grounds (at least ½ full) and sugar (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs34-k10', label: 'Coffee filter', completed: false, photoRequired: false },
+      { id: 'gs34-k11', label: 'Salt and black pepper (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs34-k12', label: 'Pack of min 10 AA and 10 AAA batteries (on top of fridge or microwave)', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs34-kitchen-notes',
+    title: 'Kitchen Notes',
+    items: [
+      { id: 'gs34-kn1', label: '1 highchair — always keep in the kitchen', completed: false, photoRequired: false },
+      { id: 'gs34-kn2', label: 'Condiments: if previous guests left unopened, leave for future guests', completed: false, photoRequired: false },
+      { id: 'gs34-kn3', label: 'Drinks: can take alcoholic drinks home, but NOT soft drinks and water', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs34-laundry',
+    title: 'Laundry Room Supplies',
+    items: [
+      { id: 'gs34-l1', label: '1 bottle of laundry detergent (1 full + partial)', completed: false, photoRequired: false },
+      { id: 'gs34-l2', label: 'Mop, broom, vacuum cleaner and dust pan (preferably in guest closet)', completed: false, photoRequired: false },
+      { id: 'gs34-l3', label: '4-6 laundry baskets (kept in laundry room)', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs34-bedrooms',
+    title: 'Bedrooms — Pillows & Towels',
+    items: [
+      { id: 'gs34-bed1', label: '4 pillows for each King/Queen bed', completed: false, photoRequired: false },
+      { id: 'gs34-bed2', label: '2-3 pillows for each Full bed', completed: false, photoRequired: false },
+      { id: 'gs34-bed3', label: '1-2 pillows for each Twin bed', completed: false, photoRequired: false },
+      { id: 'gs34-bed4', label: 'KING beds: 4 bath towels, 2 hand towels, 2 washcloths', completed: false, photoRequired: false },
+      { id: 'gs34-bed5', label: 'QUEEN beds: 3 bath towels, 2 hand towels, 2 washcloths', completed: false, photoRequired: false },
+      { id: 'gs34-bed6', label: 'FULL beds: 2 bath towels, 2 hand towels, 2 washcloths', completed: false, photoRequired: false },
+      { id: 'gs34-bed7', label: 'TWIN beds: 1 bath towel, 1 hand towel, 1 washcloth', completed: false, photoRequired: false },
+      { id: 'gs34-bed8', label: 'Leave extra 2-3 blankets for guests', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs34-bed-notes',
+    title: 'Bedrooms Notes',
+    items: [
+      { id: 'gs34-bn1', label: '2 Pack n play (in master or guest closet)', completed: false, photoRequired: false },
+      { id: 'gs34-bn2', label: 'TV Remote on nightstand, console, coffee table or wall mount', completed: false, photoRequired: false },
+      { id: 'gs34-bn3', label: 'Lock garage and owner closet doors. Turn off their lights', completed: false, photoRequired: false },
+      { id: 'gs34-bn4', label: 'Keep curtains open after each clean', completed: false, photoRequired: false },
+      { id: 'gs34-bn5', label: 'Extra sheets/blankets/quilts kept in owner garage or closet (not for guests)', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs34-beach',
+    title: 'Beach Supplies',
+    items: [
+      { id: 'gs34-bs1', label: '4-6 beach chairs', completed: false, photoRequired: false },
+      { id: 'gs34-bs2', label: '10 beach towels for 3BR / 12 for 4BR (in basket or on shelves)', completed: false, photoRequired: false },
+      { id: 'gs34-bs3', label: '2-3 beach umbrellas', completed: false, photoRequired: false },
+      { id: 'gs34-bs4', label: '1 wagon', completed: false, photoRequired: false },
+      { id: 'gs34-bs5', label: '1 beach mat', completed: false, photoRequired: false },
+      { id: 'gs34-bs6', label: '1 beach cooler', completed: false, photoRequired: false },
+    ]
+  },
+];
+
+export const GUEST_SUPPLIES_5_6BR_TEMPLATE: ChecklistSection[] = [
+  {
+    id: 'gs56-bath',
+    title: 'Bathrooms Supplies',
+    items: [
+      { id: 'gs56-b1', label: '3 rolls of toilet paper per bathroom (partial + 3 full). Do not remove partial roll', completed: false, photoRequired: false },
+      { id: 'gs56-b2', label: '1 trash bag for each bathroom can (+ leave extra)', completed: false, photoRequired: false },
+      { id: 'gs56-b3', label: 'Refill shampoo, conditioner, body wash and hand soap dispensers (at least half filled)', completed: false, photoRequired: true },
+      { id: 'gs56-b4', label: '1 bottle of hand soap per sink (at least half full)', completed: false, photoRequired: false },
+      { id: 'gs56-b5', label: '1-2 bath rugs for guest bathrooms (depending on shower/tub)', completed: false, photoRequired: false },
+      { id: 'gs56-b6', label: 'Q-Tips for each bathroom', completed: false, photoRequired: false },
+      { id: 'gs56-b7', label: 'Toilet brush for each bathroom', completed: false, photoRequired: false },
+      { id: 'gs56-b8', label: 'Plunger for each bathroom', completed: false, photoRequired: false },
+      { id: 'gs56-b9', label: 'Wash shower curtain and shower liner routinely', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs56-kitchen',
+    title: 'Kitchen Supplies',
+    items: [
+      { id: 'gs56-k1', label: '3 rolls of paper towels (+ partial roll)', completed: false, photoRequired: false },
+      { id: 'gs56-k2', label: '1 roll of trash bags under the sink (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs56-k3', label: '1 bottle multi-purpose cleaning solution under the sink (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs56-k4', label: '1 bottle of dish soap to hand wash dishes', completed: false, photoRequired: false },
+      { id: 'gs56-k5', label: '1 bottle of hand soap (at least half full)', completed: false, photoRequired: false },
+      { id: 'gs56-k6', label: '1 bottle of dishwasher detergent (1 full + partial)', completed: false, photoRequired: false },
+      { id: 'gs56-k7', label: '1 NEW dishwashing sponge', completed: false, photoRequired: false },
+      { id: 'gs56-k8', label: '4 kitchen towels (no less than four!)', completed: false, photoRequired: true },
+      { id: 'gs56-k9', label: '1 can of ground coffee (at least ½ full) and sugar (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs56-k10', label: 'Coffee filter', completed: false, photoRequired: false },
+      { id: 'gs56-k11', label: 'Salt and black pepper (at least ½ full)', completed: false, photoRequired: false },
+      { id: 'gs56-k12', label: 'Pack of min 10 AA and 10 AAA batteries (on top of fridge or microwave)', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs56-kitchen-notes',
+    title: 'Kitchen Notes',
+    items: [
+      { id: 'gs56-kn1', label: '1 highchair — always keep in the dining area', completed: false, photoRequired: false },
+      { id: 'gs56-kn2', label: 'Condiments: if previous guests left unopened, leave for future guests', completed: false, photoRequired: false },
+      { id: 'gs56-kn3', label: 'Drinks: can take alcoholic drinks home, but NOT soft drinks and water', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs56-laundry',
+    title: 'Laundry Room Supplies',
+    items: [
+      { id: 'gs56-l1', label: '1 bottle of laundry detergent (1 full + partial)', completed: false, photoRequired: false },
+      { id: 'gs56-l2', label: 'Mop, broom, vacuum cleaner and dust pan (preferably in guest closet)', completed: false, photoRequired: false },
+      { id: 'gs56-l3', label: '4-6 laundry baskets (kept in laundry room)', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs56-bedrooms',
+    title: 'Bedrooms — Pillows & Towels',
+    items: [
+      { id: 'gs56-bed1', label: '4 pillows for each King/Queen bed', completed: false, photoRequired: false },
+      { id: 'gs56-bed2', label: '2-3 pillows for each Full bed', completed: false, photoRequired: false },
+      { id: 'gs56-bed3', label: '1-2 pillows for each Twin bed', completed: false, photoRequired: false },
+      { id: 'gs56-bed4', label: 'KING beds: 4 bath towels, 2 hand towels, 2 washcloths', completed: false, photoRequired: false },
+      { id: 'gs56-bed5', label: 'QUEEN beds: 3 bath towels, 2 hand towels, 2 washcloths', completed: false, photoRequired: false },
+      { id: 'gs56-bed6', label: 'FULL beds: 2 bath towels, 2 hand towels, 2 washcloths', completed: false, photoRequired: false },
+      { id: 'gs56-bed7', label: 'TWIN beds: 1 bath towel, 1 hand towel, 1 washcloth', completed: false, photoRequired: false },
+      { id: 'gs56-bed8', label: 'Leave extra 2-3 blankets for guests', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs56-bed-notes',
+    title: 'Bedrooms Notes',
+    items: [
+      { id: 'gs56-bn1', label: '2 Pack n play (in master or guest closet)', completed: false, photoRequired: false },
+      { id: 'gs56-bn2', label: 'TV Remote on nightstand, console, coffee table or wall mount', completed: false, photoRequired: false },
+      { id: 'gs56-bn3', label: 'Lock garage and owner closet doors. Turn off their lights', completed: false, photoRequired: false },
+      { id: 'gs56-bn4', label: 'Keep curtains open after each clean', completed: false, photoRequired: false },
+      { id: 'gs56-bn5', label: 'Extra sheets/blankets/quilts kept in owner garage or closet (not for guests)', completed: false, photoRequired: false },
+    ]
+  },
+  {
+    id: 'gs56-beach',
+    title: 'Beach Supplies',
+    items: [
+      { id: 'gs56-bs1', label: '4-6 beach chairs', completed: false, photoRequired: false },
+      { id: 'gs56-bs2', label: '14 beach towels for 5BR / 16 for 6BR (in basket or on shelves)', completed: false, photoRequired: false },
+      { id: 'gs56-bs3', label: '2-3 beach umbrellas', completed: false, photoRequired: false },
+      { id: 'gs56-bs4', label: '1 wagon', completed: false, photoRequired: false },
+      { id: 'gs56-bs5', label: '1 beach cooler', completed: false, photoRequired: false },
+    ]
+  },
+];
+
 export type ChecklistPresetKey = 
   | 'standard' 
   | 'airbnb' 
@@ -531,7 +712,9 @@ export type ChecklistPresetKey =
   | 'move_in_out' 
   | 'recurring' 
   | 'post_construction' 
-  | 'commercial';
+  | 'commercial'
+  | 'guest_supplies_3_4br'
+  | 'guest_supplies_5_6br';
 
 export const CHECKLIST_PRESETS: Record<ChecklistPresetKey, {
   labelKey: string;
@@ -564,5 +747,13 @@ export const CHECKLIST_PRESETS: Record<ChecklistPresetKey, {
   commercial: {
     labelKey: 'checklist.preset.commercial',
     template: COMMERCIAL_CHECKLIST_TEMPLATE,
+  },
+  guest_supplies_3_4br: {
+    labelKey: 'checklist.preset.guestSupplies3_4br',
+    template: GUEST_SUPPLIES_3_4BR_TEMPLATE,
+  },
+  guest_supplies_5_6br: {
+    labelKey: 'checklist.preset.guestSupplies5_6br',
+    template: GUEST_SUPPLIES_5_6BR_TEMPLATE,
   },
 };
