@@ -27,7 +27,7 @@ export default function Reports() {
   const completedJobs = jobs.filter((j) => j.status === JobStatus.COMPLETED);
   // Jobs that don't have a report yet
   const unreportedJobs = completedJobs.filter(
-    (j) => !reports.some((r) => r.job_id === j.id)
+    (j) => !reports.some((r) => r.job_id === j.id) && !j.reportPdfUrl
   );
 
   const handleGenerateReport = async (job: Job) => {
