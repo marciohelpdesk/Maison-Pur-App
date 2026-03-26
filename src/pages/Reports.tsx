@@ -115,9 +115,14 @@ export default function Reports() {
     }
   };
 
-  const handleDelete = (id: string) => {
-    deleteReport(id);
-    toast.success(t('reports.deleted'));
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteReport(id);
+      toast.success(t('reports.deleted'));
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast.error('Erro ao excluir relatório');
+    }
   };
 
   if (isLoading) return <PageLoader />;

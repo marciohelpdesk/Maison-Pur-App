@@ -145,6 +145,19 @@ export const useReports = (userId: string | undefined) => {
 
   const deleteReport = useMutation({
     mutationFn: async (id: string) => {
+      // Delete child records first (no CASCADE on FK)
+      const { error: photoErr } = await supabase
+        .from('report_photos')
+        .delete()
+        .eq('report_id', id);
+      if (photoErr) console.error('Error deleting report photos:', photoErr);
+
+      const { error: roomErr } = await supabase
+        .from('report_rooms')
+        .delete()
+        .eq('report_id', id);
+      if (roomErr) console.error('Error deleting report rooms:', roomErr);
+
       const { error } = await supabase
         .from('cleaning_reports')
         .delete()
@@ -161,7 +174,7 @@ export const useReports = (userId: string | undefined) => {
     isLoading: query.isLoading,
     createReport: createReport.mutateAsync,
     updateReport: updateReport.mutate,
-    deleteReport: deleteReport.mutate,
+    deleteReport: deleteReport.mutateAsync,
     isCreating: createReport.isPending,
   };
 };
