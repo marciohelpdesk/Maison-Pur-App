@@ -1,47 +1,35 @@
 
 
-## Plano: Adicionar Checklists de Suprimentos para Hóspedes
+## Plano: Corrigir exclusão de Reports e adicionar exclusão de Jobs na Agenda
 
-### O que será feito
-Adicionar duas novas seções de checklist "Guest Supplies" ao sistema — uma para casas de 3-4 quartos e outra para 5-6 quartos. Cada item da lista será um item verificável durante a execução do job.
+### Problema 1: Reports não são apagados
+O `deleteReport` usa `.mutate()` que não aguarda resultado — o toast de sucesso aparece imediatamente, mas se o delete falhar no banco, o erro é silencioso. Além disso, as tabelas `report_rooms` e `report_photos` não têm foreign keys com CASCADE, então ficam dados órfãos mesmo quando o delete funciona.
 
-### Mudanças
+### Problema 2: Não é possível cancelar/apagar jobs da Agenda
+A `AgendaView` não tem opção de deletar jobs. O usuário precisa entrar nos detalhes do job para poder deletar — não há atalho na timeline.
 
-#### 1. `src/data/checklist.ts` — Novos templates de suprimentos
+---
 
-Criar dois novos templates exportados:
+### Correções
 
-**`GUEST_SUPPLIES_3_4BR_TEMPLATE`** com seções:
-- **Bathrooms Supplies** (9 itens): 3 rolls TP per bathroom, trash bags, refill dispensers, hand soap, bath rugs, Q-tips, toilet brush, plunger, wash shower curtain
-- **Kitchen Supplies** (12 itens): 2 rolls paper towels, trash bags, cleaning solution, dish soap, hand soap, dishwasher detergent, new sponge, 4 kitchen towels, coffee/sugar, coffee filter, salt/pepper, batteries
-- **Kitchen Notes** (3 itens): highchair in kitchen, condiments check, check drinks
-- **Laundry Room Supplies** (3 itens): laundry detergent, mop/broom/vacuum/dustpan, 4-6 laundry baskets
-- **Bedrooms - Pillows & Towels** (7 itens): pillow counts per bed size, towel counts per bed size, extra blankets
-- **Bedrooms Notes** (4 itens): pack n plays, TV remotes, lock garage/owner closet, keep curtains open
-- **Beach Supplies** (7 itens): 4-6 chairs, 10 beach towels (3BR)/12 (4BR), 2-3 umbrellas, wagon, beach mat, cooler
+#### 1. `src/hooks/useReports.ts` — Delete robusto
+- Antes de deletar o `cleaning_report`, deletar primeiro `report_photos` e `report_rooms` associados (pelo `report_id`)
+- Trocar para `mutateAsync` com tratamento de erro adequado
 
-**`GUEST_SUPPLIES_5_6BR_TEMPLATE`** — Mesmo formato, com diferenças:
-- Kitchen: 3 rolls paper towels, highchair in dining area
-- Beach: 14 towels (5BR)/16 (6BR), sem beach mat
+#### 2. `src/pages/Reports.tsx` — Toast com feedback real
+- Usar `await deleteReport(id)` com try/catch para mostrar toast de erro se falhar, em vez de mostrar sucesso imediatamente
 
-#### 2. `src/data/checklist.ts` — Registrar nos presets
+#### 3. `src/views/AgendaView.tsx` — Adicionar delete de jobs
+- Adicionar prop `onDeleteJob` à interface
+- No card de cada job na timeline, adicionar botão de lixeira (Trash2) com confirmação (AlertDialog) para cancelar/apagar o agendamento
+- Apenas jobs com status "Scheduled" podem ser deletados diretamente
 
-Adicionar ao `CHECKLIST_PRESETS`:
-- `guest_supplies_3_4br` → "Guest Supplies (3-4 BR)"
-- `guest_supplies_5_6br` → "Guest Supplies (5-6 BR)"
-
-Atualizar o tipo `ChecklistPresetKey` para incluir as novas chaves.
-
-#### 3. `src/contexts/LanguageContext.tsx` — Traduções
-
-Adicionar chaves de tradução:
-- `checklist.preset.guestSupplies3_4br` → "Guest Supplies (3-4 BR)" / "Suprimentos (3-4 Quartos)"
-- `checklist.preset.guestSupplies5_6br` → "Guest Supplies (5-6 BR)" / "Suprimentos (5-6 Quartos)"
-
-### Resultado
-Os novos templates aparecerão na seção "Checklist Base" do Dashboard e poderão ser selecionados ao criar jobs ou configurar templates de propriedades, permitindo verificar cada item de suprimento durante a execução da limpeza.
+#### 4. `src/pages/Agenda.tsx` — Passar onDeleteJob
+- Passar a função `deleteJob` do hook `useJobs` para a `AgendaView`
 
 ### Arquivos a modificar
-- `src/data/checklist.ts`
-- `src/contexts/LanguageContext.tsx`
+- `src/hooks/useReports.ts` — delete com limpeza de rooms/photos
+- `src/pages/Reports.tsx` — async delete com feedback
+- `src/views/AgendaView.tsx` — botão de cancelar job
+- `src/pages/Agenda.tsx` — passar prop onDeleteJob
 
