@@ -2,8 +2,13 @@ import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, ChevronRight, Calendar, CalendarDays, CalendarRange, Plus,
-  MapPin, Bed, Bath, Play, Clock, Check, AlertTriangle, Car, ExternalLink } from
+  MapPin, Bed, Bath, Play, Clock, Check, AlertTriangle, Car, ExternalLink, Trash2 } from
 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
 import { openAddressInMaps } from '@/lib/utils';
 import { Job, JobStatus, Property, Employee } from '@/types';
 import { DayView } from '@/components/calendar/DayView';
@@ -29,11 +34,12 @@ interface AgendaViewProps {
   onViewJob: (jobId: string) => void;
   onRescheduleJob?: (jobId: string, newDate: string, newTime?: string) => void;
   onAddJob?: (job: Job) => void;
+  onDeleteJob?: (jobId: string) => void;
 }
 
 type CalendarView = 'day' | 'week' | 'month';
 
-export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onViewJob, onRescheduleJob, onAddJob }: AgendaViewProps) => {
+export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onViewJob, onRescheduleJob, onAddJob, onDeleteJob }: AgendaViewProps) => {
   const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date()));
@@ -369,6 +375,33 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
                         
                             <Play size={10} className="inline mr-1 fill-primary-foreground" /> Iniciar
                           </button>
+                          {onDeleteJob &&
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                onClick={(e) => e.stopPropagation()}
+                                className="py-2 px-3 bg-destructive/10 text-destructive rounded-lg text-xs font-medium hover:bg-destructive/20 transition-colors">
+                                <Trash2 size={12} />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Cancelar agendamento?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  O job "{job.clientName}" será removido permanentemente.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Voltar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => { onDeleteJob(job.id); toast.success('Job cancelado'); }}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Cancelar Job
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          }
                         </div>
                     }
                     </div>

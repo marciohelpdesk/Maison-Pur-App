@@ -11,7 +11,7 @@ export default function Agenda() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { properties, isLoading: propertiesLoading } = useProperties(user?.id);
-  const { jobs, addJob, updateJob, isLoading: jobsLoading } = useJobs(user?.id);
+  const { jobs, addJob, updateJob, deleteJob, isLoading: jobsLoading } = useJobs(user?.id);
   const { employees, isLoading: employeesLoading } = useEmployees(user?.id);
 
   const isLoading = propertiesLoading || jobsLoading || employeesLoading;
@@ -53,6 +53,10 @@ export default function Agenda() {
     addJob(newJob);
   };
 
+  const handleDeleteJob = (jobId: string) => {
+    deleteJob(jobId);
+  };
+
   if (isLoading) {
     return <AgendaSkeleton />;
   }
@@ -66,6 +70,7 @@ export default function Agenda() {
       onViewJob={handleViewJob}
       onRescheduleJob={handleRescheduleJob}
       onAddJob={handleAddJob}
+      onDeleteJob={handleDeleteJob}
     />
   );
 }
