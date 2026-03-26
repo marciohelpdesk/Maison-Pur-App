@@ -1,29 +1,52 @@
 
 
-## Plano: Ocultar jobs da "Pending Generation" após exclusão de report
+## Plano: Melhorias no Relatório Público
 
-### Problema real
-O delete do report **funciona** (o toast "Report deleted" aparece e o report é removido do banco). Porém, como o filtro `unreportedJobs` mostra todos os jobs concluídos que NÃO têm um report associado, ao apagar o report o job volta a aparecer em "Pending Generation" — como se pedisse para gerar novamente.
+### 3 Problemas identificados
 
-### Solução
-Quando um job é concluído pelo fluxo normal (Execution), o campo `reportPdfUrl` é preenchido no job. Usar esse campo como indicador de que o job já teve um report gerado, mesmo que o report tenha sido excluído depois.
+1. **PDF não baixa** — `generatePublicReportPdf` usa `window.open(blobUrl)` que é bloqueado em iframes/sandboxes. Precisa usar `<a download>` como fallback.
+2. **Falta botão "Download All Photos"** — Não existe opção para o cliente baixar todas as fotos de uma vez.
+3. **PDF em português com layout básico** — O PDF gerado na página pública usa um gerador simples inline (jsPDF direto) com textos em português. Precisa de layout melhorado e conteúdo em inglês.
 
-### Mudança
+---
 
-**Arquivo**: `src/pages/Reports.tsx` (linha 29-31)
+### Mudanças
 
-Alterar o filtro `unreportedJobs` para também excluir jobs que já possuem `reportPdfUrl`:
+#### 1. `src/pages/PublicReport.tsx` — Fix PDF download + Add "Download Photos" button
 
-```typescript
-const unreportedJobs = completedJobs.filter(
-  (j) => !reports.some((r) => r.job_id === j.id) && !j.reportPdfUrl
-);
-```
+**Fix PDF download (linhas 97-244):**
+- Alterar `generatePublicReportPdf` para retornar um `Blob` em vez de abrir `window.open()`
+- No `onClick` do botão, usar `document.createElement('a')` com `download` attribute como primary, e `window.open` como fallback
+- Isso resolve o bloqueio em sandboxes e iframes
 
-Isso garante que:
-- Jobs concluídos pelo fluxo normal (que já geraram PDF) nunca voltam para "Pending Generation"
-- Jobs concluídos manualmente sem PDF e sem report continuam aparecendo para gerar
+**Add "Download All Photos" button (abaixo do botão de PDF, ~linha 639):**
+- Novo botão "Download Photos" que aparece apenas se houver fotos
+- Ao clicar, faz fetch de todas as `photo_url` como blobs, empacota num ZIP usando JSZip, e dispara download
+- Dependência: adicionar `jszip` ao projeto
 
-### Arquivo a modificar
-- `src/pages/Reports.tsx` — uma linha de filtro
+**Tradução "downloadPhotos":**
+- Adicionar chave `downloadPhotos` nas 5 línguas do objeto `translations`
+- Adicionar chave `downloadingPhotos` para estado de loading
+
+#### 2. `src/pages/PublicReport.tsx` — PDF layout melhorado e em inglês
+
+Reescrever `generatePublicReportPdf` com:
+- **Textos em inglês**: "Cleaning Inspection Report", "Property", "Date", "Completion", "Tasks", "Duration", "Rooms", "Checklist", "Damages Reported", "Notes"
+- **Layout melhorado**:
+  - Header bar mais elegante com gradiente stone-900
+  - Property name com fonte maior e espaçamento adequado
+  - Summary box com 4 stats em grid com ícones de texto (✓, 📷, ⏱, 🏠)
+  - Room sections com header colorido (#717D62 — a cor da marca) e progress bar
+  - Checklist items com checkmarks visuais (✓ / ○) e zebra striping
+  - Damages section com severity badges
+  - Footer com "© Maison Pur • maisonpurusa.com" e page numbers
+  - Melhor uso de espaço e tipografia (hierarquia clara de fontes)
+
+#### 3. `package.json` — Adicionar JSZip
+
+- Instalar dependência `jszip` para empacotamento de fotos em ZIP
+
+### Arquivos a modificar
+- `src/pages/PublicReport.tsx` — fix download, novo botão, PDF reescrito
+- `package.json` — adicionar `jszip`
 
