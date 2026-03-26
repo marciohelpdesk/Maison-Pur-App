@@ -1,52 +1,43 @@
 
 
-## Plano: Melhorias no Relatório Público
+## Plano: Corrigir PDF do Relatório Público
 
-### 3 Problemas identificados
+### 3 Problemas no PDF
 
-1. **PDF não baixa** — `generatePublicReportPdf` usa `window.open(blobUrl)` que é bloqueado em iframes/sandboxes. Precisa usar `<a download>` como fallback.
-2. **Falta botão "Download All Photos"** — Não existe opção para o cliente baixar todas as fotos de uma vez.
-3. **PDF em português com layout básico** — O PDF gerado na página pública usa um gerador simples inline (jsPDF direto) com textos em português. Precisa de layout melhorado e conteúdo em inglês.
+1. **Checkmark "✓" aparece como "E"** — jsPDF com fonte helvetica não suporta o caractere Unicode ✓. Precisa substituir por um desenho vetorial (linhas do PDF) ou usar a letra "v" estilizada como já feito no `pdfGenerator.ts` interno.
+
+2. **Logo ausente** — O `generatePublicReportPdf` não carrega nem insere o logo. Precisa carregar `/logo-512.png` via canvas→dataURL e inserir no header do PDF.
+
+3. **Falta campo de assinatura** — O footer atual só tem copyright e page number. Precisa de uma linha de assinatura com texto "Inspector Signature" abaixo.
+
+### Sobre o botão "Download Photos"
+
+O botão já existe no código (linha 797) e aparece **somente quando há fotos no relatório** (`photos.length > 0`). Se o relatório não tem fotos associadas, o botão não aparece — esse é o comportamento correto e esperado.
 
 ---
 
 ### Mudanças
 
-#### 1. `src/pages/PublicReport.tsx` — Fix PDF download + Add "Download Photos" button
+#### `src/pages/PublicReport.tsx` — função `generatePublicReportPdf`
 
-**Fix PDF download (linhas 97-244):**
-- Alterar `generatePublicReportPdf` para retornar um `Blob` em vez de abrir `window.open()`
-- No `onClick` do botão, usar `document.createElement('a')` com `download` attribute como primary, e `window.open` como fallback
-- Isso resolve o bloqueio em sandboxes e iframes
+**1. Fix checkmark (linha 260):**
+- Substituir `doc.text('✓', ...)` por desenho vetorial: duas linhas formando um "V" (check) usando `doc.line()`
+- Substituir `doc.text('○', ...)` por `doc.circle()` vazio
+- Isso garante renderização correta em qualquer fonte
 
-**Add "Download All Photos" button (abaixo do botão de PDF, ~linha 639):**
-- Novo botão "Download Photos" que aparece apenas se houver fotos
-- Ao clicar, faz fetch de todas as `photo_url` como blobs, empacota num ZIP usando JSZip, e dispara download
-- Dependência: adicionar `jszip` ao projeto
+**2. Adicionar logo no header (linhas 142-161):**
+- Antes de gerar o PDF, carregar `/logo-512.png` via `Image` → canvas → `toDataURL('image/png')`
+- Tornar `generatePublicReportPdf` **async** para aguardar o carregamento
+- Inserir o logo no canto esquerdo do header bar escuro (ao lado de "MAISON PUR")
+- Atualizar `handleDownloadPdf` para usar `await`
 
-**Tradução "downloadPhotos":**
-- Adicionar chave `downloadPhotos` nas 5 línguas do objeto `translations`
-- Adicionar chave `downloadingPhotos` para estado de loading
+**3. Adicionar campo de assinatura no footer (após linha 338):**
+- Antes do footer de copyright, adicionar uma seção com:
+  - Linha horizontal para assinatura (~60mm)
+  - Texto "Inspector Signature" centralizado abaixo da linha
+  - Nome do cleaner abaixo
+- Posicionar acima do footer existente
 
-#### 2. `src/pages/PublicReport.tsx` — PDF layout melhorado e em inglês
-
-Reescrever `generatePublicReportPdf` com:
-- **Textos em inglês**: "Cleaning Inspection Report", "Property", "Date", "Completion", "Tasks", "Duration", "Rooms", "Checklist", "Damages Reported", "Notes"
-- **Layout melhorado**:
-  - Header bar mais elegante com gradiente stone-900
-  - Property name com fonte maior e espaçamento adequado
-  - Summary box com 4 stats em grid com ícones de texto (✓, 📷, ⏱, 🏠)
-  - Room sections com header colorido (#717D62 — a cor da marca) e progress bar
-  - Checklist items com checkmarks visuais (✓ / ○) e zebra striping
-  - Damages section com severity badges
-  - Footer com "© Maison Pur • maisonpurusa.com" e page numbers
-  - Melhor uso de espaço e tipografia (hierarquia clara de fontes)
-
-#### 3. `package.json` — Adicionar JSZip
-
-- Instalar dependência `jszip` para empacotamento de fotos em ZIP
-
-### Arquivos a modificar
-- `src/pages/PublicReport.tsx` — fix download, novo botão, PDF reescrito
-- `package.json` — adicionar `jszip`
+### Arquivo a modificar
+- `src/pages/PublicReport.tsx` — 3 correções na função `generatePublicReportPdf`
 
