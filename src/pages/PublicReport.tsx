@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { usePublicReport, ReportRoom, ReportPhoto, CleaningReport } from '@/hooks/useReports';
 import jsPDF from 'jspdf';
+import JSZip from 'jszip';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { enUS, ptBR, ko, th, es } from 'date-fns/locale';
@@ -24,6 +25,7 @@ const translations: Record<string, Record<string, string>> = {
     contact: 'Contact', poweredBy: 'Powered by',
     minutes: 'min', overview: 'Overview',
     downloadPdf: 'Download PDF', generating: 'Generating...',
+    downloadPhotos: 'Download All Photos', downloadingPhotos: 'Preparing Photos...',
   },
   pt: {
     subtitle: 'SEU TEMPO IMPORTA, NÓS CUIDAMOS DA LIMPEZA',
@@ -40,6 +42,7 @@ const translations: Record<string, Record<string, string>> = {
     contact: 'Contato', poweredBy: 'Desenvolvido por',
     minutes: 'min', overview: 'Resumo',
     downloadPdf: 'Baixar PDF', generating: 'Gerando...',
+    downloadPhotos: 'Baixar Todas as Fotos', downloadingPhotos: 'Preparando Fotos...',
   },
   ko: {
     subtitle: '당신의 시간은 소중합니다',
@@ -56,6 +59,7 @@ const translations: Record<string, Record<string, string>> = {
     contact: '연락처', poweredBy: '제공',
     minutes: '분', overview: '개요',
     downloadPdf: 'PDF 다운로드', generating: '생성 중...',
+    downloadPhotos: '모든 사진 다운로드', downloadingPhotos: '사진 준비 중...',
   },
   th: {
     subtitle: 'เวลาของคุณมีค่า',
@@ -72,6 +76,7 @@ const translations: Record<string, Record<string, string>> = {
     contact: 'ติดต่อ', poweredBy: 'ขับเคลื่อนโดย',
     minutes: 'นาที', overview: 'ภาพรวม',
     downloadPdf: 'ดาวน์โหลด PDF', generating: 'กำลังสร้าง...',
+    downloadPhotos: 'ดาวน์โหลดรูปภาพทั้งหมด', downloadingPhotos: 'กำลังเตรียมรูปภาพ...',
   },
   es: {
     subtitle: 'SU TIEMPO IMPORTA, NOSOTROS LIMPIAMOS',
@@ -88,160 +93,256 @@ const translations: Record<string, Record<string, string>> = {
     contact: 'Contacto', poweredBy: 'Desarrollado por',
     minutes: 'min', overview: 'Resumen',
     downloadPdf: 'Descargar PDF', generating: 'Generando...',
+    downloadPhotos: 'Descargar Todas las Fotos', downloadingPhotos: 'Preparando Fotos...',
   },
 };
 
 const dateLocales: Record<string, any> = { en: enUS, pt: ptBR, ko, th, es };
 
-// ─── PDF Generator for Public Report ───
+// ─── PDF Generator for Public Report (English, improved layout) ───
 function generatePublicReportPdf(
   report: CleaningReport,
   rooms: ReportRoom[],
   photos: ReportPhoto[],
-  t: (key: string) => string,
   durationStr: string,
   completionPct: number,
-) {
+): Blob {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
-  const margin = 18;
-  let y = 20;
+  const H = doc.internal.pageSize.getHeight();
+  const margin = 16;
+  const contentW = W - margin * 2;
+  let y = 0;
+  let pageNum = 1;
 
-  const addPage = () => { doc.addPage(); y = 20; };
-  const checkPage = (needed: number) => { if (y + needed > 275) addPage(); };
+  const brandGreen: [number, number, number] = [113, 125, 98];
+  const darkBg: [number, number, number] = [28, 25, 23];
+  const lightBg: [number, number, number] = [245, 245, 240];
 
-  // Header bar
-  doc.setFillColor(40, 40, 40);
-  doc.rect(0, 0, W, 38, 'F');
+  const addFooter = () => {
+    doc.setDrawColor(210, 210, 210);
+    doc.line(margin, H - 12, W - margin, H - 12);
+    doc.setFontSize(6.5);
+    doc.setTextColor(160, 160, 160);
+    doc.text(`© ${new Date().getFullYear()} Maison Pur  •  maisonpurusa.com`, margin, H - 7);
+    doc.text(`Page ${pageNum}`, W - margin, H - 7, { align: 'right' });
+  };
+
+  const addPage = () => {
+    addFooter();
+    doc.addPage();
+    pageNum++;
+    y = 16;
+  };
+
+  const checkPage = (needed: number) => {
+    if (y + needed > H - 18) addPage();
+  };
+
+  // ── Header Bar ──
+  doc.setFillColor(...darkBg);
+  doc.rect(0, 0, W, 36, 'F');
+  // Accent line
+  doc.setFillColor(...brandGreen);
+  doc.rect(0, 36, W, 1.5, 'F');
+
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(20);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('MAISON PUR', margin, 18);
-  doc.setFontSize(9);
+  doc.text('MAISON PUR', margin, 16);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text(t('visitReport').toUpperCase(), margin, 28);
   doc.setTextColor(180, 180, 180);
-  doc.text(`ID: ${report.public_token.slice(0, 8)}`, W - margin, 28, { align: 'right' });
+  doc.text('CLEANING INSPECTION REPORT', margin, 24);
+  doc.setFontSize(7);
+  doc.text(`ID: ${report.public_token.slice(0, 8).toUpperCase()}`, W - margin, 24, { align: 'right' });
+  doc.setTextColor(140, 140, 140);
+  doc.text(report.cleaning_date, W - margin, 16, { align: 'right' });
 
-  y = 50;
+  y = 46;
 
-  // Property info
-  doc.setTextColor(30, 30, 30);
+  // ── Property Name ──
+  doc.setTextColor(28, 25, 23);
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text(report.property_name, margin, y);
-  y += 8;
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(report.property_address, margin, y);
-  y += 6;
-  doc.text(`${t('date')}: ${report.cleaning_date}  •  ${report.cleaner_name}`, margin, y);
-  y += 12;
+  const propLines = doc.splitTextToSize(report.property_name, contentW);
+  doc.text(propLines, margin, y);
+  y += propLines.length * 8 + 2;
 
-  // Summary box
-  doc.setFillColor(245, 245, 240);
-  doc.roundedRect(margin, y, W - margin * 2, 22, 3, 3, 'F');
-  doc.setTextColor(50, 50, 50);
   doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  const colW = (W - margin * 2) / 4;
-  const statsY = y + 9;
-  const statsLabelY = y + 16;
-  doc.setFontSize(16);
-  doc.text(`${completionPct}%`, margin + colW * 0.5, statsY, { align: 'center' });
-  doc.text(`${photos.length}`, margin + colW * 1.5, statsY, { align: 'center' });
-  doc.text(durationStr, margin + colW * 2.5, statsY, { align: 'center' });
-  doc.text(`${rooms.length}`, margin + colW * 3.5, statsY, { align: 'center' });
-  doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(130, 130, 130);
-  doc.text(t('completion').toUpperCase(), margin + colW * 0.5, statsLabelY, { align: 'center' });
-  doc.text(t('photos').toUpperCase(), margin + colW * 1.5, statsLabelY, { align: 'center' });
-  doc.text(t('duration').toUpperCase(), margin + colW * 2.5, statsLabelY, { align: 'center' });
-  doc.text(t('rooms').toUpperCase(), margin + colW * 3.5, statsLabelY, { align: 'center' });
+  doc.setTextColor(120, 120, 120);
+  doc.text(report.property_address, margin, y);
+  y += 5;
+  doc.text(`Cleaned by ${report.cleaner_name}`, margin, y);
+  y += 10;
 
-  y += 30;
+  // ── Summary Stats Box ──
+  const statsBoxH = 24;
+  doc.setFillColor(...lightBg);
+  doc.roundedRect(margin, y, contentW, statsBoxH, 3, 3, 'F');
+  // Border
+  doc.setDrawColor(220, 220, 215);
+  doc.roundedRect(margin, y, contentW, statsBoxH, 3, 3, 'S');
 
-  // Rooms
-  rooms.forEach((room) => {
-    checkPage(30);
-    // Room header
-    doc.setFillColor(113, 125, 98);
-    doc.roundedRect(margin, y, W - margin * 2, 10, 2, 2, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
+  const colW = contentW / 4;
+  const totalTasks = rooms.reduce((s, r) => s + r.tasks_total, 0);
+  const completedTasks = rooms.reduce((s, r) => s + r.tasks_completed, 0);
+
+  const statsData = [
+    { value: `${completionPct}%`, label: 'COMPLETION' },
+    { value: `${completedTasks}/${totalTasks}`, label: 'TASKS' },
+    { value: durationStr, label: 'DURATION' },
+    { value: `${photos.length}`, label: 'PHOTOS' },
+  ];
+
+  statsData.forEach((stat, i) => {
+    const cx = margin + colW * i + colW / 2;
+    doc.setFontSize(15);
     doc.setFont('helvetica', 'bold');
-    doc.text(room.name, margin + 5, y + 7);
-    const pct = room.tasks_total > 0 ? Math.round((room.tasks_completed / room.tasks_total) * 100) : 0;
-    doc.setFontSize(9);
-    doc.text(`${pct}%`, W - margin - 5, y + 7, { align: 'right' });
-    y += 14;
+    doc.setTextColor(28, 25, 23);
+    doc.text(stat.value, cx, y + 10, { align: 'center' });
+    doc.setFontSize(6);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(150, 150, 150);
+    doc.text(stat.label, cx, y + 16, { align: 'center' });
+    // Divider
+    if (i < 3) {
+      doc.setDrawColor(210, 210, 205);
+      doc.line(margin + colW * (i + 1), y + 4, margin + colW * (i + 1), y + statsBoxH - 4);
+    }
+  });
 
-    // Checklist items
+  y += statsBoxH + 10;
+
+  // ── Rooms ──
+  rooms.forEach((room) => {
+    checkPage(28);
+
+    // Room header bar
+    doc.setFillColor(...brandGreen);
+    doc.roundedRect(margin, y, contentW, 9, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(room.name.toUpperCase(), margin + 4, y + 6.5);
+    const pct = room.tasks_total > 0 ? Math.round((room.tasks_completed / room.tasks_total) * 100) : 0;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${room.tasks_completed}/${room.tasks_total}  (${pct}%)`, W - margin - 4, y + 6.5, { align: 'right' });
+    y += 12;
+
+    // Progress bar
+    const barW = contentW;
+    const barH = 2;
+    doc.setFillColor(230, 230, 225);
+    doc.roundedRect(margin, y, barW, barH, 1, 1, 'F');
+    if (pct > 0) {
+      doc.setFillColor(pct === 100 ? 130 : 113, pct === 100 ? 170 : 125, pct === 100 ? 110 : 98);
+      doc.roundedRect(margin, y, barW * (pct / 100), barH, 1, 1, 'F');
+    }
+    y += 5;
+
+    // Checklist items with zebra striping
     const items = (room.checklist as any[]) || [];
-    items.forEach((item: any) => {
+    items.forEach((item: any, idx: number) => {
       checkPage(6);
+      // Zebra bg
+      if (idx % 2 === 0) {
+        doc.setFillColor(250, 250, 248);
+        doc.rect(margin, y - 3.5, contentW, 5.5, 'F');
+      }
+      // Checkmark
       doc.setFontSize(9);
+      if (item.completed) {
+        doc.setTextColor(90, 140, 80);
+        doc.setFont('helvetica', 'bold');
+        doc.text('✓', margin + 3, y);
+      } else {
+        doc.setTextColor(190, 190, 190);
+        doc.setFont('helvetica', 'normal');
+        doc.text('○', margin + 3, y);
+      }
+      // Label
       doc.setFont('helvetica', 'normal');
-      const check = item.completed ? '✓' : '○';
-      doc.setTextColor(item.completed ? 80 : 180, item.completed ? 120 : 180, item.completed ? 80 : 180);
-      doc.text(check, margin + 3, y);
-      doc.setTextColor(60, 60, 60);
-      doc.text(item.label || item.name || '', margin + 10, y);
-      y += 5.5;
+      doc.setTextColor(item.completed ? 60 : 160, item.completed ? 60 : 160, item.completed ? 60 : 160);
+      doc.setFontSize(8.5);
+      const label = item.label || item.name || '';
+      const labelLines = doc.splitTextToSize(label, contentW - 14);
+      doc.text(labelLines, margin + 10, y);
+      y += labelLines.length * 4.5 + 1;
     });
 
-    // Damages
+    // Damages for this room
     const damages = (room.damages as any[]) || [];
     if (damages.length > 0) {
       checkPage(10);
       y += 2;
+      doc.setFillColor(255, 245, 235);
+      doc.roundedRect(margin, y - 3, contentW, 7, 1.5, 1.5, 'F');
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(200, 80, 60);
-      doc.text(`⚠ ${t('damages')} (${damages.length})`, margin + 3, y);
-      y += 5;
+      doc.setTextColor(200, 80, 50);
+      doc.text(`⚠  DAMAGES REPORTED (${damages.length})`, margin + 3, y + 1);
+      y += 7;
       damages.forEach((d: any) => {
         checkPage(6);
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(100, 100, 100);
+        doc.setTextColor(100, 80, 70);
         doc.setFontSize(8);
-        doc.text(`• ${d.description || d.type || ''}`, margin + 6, y);
-        y += 4.5;
+        const dLines = doc.splitTextToSize(`•  ${d.description || d.type || ''}`, contentW - 8);
+        doc.text(dLines, margin + 5, y);
+        y += dLines.length * 4 + 1;
       });
     }
 
-    y += 6;
+    y += 8;
   });
 
-  // Notes
+  // ── Notes ──
   if (report.notes) {
     checkPage(20);
-    doc.setFontSize(9);
+    doc.setFillColor(...lightBg);
+    doc.roundedRect(margin, y, contentW, 7, 1.5, 1.5, 'F');
+    doc.setFontSize(8.5);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(50, 50, 50);
-    doc.text('Notes', margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
     doc.setTextColor(80, 80, 80);
-    const lines = doc.splitTextToSize(report.notes, W - margin * 2);
-    doc.text(lines, margin, y);
-    y += lines.length * 4.5 + 4;
+    doc.text('NOTES', margin + 4, y + 5);
+    y += 10;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(90, 90, 90);
+    doc.setFontSize(8.5);
+    const noteLines = doc.splitTextToSize(report.notes, contentW - 4);
+    noteLines.forEach((line: string) => {
+      checkPage(5);
+      doc.text(line, margin + 2, y);
+      y += 4.5;
+    });
+    y += 4;
+  }
+
+  // ── Photo Documentation Links ──
+  if (photos.length > 0) {
+    checkPage(14);
+    doc.setFillColor(...lightBg);
+    doc.roundedRect(margin, y, contentW, 7, 1.5, 1.5, 'F');
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(80, 80, 80);
+    doc.text(`PHOTO DOCUMENTATION  (${photos.length} photos)`, margin + 4, y + 5);
+    y += 10;
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(120, 120, 120);
+    doc.text('Photos are available in the interactive online report.', margin + 2, y);
+    y += 6;
   }
 
   // Footer on last page
-  const footerY = 285;
-  doc.setDrawColor(200, 200, 200);
-  doc.line(margin, footerY - 4, W - margin, footerY - 4);
-  doc.setFontSize(7);
-  doc.setTextColor(160, 160, 160);
-  doc.text(`© ${new Date().getFullYear()} Maison Pur • maisonpurusa.com`, W / 2, footerY, { align: 'center' });
+  addFooter();
 
-  // Download
-  const filename = `Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_${report.cleaning_date}.pdf`;
-  const blobUrl = doc.output('bloburl') as unknown as string;
-  window.open(blobUrl, '_blank');
+  // Return as Blob
+  return doc.output('blob');
 }
 
 // ─── Sticky Room Nav with scroll indicators ───
@@ -283,11 +384,9 @@ function StickyRoomNav({
   return (
     <div className="sticky top-0 z-30 bg-stone-50/95 backdrop-blur-md border-b border-stone-200/60 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 relative">
-        {/* Left fade gradient */}
         {canScrollLeft && (
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-50/95 to-transparent z-10 pointer-events-none" />
         )}
-
         <div
           ref={scrollRef}
           onScroll={handleScroll}
@@ -321,8 +420,6 @@ function StickyRoomNav({
             </button>
           )}
         </div>
-
-        {/* Right fade gradient + animated arrow */}
         {canScrollRight && (
           <>
             <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-stone-50/95 to-transparent z-10 pointer-events-none" />
@@ -350,6 +447,7 @@ export default function PublicReport() {
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const roomRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isDownloadingPhotos, setIsDownloadingPhotos] = useState(false);
 
   const t = useCallback((key: string) => {
     return translations[lang]?.[key] || translations.en?.[key] || key;
@@ -359,7 +457,6 @@ export default function PublicReport() {
     if (report?.language && translations[report.language]) setLang(report.language);
   }, [report]);
 
-  // OG meta
   useEffect(() => {
     if (!report) return;
     const ogUrl = BRAND_OG_IMAGE;
@@ -376,14 +473,12 @@ export default function PublicReport() {
     return () => { document.title = 'Maison Pur — Cleaning Management'; };
   }, [report, t]);
 
-  // Close lang menu on outside click
   useEffect(() => {
     const handler = () => setLangMenuOpen(false);
     if (langMenuOpen) document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, [langMenuOpen]);
 
-  // Scroll spy for room navigation
   useEffect(() => {
     if (rooms.length === 0) return;
     const observer = new IntersectionObserver(
@@ -408,6 +503,79 @@ export default function PublicReport() {
   const scrollToRoom = (roomId: string) => {
     roomRefs.current[roomId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const handleDownloadPdf = useCallback(() => {
+    if (!report) return;
+    setIsGeneratingPdf(true);
+    setTimeout(() => {
+      try {
+        const totalTasks = rooms.reduce((s, r) => s + r.tasks_total, 0);
+        const completedTasks = rooms.reduce((s, r) => s + r.tasks_completed, 0);
+        const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+        let dur = '—';
+        if (report.start_time && report.end_time) {
+          const mins = Math.round((report.end_time - report.start_time) / 60000);
+          const h = Math.floor(mins / 60);
+          const m = mins % 60;
+          dur = h > 0 ? `${h}h ${m}min` : `${m} min`;
+        }
+
+        const blob = generatePublicReportPdf(report, rooms, photos, dur, pct);
+        const filename = `Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_${report.cleaning_date}.pdf`;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch (err) {
+        console.error('PDF generation failed:', err);
+      } finally {
+        setIsGeneratingPdf(false);
+      }
+    }, 100);
+  }, [report, rooms, photos]);
+
+  const handleDownloadPhotos = useCallback(async () => {
+    if (!report || photos.length === 0) return;
+    setIsDownloadingPhotos(true);
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder(`Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_Photos`);
+      if (!folder) throw new Error('Failed to create zip folder');
+
+      await Promise.all(
+        photos.map(async (photo, idx) => {
+          try {
+            const res = await fetch(photo.photo_url);
+            const blob = await res.blob();
+            const ext = photo.photo_url.match(/\.(jpg|jpeg|png|webp)/i)?.[1] || 'jpg';
+            const prefix = photo.photo_type || 'photo';
+            folder.file(`${prefix}_${String(idx + 1).padStart(3, '0')}.${ext}`, blob);
+          } catch (e) {
+            console.warn(`Failed to fetch photo ${idx}:`, e);
+          }
+        })
+      );
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_Photos.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (err) {
+      console.error('Photo download failed:', err);
+    } finally {
+      setIsDownloadingPhotos(false);
+    }
+  }, [report, photos]);
 
   if (isLoading) {
     return (
@@ -438,7 +606,6 @@ export default function PublicReport() {
   const completionPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const totalIncidents = allDamages.length + allLostFound.length;
 
-  // Duration
   let durationStr = '—';
   if (report.start_time && report.end_time) {
     const mins = Math.round((report.end_time - report.start_time) / 60000);
@@ -460,13 +627,9 @@ export default function PublicReport() {
           alt={report.property_name}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-stone-50/90 md:to-stone-50/50" />
-
-        {/* Logo */}
         <div className="absolute left-6 z-20" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}>
           <BrandLogo className="h-12 w-auto drop-shadow-md" />
         </div>
-
-        {/* Language Switcher */}
         <div className="absolute right-6 z-20" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)' }}>
           <button
             onClick={(e) => { e.stopPropagation(); setLangMenuOpen(!langMenuOpen); }}
@@ -504,7 +667,6 @@ export default function PublicReport() {
           {report.cleaner_name}
         </h1>
 
-        {/* Info Card */}
         <div className="max-w-3xl mx-auto bg-white border border-stone-100 shadow-xl shadow-stone-200/50 rounded-2xl overflow-hidden mb-8">
           <div className="py-6 px-4 border-b border-stone-100 bg-stone-50/30">
             <p className="text-xs font-bold text-[#717D62] uppercase tracking-[0.2em]">{t('subtitle')}</p>
@@ -612,15 +774,9 @@ export default function PublicReport() {
            </div>
 
           {/* Download PDF button */}
-          <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/30">
+          <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/30 space-y-2.5">
             <button
-              onClick={() => {
-                setIsGeneratingPdf(true);
-                setTimeout(() => {
-                  generatePublicReportPdf(report, rooms, photos, t, durationStr, completionPct);
-                  setIsGeneratingPdf(false);
-                }, 100);
-              }}
+              onClick={handleDownloadPdf}
               disabled={isGeneratingPdf}
               className="w-full flex justify-center items-center gap-2.5 bg-stone-800 hover:bg-stone-700 disabled:bg-stone-400 text-white px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
             >
@@ -636,6 +792,27 @@ export default function PublicReport() {
                 </>
               )}
             </button>
+
+            {/* Download All Photos button */}
+            {photos.length > 0 && (
+              <button
+                onClick={handleDownloadPhotos}
+                disabled={isDownloadingPhotos}
+                className="w-full flex justify-center items-center gap-2.5 bg-white hover:bg-stone-100 disabled:bg-stone-100 border border-stone-200 text-stone-700 disabled:text-stone-400 px-5 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all"
+              >
+                {isDownloadingPhotos ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
+                    {t('downloadingPhotos')}
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    {t('downloadPhotos')} ({photos.length})
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -678,9 +855,7 @@ export default function PublicReport() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-                {/* Checklist Column — full width if no photos */}
                 <div className={`${hasPhotos ? 'lg:col-span-4' : 'lg:col-span-12'} order-1 lg:order-1 space-y-6`}>
-                  {/* Checklist Card */}
                   {checklistItems.length > 0 && (
                     <div className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden">
                       <div className="bg-stone-50 px-4 py-3 border-b border-stone-100 flex justify-between items-center">
@@ -692,7 +867,6 @@ export default function PublicReport() {
                           {room.tasks_completed}/{room.tasks_total}
                         </span>
                       </div>
-                      {/* Room progress bar */}
                       <div className="px-4 pt-3 pb-1">
                         <div className="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden">
                           <div
@@ -723,7 +897,6 @@ export default function PublicReport() {
                     </div>
                   )}
 
-                  {/* Damages Card */}
                   {roomDamages.length > 0 && (
                     <div className="bg-white rounded-xl border-2 border-amber-200 shadow-sm overflow-hidden">
                       <div className="bg-amber-50 px-4 py-3 border-b border-amber-100 flex justify-between items-center">
@@ -767,7 +940,6 @@ export default function PublicReport() {
                     </div>
                   )}
 
-                  {/* Lost & Found Card */}
                   {roomLostFound.length > 0 && (
                     <div className="bg-white rounded-xl border-2 border-blue-200 shadow-sm overflow-hidden">
                       <div className="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
@@ -803,7 +975,6 @@ export default function PublicReport() {
                   )}
                 </div>
 
-                {/* Photos Column — only if there are photos */}
                 {hasPhotos && (
                   <div className="lg:col-span-8 order-2 lg:order-2">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -879,7 +1050,6 @@ export default function PublicReport() {
           </div>
         )}
 
-        {/* Standalone damages/lostfound */}
         {rooms.length === 0 && (allDamages.length > 0 || allLostFound.length > 0) && (
           <div className="space-y-6">
             {allDamages.length > 0 && (
