@@ -100,13 +100,13 @@ const translations: Record<string, Record<string, string>> = {
 const dateLocales: Record<string, any> = { en: enUS, pt: ptBR, ko, th, es };
 
 // ─── PDF Generator for Public Report (English, improved layout) ───
-function generatePublicReportPdf(
+async function generatePublicReportPdf(
   report: CleaningReport,
   rooms: ReportRoom[],
   photos: ReportPhoto[],
   durationStr: string,
   completionPct: number,
-): Blob {
+): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
@@ -139,6 +139,24 @@ function generatePublicReportPdf(
     if (y + needed > H - 18) addPage();
   };
 
+  // ── Load Logo ──
+  let logoDataUrl: string | null = null;
+  try {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject();
+      img.src = '/logo-512.png';
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(img, 0, 0);
+    logoDataUrl = canvas.toDataURL('image/png');
+  } catch { /* continue without logo */ }
+
   // ── Header Bar ──
   doc.setFillColor(...darkBg);
   doc.rect(0, 0, W, 36, 'F');
@@ -146,10 +164,16 @@ function generatePublicReportPdf(
   doc.setFillColor(...brandGreen);
   doc.rect(0, 36, W, 1.5, 'F');
 
+  // Logo
+  const logoOffset = logoDataUrl ? 14 : 0;
+  if (logoDataUrl) {
+    try { doc.addImage(logoDataUrl, 'PNG', margin, 6, 10, 10); } catch {}
+  }
+
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('MAISON PUR', margin, 16);
+  doc.text('MAISON PUR', margin + logoOffset, 16);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(180, 180, 180);
@@ -252,16 +276,18 @@ function generatePublicReportPdf(
         doc.setFillColor(250, 250, 248);
         doc.rect(margin, y - 3.5, contentW, 5.5, 'F');
       }
-      // Checkmark
-      doc.setFontSize(9);
+      // Checkmark (vector drawing — no Unicode needed)
       if (item.completed) {
-        doc.setTextColor(90, 140, 80);
-        doc.setFont('helvetica', 'bold');
-        doc.text('✓', margin + 3, y);
+        doc.setDrawColor(90, 140, 80);
+        doc.setLineWidth(0.6);
+        const cx = margin + 4.5;
+        const cy = y - 1.5;
+        doc.line(cx - 1.5, cy, cx - 0.2, cy + 1.8);
+        doc.line(cx - 0.2, cy + 1.8, cx + 2, cy - 1);
       } else {
-        doc.setTextColor(190, 190, 190);
-        doc.setFont('helvetica', 'normal');
-        doc.text('○', margin + 3, y);
+        doc.setDrawColor(190, 190, 190);
+        doc.setLineWidth(0.4);
+        doc.circle(margin + 4.5, y - 0.8, 1.8);
       }
       // Label
       doc.setFont('helvetica', 'normal');
@@ -337,6 +363,27 @@ function generatePublicReportPdf(
     doc.text('Photos are available in the interactive online report.', margin + 2, y);
     y += 6;
   }
+
+  // ── Inspector Signature ──
+  checkPage(35);
+  y += 8;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(80, 80, 80);
+  doc.text('INSPECTOR SIGNATURE', margin, y);
+  y += 12;
+  // Signature line
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, margin + 70, y);
+  y += 5;
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(120, 120, 120);
+  doc.text(report.cleaner_name, margin, y);
+  y += 3;
+  doc.setFontSize(6.5);
+  doc.text(`Date: ${report.cleaning_date}`, margin, y);
 
   // Footer on last page
   addFooter();
@@ -504,39 +551,37 @@ export default function PublicReport() {
     roomRefs.current[roomId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleDownloadPdf = useCallback(() => {
+  const handleDownloadPdf = useCallback(async () => {
     if (!report) return;
     setIsGeneratingPdf(true);
-    setTimeout(() => {
-      try {
-        const totalTasks = rooms.reduce((s, r) => s + r.tasks_total, 0);
-        const completedTasks = rooms.reduce((s, r) => s + r.tasks_completed, 0);
-        const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    try {
+      const totalTasks = rooms.reduce((s, r) => s + r.tasks_total, 0);
+      const completedTasks = rooms.reduce((s, r) => s + r.tasks_completed, 0);
+      const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-        let dur = '—';
-        if (report.start_time && report.end_time) {
-          const mins = Math.round((report.end_time - report.start_time) / 60000);
-          const h = Math.floor(mins / 60);
-          const m = mins % 60;
-          dur = h > 0 ? `${h}h ${m}min` : `${m} min`;
-        }
-
-        const blob = generatePublicReportPdf(report, rooms, photos, dur, pct);
-        const filename = `Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_${report.cleaning_date}.pdf`;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
-      } catch (err) {
-        console.error('PDF generation failed:', err);
-      } finally {
-        setIsGeneratingPdf(false);
+      let dur = '—';
+      if (report.start_time && report.end_time) {
+        const mins = Math.round((report.end_time - report.start_time) / 60000);
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        dur = h > 0 ? `${h}h ${m}min` : `${m} min`;
       }
-    }, 100);
+
+      const blob = await generatePublicReportPdf(report, rooms, photos, dur, pct);
+      const filename = `Maison-Pur_${report.property_name.replace(/[^a-zA-Z0-9]/g, '-')}_${report.cleaning_date}.pdf`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   }, [report, rooms, photos]);
 
   const handleDownloadPhotos = useCallback(async () => {
