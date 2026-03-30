@@ -1,19 +1,26 @@
 
 
-## Plan: Redeploy Edge Functions to Fix Sharing Links
+## Plan: Improve Lightbox — Pinch-to-Zoom + Safe Area Close Button
 
-### Problem
-The screenshot shows the edge function's HTML being displayed as raw source text instead of being rendered as an HTML page. The code is correct (Content-Type is properly set to `text/html`), but the deployed version appears to be stale or not properly deployed.
+### Problems
+1. **No zoom on photos** — Lightbox shows full image but no way to pinch-to-zoom or double-tap to zoom on mobile
+2. **Close button too close to status bar** — `top-6` (24px) is not enough on notched iPhones; overlaps with Wi-Fi/battery indicators, making it impossible to tap
 
-### Solution
-Redeploy all three sharing edge functions (`share-report`, `share-invoice`, `share-estimate`) and verify they work correctly by testing each one.
+### Changes — `src/pages/PublicReport.tsx`
 
-### Steps
+**1. Close button safe area fix (line 1156):**
+- Change positioning from `top-6` to use `top-[calc(env(safe-area-inset-top,20px)+16px)]` so the X button sits below the notch/status bar on all devices
+- Increase button size from `p-2` to `p-3` for easier tapping
 
-1. **Redeploy `share-report`** edge function and test with a sample token
-2. **Redeploy `share-invoice`** edge function and test
-3. **Redeploy `share-estimate`** edge function and test
-4. **Verify** that each function returns proper `text/html` Content-Type and redirects correctly
+**2. Add pinch-to-zoom support:**
+- Wrap the lightbox `<img>` in a container with CSS `touch-action: manipulation` and use React state + touch event handlers for pinch-to-zoom and double-tap-to-zoom
+- Track scale (1x–4x) and translate position via `onTouchStart`, `onTouchMove`, `onTouchEnd`
+- Double-tap toggles between 1x and 2.5x zoom
+- Pinch gesture calculates distance between two touch points to adjust scale
+- Apply `transform: scale(${scale}) translate(${x}px, ${y}px)` to the image
+- Reset zoom when lightbox closes
+- Stop propagation on image touch events so backdrop click-to-close still works
 
-No code changes needed — the existing code is correct. This is a deployment sync issue.
+### Single file to modify
+- `src/pages/PublicReport.tsx` — lightbox section only (lines 1148–1165)
 

@@ -30,7 +30,7 @@ export default function EstimateHistoryContent({ userId }: EstimateHistoryConten
   const pendingTotal = estimates.filter(e => e.status === 'sent').reduce((s, e) => s + Number(e.amount), 0);
 
   const copyLink = (token: string) => {
-    navigator.clipboard.writeText(`https://ebafqcanwdqomqcrifrj.supabase.co/functions/v1/share-estimate?token=${token}`);
+    navigator.clipboard.writeText(`https://maisonpur.lovable.app/estimate/${token}?v=${Date.now()}`);
     toast.success('Estimate link copied!');
   };
 

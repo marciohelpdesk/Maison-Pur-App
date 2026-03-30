@@ -9,8 +9,6 @@ const corsHeaders = {
 const APP_URL = "https://maisonpur.lovable.app";
 const OG_IMAGE = "https://i.ibb.co/1Yh2WJjw/Branding.png";
 
-const BOT_UA = /whatsapp|facebookexternalhit|telegrambot|twitterbot|linkedinbot|slackbot|discordbot|googlebot|bingbot|yandex|baiduspider|pinterest|snapchat/i;
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,14 +23,6 @@ Deno.serve(async (req) => {
     }
 
     const redirectUrl = `${APP_URL}/estimate/${token}`;
-    const ua = req.headers.get("user-agent") || "";
-
-    if (!BOT_UA.test(ua)) {
-      return new Response(null, {
-        status: 302,
-        headers: { ...corsHeaders, Location: redirectUrl },
-      });
-    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -71,8 +61,7 @@ Deno.serve(async (req) => {
   <meta property="og:image:height" content="630" />
   <meta property="og:url" content="${redirectUrl}" />
   <meta property="og:site_name" content="Maison Pur" />
-  <meta property="og:image:type" content="image/png" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${OG_IMAGE}" />
@@ -80,6 +69,7 @@ Deno.serve(async (req) => {
 </head>
 <body>
   <p>Redirecting to estimate...</p>
+  <script>window.location.href = "${redirectUrl}";</script>
 </body>
 </html>`;
 

@@ -145,7 +145,7 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
   };
 
   const copyLink = (token: string) => {
-    navigator.clipboard.writeText(`https://ebafqcanwdqomqcrifrj.supabase.co/functions/v1/share-estimate?token=${token}`);
+    navigator.clipboard.writeText(`https://maisonpur.lovable.app/estimate/${token}?v=${Date.now()}`);
     toast.success('Estimate link copied!');
   };
 

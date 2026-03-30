@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Clock, Camera, ClipboardCheck, MessageSquare, AlertTriangle, Package, Search } from 'lucide-react';
+import { Check, Clock, Camera, ClipboardCheck, Star, MessageSquare, AlertTriangle, Package, Search, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Job, InventoryItem } from '@/types';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PdfPreviewModal } from './PdfPreviewModal';
 
 // Confetti colors: lavender, pink, mint, gold (design system palette)
 const CONFETTI_COLORS = [
@@ -85,7 +86,7 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
   const { t } = useLanguage();
   const [note, setNote] = useState(job.reportNote || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [showPreview, setShowPreview] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Calculate stats
@@ -112,6 +113,9 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
     return remaining <= item.threshold;
   });
 
+  const handlePreviewPdf = () => {
+    setShowPreview(true);
+  };
 
   const handleComplete = async () => {
     setIsSubmitting(true);
@@ -300,7 +304,45 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
           />
         </div>
 
+        {/* Earnings Preview */}
+        {job.price && (
+          <div className="glass-panel p-4 mb-4 border-l-4 border-l-primary">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">{t('exec.summary.serviceValue')}</p>
+                <p className="text-2xl font-bold text-foreground">R$ {job.price.toFixed(2)}</p>
+              </div>
+              <div className="flex items-center gap-1 text-warning">
+                <Star className="w-5 h-5 fill-current" />
+                <Star className="w-5 h-5 fill-current" />
+                <Star className="w-5 h-5 fill-current" />
+                <Star className="w-5 h-5 fill-current" />
+                <Star className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Generate PDF Button */}
+        <Button
+          variant="outline"
+          onClick={handlePreviewPdf}
+          className="w-full mb-4 h-12 rounded-xl gap-2"
+        >
+          <Eye className="w-5 h-5" />
+          {t('exec.summary.previewPdf')}
+        </Button>
       </div>
+
+      {/* PDF Preview Modal */}
+      <PdfPreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        job={job}
+        inventory={inventory}
+        responsibleName="Kamila Petters"
+        note={note}
+      />
 
       {/* Actions */}
       <div className="p-4 flex gap-3">
