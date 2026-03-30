@@ -58,7 +58,8 @@ Deno.serve(async (req) => {
   <meta property="og:image:height" content="630" />
   <meta property="og:url" content="${redirectUrl}" />
   <meta property="og:site_name" content="Maison Pur" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image:type" content="image/png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${OG_IMAGE}" />
