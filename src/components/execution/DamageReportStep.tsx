@@ -38,8 +38,10 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
     type: 'furniture',
     severity: 'medium',
     description: '',
+    location: '',
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [activePhotoTarget, setActivePhotoTarget] = useState<'closeup' | 'context'>('closeup');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -77,7 +79,11 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
     setIsProcessing(false);
 
     if (url) {
-      setNewDamage(prev => ({ ...prev, photoUrl: url }));
+      if (activePhotoTarget === 'context') {
+        setNewDamage(prev => ({ ...prev, contextPhotoUrl: url }));
+      } else {
+        setNewDamage(prev => ({ ...prev, photoUrl: url }));
+      }
     } else {
       toast({
         title: t('common.error'),
@@ -105,10 +111,12 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
       severity: newDamage.severity || 'medium',
       description: newDamage.description,
       photoUrl: newDamage.photoUrl,
+      contextPhotoUrl: newDamage.contextPhotoUrl,
+      location: newDamage.location || undefined,
     };
     
     onDamagesChange([...damages, damage]);
-    setNewDamage({ type: 'furniture', severity: 'medium', description: '' });
+    setNewDamage({ type: 'furniture', severity: 'medium', description: '', location: '' });
     setIsAdding(false);
   };
 
