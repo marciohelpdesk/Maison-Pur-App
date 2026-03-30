@@ -49,6 +49,8 @@ export interface DamageReport {
   type: 'furniture' | 'electronics' | 'stain' | 'other';
   description: string;
   photoUrl?: string;
+  contextPhotoUrl?: string;
+  location?: string;
   severity: 'low' | 'medium' | 'high';
 }
 
