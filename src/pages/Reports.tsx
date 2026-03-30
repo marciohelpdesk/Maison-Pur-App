@@ -103,7 +103,7 @@ export default function Reports() {
   };
 
   const getShareUrl = (report: CleaningReport) => {
-    return `https://maisonpur.lovable.app/r/${report.public_token}?v=${Date.now()}`;
+    return `https://ebafqcanwdqomqcrifrj.supabase.co/functions/v1/share-report?token=${report.public_token}`;
   };
 
   const handleCopyLink = async (report: CleaningReport) => {
