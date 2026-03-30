@@ -3,7 +3,7 @@ import { usePublicReport, ReportRoom, ReportPhoto, CleaningReport } from '@/hook
 import jsPDF from 'jspdf';
 import JSZip from 'jszip';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { enUS, ptBR, ko, th, es } from 'date-fns/locale';
 import { BrandLogo } from '@/components/BrandLogo';
 import { BRAND_OG_IMAGE } from '@/lib/brand';
@@ -543,7 +543,7 @@ export default function PublicReport() {
 
   const formatDate = useCallback((dateStr: string) => {
     try {
-      return format(new Date(dateStr), 'PPPP', { locale: dateLocales[lang] || enUS });
+      return format(parseISO(dateStr), 'PPPP', { locale: dateLocales[lang] || enUS });
     } catch { return dateStr; }
   }, [lang]);
 
@@ -660,7 +660,7 @@ export default function PublicReport() {
   }
 
   const getPhotosForRoom = (roomId: string) => photos.filter(p => p.room_id === roomId);
-  const generalPhotos = photos.filter(p => !p.room_id);
+  const generalPhotos = photos.filter(p => !p.room_id && p.photo_type !== 'damage' && p.photo_type !== 'lost_found');
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 antialiased font-sans selection:bg-stone-200" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -734,7 +734,7 @@ export default function PublicReport() {
             </div>
           </div>
           <div className="p-4 bg-stone-50 border-t border-stone-100 flex flex-col md:flex-row justify-center gap-3">
-            <a href="sms:" className="flex-1 flex justify-center items-center gap-2 bg-white hover:bg-stone-100 border border-stone-200 text-stone-600 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
+            <a href="sms:+19413304713" className="flex-1 flex justify-center items-center gap-2 bg-white hover:bg-stone-100 border border-stone-200 text-stone-600 px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
               {t('messenger')}
             </a>
@@ -956,11 +956,18 @@ export default function PublicReport() {
                       <div className="p-4 space-y-4">
                         {roomDamages.map((d: any, idx: number) => (
                           <div key={idx} className="flex items-start gap-4">
-                            {d.photoUrl && (
-                              <button onClick={() => setLightboxUrl(d.photoUrl)} className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 hover:opacity-80 transition-opacity border-2 border-amber-100 shadow-sm">
-                                <img src={d.photoUrl} alt="" className="w-full h-full object-cover" />
-                              </button>
-                            )}
+                            <div className="flex gap-2 flex-shrink-0">
+                              {d.photoUrl && (
+                                <button onClick={() => setLightboxUrl(d.photoUrl)} className="w-20 h-20 rounded-xl overflow-hidden hover:opacity-80 transition-opacity border-2 border-amber-100 shadow-sm">
+                                  <img src={d.photoUrl} alt="Close-up" className="w-full h-full object-cover" />
+                                </button>
+                              )}
+                              {d.contextPhotoUrl && (
+                                <button onClick={() => setLightboxUrl(d.contextPhotoUrl)} className="w-20 h-20 rounded-xl overflow-hidden hover:opacity-80 transition-opacity border-2 border-amber-100 shadow-sm">
+                                  <img src={d.contextPhotoUrl} alt="Environment" className="w-full h-full object-cover" />
+                                </button>
+                              )}
+                            </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-stone-800 font-medium">{d.description}</p>
                               {d.severity && (

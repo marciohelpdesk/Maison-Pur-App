@@ -78,6 +78,7 @@ export default function Execution() {
         ...finalJob.photosBefore.map((url, i) => ({ photo_url: url, photo_type: 'before' as const, display_order: i })),
         ...finalJob.photosAfter.map((url, i) => ({ photo_url: url, photo_type: 'after' as const, display_order: i })),
         ...(finalJob.damages || []).filter(d => d.photoUrl).map((d, i) => ({ photo_url: d.photoUrl!, photo_type: 'damage' as const, display_order: i, caption: d.description })),
+        ...(finalJob.damages || []).filter(d => d.contextPhotoUrl).map((d, i) => ({ photo_url: d.contextPhotoUrl!, photo_type: 'damage' as const, display_order: i + 100, caption: `${d.location || ''} - ${d.description}` })),
         ...(finalJob.lostAndFound || []).filter(l => l.photoUrl).map((l, i) => ({ photo_url: l.photoUrl!, photo_type: 'lost_found' as const, display_order: i, caption: l.description })),
         ...finalJob.checklist.flatMap((section, sIdx) => {
           const roomPhotos = (section as any).roomPhotos || [];
