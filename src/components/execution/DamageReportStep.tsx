@@ -199,15 +199,22 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
                 className="glass-panel p-3 mb-3"
               >
                 <div className="flex items-start gap-3">
-                  {damage.photoUrl ? (
-                    <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                      <img src={damage.photoUrl} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-16 h-16 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
-                      <Icon className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                  )}
+                  <div className="flex gap-1.5 shrink-0">
+                    {damage.photoUrl ? (
+                      <div className="w-14 h-14 rounded-lg overflow-hidden">
+                        <img src={damage.photoUrl} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-lg bg-muted/50 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    )}
+                    {damage.contextPhotoUrl && (
+                      <div className="w-14 h-14 rounded-lg overflow-hidden">
+                        <img src={damage.contextPhotoUrl} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -219,6 +226,11 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
                       </span>
                     </div>
                     <p className="text-sm text-foreground line-clamp-2">{damage.description}</p>
+                    {damage.location && (
+                      <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                        📍 {damage.location}
+                      </p>
+                    )}
                   </div>
                   
                   <button
@@ -287,6 +299,18 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
                 </div>
               </div>
 
+              {/* Location */}
+              <div className="mb-3">
+                <p className="text-xs text-muted-foreground mb-2">📍 Location</p>
+                <input
+                  type="text"
+                  value={newDamage.location || ''}
+                  onChange={(e) => setNewDamage(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="e.g. Master Bedroom, Kitchen counter"
+                  className="flex h-10 w-full rounded-md border border-input bg-card/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+
               {/* Description */}
               <div className="mb-3">
                 <p className="text-xs text-muted-foreground mb-2">{t('exec.damage.description')}</p>
@@ -298,10 +322,10 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
                 />
               </div>
 
-              {/* Photo */}
-              <div className="mb-4">
-                <p className="text-xs text-muted-foreground mb-2">{t('exec.damage.photo')}</p>
-                {isLoading ? (
+              {/* Close-up Photo */}
+              <div className="mb-3">
+                <p className="text-xs text-muted-foreground mb-2">📸 Close-up Photo</p>
+                {isLoading && activePhotoTarget === 'closeup' ? (
                   <div className="w-24 h-24 rounded-lg border-2 border-dashed border-muted flex flex-col items-center justify-center gap-1">
                     <Loader2 className="w-5 h-5 animate-spin text-primary" />
                     <span className="text-[10px] text-muted-foreground">
@@ -321,14 +345,54 @@ export const DamageReportStep = ({ damages, onDamagesChange, onNext, onBack, use
                 ) : (
                   <div className="flex gap-2">
                     <button
-                      onClick={() => cameraInputRef.current?.click()}
+                      onClick={() => { setActivePhotoTarget('closeup'); cameraInputRef.current?.click(); }}
                       className="w-20 h-20 rounded-lg border-2 border-dashed border-muted flex flex-col items-center justify-center gap-1 hover:border-secondary transition-colors"
                     >
                       <Camera className="w-5 h-5 text-muted-foreground" />
                       <span className="text-[10px] text-muted-foreground">Camera</span>
                     </button>
                     <button
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => { setActivePhotoTarget('closeup'); fileInputRef.current?.click(); }}
+                      className="w-20 h-20 rounded-lg border-2 border-dashed border-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
+                    >
+                      <Upload className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-[10px] text-muted-foreground">Gallery</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Environment/Context Photo */}
+              <div className="mb-4">
+                <p className="text-xs text-muted-foreground mb-2">🏠 Environment Photo</p>
+                {isLoading && activePhotoTarget === 'context' ? (
+                  <div className="w-24 h-24 rounded-lg border-2 border-dashed border-muted flex flex-col items-center justify-center gap-1">
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    <span className="text-[10px] text-muted-foreground">
+                      {isProcessing ? 'Optimizing...' : 'Uploading...'}
+                    </span>
+                  </div>
+                ) : newDamage.contextPhotoUrl ? (
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden">
+                    <img src={newDamage.contextPhotoUrl} alt="" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setNewDamage(prev => ({ ...prev, contextPhotoUrl: undefined }))}
+                      className="absolute top-1 right-1 p-1 rounded-full bg-black/50"
+                    >
+                      <Trash2 className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setActivePhotoTarget('context'); cameraInputRef.current?.click(); }}
+                      className="w-20 h-20 rounded-lg border-2 border-dashed border-muted flex flex-col items-center justify-center gap-1 hover:border-secondary transition-colors"
+                    >
+                      <Camera className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-[10px] text-muted-foreground">Camera</span>
+                    </button>
+                    <button
+                      onClick={() => { setActivePhotoTarget('context'); fileInputRef.current?.click(); }}
                       className="w-20 h-20 rounded-lg border-2 border-dashed border-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
                     >
                       <Upload className="w-5 h-5 text-muted-foreground" />
