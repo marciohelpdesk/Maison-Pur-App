@@ -1,26 +1,28 @@
 
 
-## Plan: Improve Lightbox — Pinch-to-Zoom + Safe Area Close Button
+## Plan: Fix WhatsApp Link Preview to Match iMessage
 
-### Problems
-1. **No zoom on photos** — Lightbox shows full image but no way to pinch-to-zoom or double-tap to zoom on mobile
-2. **Close button too close to status bar** — `top-6` (24px) is not enough on notched iPhones; overlaps with Wi-Fi/battery indicators, making it impossible to tap
+### Problem
+The OG preview cards look different on WhatsApp vs iMessage. Two causes identified:
 
-### Changes — `src/pages/PublicReport.tsx`
+1. **Edge functions use `twitter:card: summary`** (small square thumbnail) instead of `summary_large_image` (full-width banner like iMessage shows)
+2. **Missing `og:image:type` meta tag** — WhatsApp sometimes needs this to render the image correctly
 
-**1. Close button safe area fix (line 1156):**
-- Change positioning from `top-6` to use `top-[calc(env(safe-area-inset-top,20px)+16px)]` so the X button sits below the notch/status bar on all devices
-- Increase button size from `p-2` to `p-3` for easier tapping
+### Changes
 
-**2. Add pinch-to-zoom support:**
-- Wrap the lightbox `<img>` in a container with CSS `touch-action: manipulation` and use React state + touch event handlers for pinch-to-zoom and double-tap-to-zoom
-- Track scale (1x–4x) and translate position via `onTouchStart`, `onTouchMove`, `onTouchEnd`
-- Double-tap toggles between 1x and 2.5x zoom
-- Pinch gesture calculates distance between two touch points to adjust scale
-- Apply `transform: scale(${scale}) translate(${x}px, ${y}px)` to the image
-- Reset zoom when lightbox closes
-- Stop propagation on image touch events so backdrop click-to-close still works
+#### 1. `supabase/functions/share-report/index.ts`
+- Change `twitter:card` from `summary` to `summary_large_image`
+- Add `og:image:type` = `image/png`
 
-### Single file to modify
-- `src/pages/PublicReport.tsx` — lightbox section only (lines 1148–1165)
+#### 2. `supabase/functions/share-invoice/index.ts`
+- Same two changes
+
+#### 3. `supabase/functions/share-estimate/index.ts`
+- Same two changes
+
+#### 4. `index.html`
+- Add `og:image:type` = `image/png`
+- Add `og:image:width` = `1200` and `og:image:height` = `630` (already present in edge functions but missing from index.html)
+
+All four files, same small meta tag additions.
 
