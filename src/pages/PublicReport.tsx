@@ -491,6 +491,70 @@ export default function PublicReport() {
   const [lang, setLang] = useState('en');
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [zoomOffset, setZoomOffset] = useState({ x: 0, y: 0 });
+  const lastTouchRef = useRef<{ time: number; x: number; y: number } | null>(null);
+  const pinchStartRef = useRef<{ dist: number; scale: number } | null>(null);
+  const panStartRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+
+  const closeLightbox = () => {
+    setLightboxUrl(null);
+    setZoomScale(1);
+    setZoomOffset({ x: 0, y: 0 });
+  };
+
+  const getTouchDist = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const handleImageTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (e.touches.length === 2) {
+      pinchStartRef.current = { dist: getTouchDist(e.touches), scale: zoomScale };
+      panStartRef.current = null;
+    } else if (e.touches.length === 1) {
+      const now = Date.now();
+      const touch = e.touches[0];
+      if (lastTouchRef.current && now - lastTouchRef.current.time < 300) {
+        // Double tap
+        if (zoomScale > 1) {
+          setZoomScale(1);
+          setZoomOffset({ x: 0, y: 0 });
+        } else {
+          setZoomScale(2.5);
+        }
+        lastTouchRef.current = null;
+      } else {
+        lastTouchRef.current = { time: now, x: touch.clientX, y: touch.clientY };
+        if (zoomScale > 1) {
+          panStartRef.current = { x: touch.clientX, y: touch.clientY, ox: zoomOffset.x, oy: zoomOffset.y };
+        }
+      }
+    }
+  };
+
+  const handleImageTouchMove = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (e.touches.length === 2 && pinchStartRef.current) {
+      const newDist = getTouchDist(e.touches);
+      const newScale = Math.min(4, Math.max(1, pinchStartRef.current.scale * (newDist / pinchStartRef.current.dist)));
+      setZoomScale(newScale);
+      if (newScale <= 1) setZoomOffset({ x: 0, y: 0 });
+    } else if (e.touches.length === 1 && panStartRef.current && zoomScale > 1) {
+      const touch = e.touches[0];
+      const dx = (touch.clientX - panStartRef.current.x) / zoomScale;
+      const dy = (touch.clientY - panStartRef.current.y) / zoomScale;
+      setZoomOffset({ x: panStartRef.current.ox + dx, y: panStartRef.current.oy + dy });
+    }
+  };
+
+  const handleImageTouchEnd = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    pinchStartRef.current = null;
+    panStartRef.current = null;
+  };
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const roomRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -1149,20 +1213,29 @@ export default function PublicReport() {
       {lightboxUrl && (
         <div
           className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 p-4 backdrop-blur-sm"
-          onClick={() => setLightboxUrl(null)}
+          onClick={closeLightbox}
         >
           <button
-            onClick={() => setLightboxUrl(null)}
-            className="fixed top-6 right-6 z-[100000] bg-stone-900/50 text-white hover:bg-stone-800 p-2 rounded-full backdrop-blur-md transition-colors"
+            onClick={closeLightbox}
+            className="fixed right-5 z-[100000] bg-stone-900/70 text-white hover:bg-stone-800 p-3 rounded-full backdrop-blur-md transition-colors"
+            style={{ top: 'calc(env(safe-area-inset-top, 20px) + 16px)' }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
-          <div className="max-w-5xl max-h-[90vh] relative w-full flex justify-center items-center">
+          <div
+            className="max-w-5xl max-h-[90vh] relative w-full flex justify-center items-center overflow-hidden"
+            style={{ touchAction: 'none' }}
+            onTouchStart={handleImageTouchStart}
+            onTouchMove={handleImageTouchMove}
+            onTouchEnd={handleImageTouchEnd}
+          >
             <img
               src={lightboxUrl}
-              className="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain"
+              className="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain transition-transform duration-100"
               alt=""
               onClick={e => e.stopPropagation()}
+              draggable={false}
+              style={{ transform: `scale(${zoomScale}) translate(${zoomOffset.x}px, ${zoomOffset.y}px)` }}
             />
           </div>
         </div>
