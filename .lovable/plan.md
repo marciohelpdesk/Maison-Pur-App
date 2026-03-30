@@ -1,43 +1,59 @@
 
 
-## Plano: Corrigir PDF do Relatório Público
+## Plan: Fix Public Report — 5 Issues
 
-### 3 Problemas no PDF
+### Problems
 
-1. **Checkmark "✓" aparece como "E"** — jsPDF com fonte helvetica não suporta o caractere Unicode ✓. Precisa substituir por um desenho vetorial (linhas do PDF) ou usar a letra "v" estilizada como já feito no `pdfGenerator.ts` interno.
+1. **Date off by one day** — `new Date("2026-03-30")` parses as UTC midnight, which in US Eastern timezone becomes March 29. Fix: use `parseISO` from date-fns.
 
-2. **Logo ausente** — O `generatePublicReportPdf` não carrega nem insere o logo. Precisa carregar `/logo-512.png` via canvas→dataURL e inserir no header do PDF.
+2. **iMessage button has no phone number** — `href="sms:"` with no destination. Fix: `href="sms:+19413304713"`.
 
-3. **Falta campo de assinatura** — O footer atual só tem copyright e page number. Precisa de uma linha de assinatura com texto "Inspector Signature" abaixo.
+3. **Damage report only supports 1 photo** — Need 2 photos: close-up of damage + environment/context photo. Also need a `location` field to specify where in the property.
 
-### Sobre o botão "Download Photos"
+4. **Damage photos mixed into Before & After section** — `generalPhotos` includes damage and lost-found type photos because they have no `room_id`. Need to filter those out.
 
-O botão já existe no código (linha 797) e aparece **somente quando há fotos no relatório** (`photos.length > 0`). Se o relatório não tem fotos associadas, o botão não aparece — esse é o comportamento correto e esperado.
+5. **DamageReport type missing `location` field** — No way to capture where the damage is located.
 
 ---
 
-### Mudanças
+### Changes
 
-#### `src/pages/PublicReport.tsx` — função `generatePublicReportPdf`
+#### 1. `src/types/index.ts` — Update DamageReport interface
+- Add `location?: string` field (room/area name)
+- Add `contextPhotoUrl?: string` (environment photo, second photo)
+- Keep `photoUrl` for backward compatibility (close-up photo)
 
-**1. Fix checkmark (linha 260):**
-- Substituir `doc.text('✓', ...)` por desenho vetorial: duas linhas formando um "V" (check) usando `doc.line()`
-- Substituir `doc.text('○', ...)` por `doc.circle()` vazio
-- Isso garante renderização correta em qualquer fonte
+#### 2. `src/components/execution/DamageReportStep.tsx` — Enhanced form
+- Add `location` text input (e.g. "Master Bedroom", "Kitchen counter")
+- Add second photo upload slot: "Close-up" (existing `photoUrl`) and "Environment" (`contextPhotoUrl`)
+- Show both photos + location in the damage card list
+- Two separate camera/gallery button groups for each photo type
 
-**2. Adicionar logo no header (linhas 142-161):**
-- Antes de gerar o PDF, carregar `/logo-512.png` via `Image` → canvas → `toDataURL('image/png')`
-- Tornar `generatePublicReportPdf` **async** para aguardar o carregamento
-- Inserir o logo no canto esquerdo do header bar escuro (ao lado de "MAISON PUR")
-- Atualizar `handleDownloadPdf` para usar `await`
+#### 3. `src/pages/PublicReport.tsx` — Multiple fixes
 
-**3. Adicionar campo de assinatura no footer (após linha 338):**
-- Antes do footer de copyright, adicionar uma seção com:
-  - Linha horizontal para assinatura (~60mm)
-  - Texto "Inspector Signature" centralizado abaixo da linha
-  - Nome do cleaner abaixo
-- Posicionar acima do footer existente
+**Date fix (line 546):**
+- Import `parseISO` from date-fns
+- Replace `new Date(dateStr)` with `parseISO(dateStr)` to prevent timezone shift
 
-### Arquivo a modificar
-- `src/pages/PublicReport.tsx` — 3 correções na função `generatePublicReportPdf`
+**iMessage fix (line 737):**
+- Change `href="sms:"` to `href="sms:+19413304713"`
+
+**Filter damage/lost-found photos from Before & After (line 663):**
+- Change `generalPhotos` to exclude `damage` and `lost_found` photo types:
+  `photos.filter(p => !p.room_id && p.photo_type !== 'damage' && p.photo_type !== 'lost_found')`
+
+**Show damage location and context photo in room damage cards (lines 957-982):**
+- Display `d.contextPhotoUrl` as second thumbnail alongside close-up
+- Location is already rendered (line 975-980) — just needs data populated
+
+#### 4. `src/pages/Execution.tsx` — Update report generation
+- Include `location` in damage data passed to room damages
+- Map `contextPhotoUrl` as additional damage photo in the photos array
+- Ensure damage photos get `photo_type: 'damage'` so they're properly categorized
+
+### Files to modify
+- `src/types/index.ts`
+- `src/components/execution/DamageReportStep.tsx`
+- `src/pages/PublicReport.tsx`
+- `src/pages/Execution.tsx`
 
