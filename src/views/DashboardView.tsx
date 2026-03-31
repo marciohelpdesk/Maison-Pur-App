@@ -86,9 +86,9 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
 
   // Service categories
   const categories = [
-    { icon: Home, label: 'Airbnb', color: 'from-orange-400 to-amber-300', description: 'Limpeza profissional para propriedades de aluguel por temporada. Preparação completa entre hóspedes incluindo troca de roupa de cama, reposição de amenities e verificação de inventário.' },
-    { icon: Building2, label: 'Residencial', color: 'from-emerald-400 to-teal-300', description: 'Limpeza regular de casas e apartamentos. Manutenção periódica com foco em higienização profunda de todos os ambientes.' },
-    { icon: Sparkles, label: 'Pós-obra', color: 'from-amber-400 to-yellow-300', description: 'Limpeza especializada após reformas e construções. Remoção de resíduos, poeira fina e preparação do espaço para uso imediato.' },
+    { icon: Home, label: 'Airbnb', color: 'from-orange-400 to-amber-300', bgImage: airbnbImg, description: 'Limpeza profissional para propriedades de aluguel por temporada. Preparação completa entre hóspedes incluindo troca de roupa de cama, reposição de amenities e verificação de inventário.' },
+    { icon: Building2, label: 'Residencial', color: 'from-emerald-400 to-teal-300', bgImage: residencialImg, description: 'Limpeza regular de casas e apartamentos. Manutenção periódica com foco em higienização profunda de todos os ambientes.' },
+    { icon: Sparkles, label: 'Pós-obra', color: 'from-amber-400 to-yellow-300', bgImage: posobraImg, description: 'Limpeza especializada após reformas e construções. Remoção de resíduos, poeira fina e preparação do espaço para uso imediato.' },
     { icon: Briefcase, label: 'Comercial', color: 'from-slate-500 to-slate-400', description: 'Limpeza de escritórios e espaços comerciais. Manutenção profissional com horários flexíveis para não interferir nas operações.' },
   ];
 
@@ -151,8 +151,12 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 onClick={() => setSelectedCategory(idx)}
                 className="flex flex-col items-center gap-2 min-w-[72px]"
               >
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center shadow-lg`}>
-                  <cat.icon size={24} className="text-white" />
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} overflow-hidden shadow-lg relative flex items-center justify-center`}>
+                  {cat.bgImage ? (
+                    <img src={cat.bgImage} alt="" className="w-full h-full object-cover opacity-80" />
+                  ) : (
+                    <cat.icon size={24} className="text-white" />
+                  )}
                 </div>
                 <span className="text-[11px] font-medium text-muted-foreground whitespace-nowrap">{cat.label}</span>
               </motion.button>
