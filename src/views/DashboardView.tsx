@@ -163,7 +163,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
             <h2 className="text-sm font-bold text-foreground mb-3 uppercase tracking-wider">
-              {t('dashboard.nextJob') || 'Próximo Serviço'}
+              NEXT JOB
             </h2>
             <div className="relative overflow-hidden rounded-3xl">
               {/* Background */}
