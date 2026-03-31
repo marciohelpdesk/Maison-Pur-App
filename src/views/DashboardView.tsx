@@ -151,8 +151,12 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 onClick={() => setSelectedCategory(idx)}
                 className="flex flex-col items-center gap-2 min-w-[72px]"
               >
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center shadow-lg`}>
-                  <cat.icon size={24} className="text-white" />
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} overflow-hidden shadow-lg relative flex items-center justify-center`}>
+                  {cat.bgImage ? (
+                    <img src={cat.bgImage} alt="" className="w-full h-full object-cover opacity-80" />
+                  ) : (
+                    <cat.icon size={24} className="text-white" />
+                  )}
                 </div>
                 <span className="text-[11px] font-medium text-muted-foreground whitespace-nowrap">{cat.label}</span>
               </motion.button>
