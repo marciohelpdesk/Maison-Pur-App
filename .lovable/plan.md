@@ -1,33 +1,23 @@
 
 
-## Plan: Add Illustrations to Quick Action Category Cards
+## Plan: Simplify Checklist Base Cards
 
 ### What
-Replace the current Lucide icons in the 4 service category buttons (Airbnb, Residencial, Pós-obra, Comercial) with the same illustration images already used in the checklist template cards.
-
-### Image Mapping
-| Category | Image |
-|---|---|
-| Airbnb | `airbnb.jpg` |
-| Residencial | `residencial.jpg` |
-| Pós-obra | `posobra.jpg` |
-| Comercial | No matching image — keep icon |
+Remove the background illustration images from the checklist template cards and make the cards more compact and discrete.
 
 ### Changes — `src/views/DashboardView.tsx`
 
-1. **Update `categories` array** (lines 88-93): Add an optional `bgImage` field to each category, mapped to the imported assets.
+1. **Remove `bgImage` from templates array**: Delete the `bgImage` property from all checklist template objects (keep the imports for Quick Actions which still use them).
 
-2. **Update category card rendering** (lines 146-158): Replace the `<cat.icon>` inside the gradient circle with the illustration image when `bgImage` is available. The image will use `object-cover rounded-2xl` to fill the 64px square, with slight opacity overlay to maintain the colored tint.
+2. **Restore emoji icons**: Always show the emoji `<span>` icon instead of conditionally rendering the background image.
 
-```tsx
-<div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} overflow-hidden shadow-lg relative`}>
-  {cat.bgImage ? (
-    <img src={cat.bgImage} alt="" className="w-full h-full object-cover opacity-80" />
-  ) : (
-    <cat.icon size={24} className="text-white absolute inset-0 m-auto" />
-  )}
-</div>
-```
+3. **Make cards more compact and discrete**:
+   - Reduce `min-w` from `160px` to `130px`
+   - Reduce padding from `p-4` to `p-3`
+   - Make emoji smaller: `text-2xl` instead of `text-3xl`
+   - Reduce title font size: `text-xs` instead of `text-sm`
+   - Remove `overflow-hidden` and `relative` (no longer needed without images)
+   - Soften the left border: `border-l-2` instead of `border-l-4`
 
 ### Single file modified
 - `src/views/DashboardView.tsx`
