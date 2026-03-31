@@ -1,35 +1,34 @@
 
 
-## Plan: Add Illustration Backgrounds to Checklist Template Cards
+## Plan: Add Illustrations to Quick Action Category Cards
 
 ### What
-Apply the 5 uploaded cleaning illustration images as subtle background decorations on the checklist template cards, matching the style shown in the screenshot — images positioned in the top-right area of each card with a soft fade.
+Replace the current Lucide icons in the 4 service category buttons (Airbnb, Residencial, Pós-obra, Comercial) with the same illustration images already used in the checklist template cards.
 
 ### Image Mapping
-| Template | Image |
+| Category | Image |
 |---|---|
-| Airbnb Premium | Welcome/bed illustration (CC.jpg) |
-| Residencial | Vacuuming illustration (4A599C7B.jpg) |
-| Deep Clean | Bathroom cleaning illustration (CC_2.jpg) |
-| Move-in/out | Moving/fridge cleaning illustration (CC_4.jpg) |
-| Pós-obra | Construction illustration (CC_3.jpg) |
-| Recorrente | No image (keep emoji only) |
-| Comercial | No image (keep emoji only) |
+| Airbnb | `airbnb.jpg` |
+| Residencial | `residencial.jpg` |
+| Pós-obra | `posobra.jpg` |
+| Comercial | No matching image — keep icon |
 
-### Changes
+### Changes — `src/views/DashboardView.tsx`
 
-#### 1. Copy images to `src/assets/checklist/`
-Copy all 5 uploaded images into the project assets folder.
+1. **Update `categories` array** (lines 88-93): Add an optional `bgImage` field to each category, mapped to the imported assets.
 
-#### 2. `src/views/DashboardView.tsx`
-- Add an optional `bgImage` field to the checklist templates array
-- Import the 5 images and assign them to the matching templates
-- Update the card rendering to show the illustration as a positioned background image (top-right, ~60-70px, with opacity ~0.3-0.4 so text stays readable)
-- Remove the emoji `<span>` for templates that have a background image (the illustration replaces it)
+2. **Update category card rendering** (lines 146-158): Replace the `<cat.icon>` inside the gradient circle with the illustration image when `bgImage` is available. The image will use `object-cover rounded-2xl` to fill the 64px square, with slight opacity overlay to maintain the colored tint.
 
-### Technical Detail
-The image will be rendered as an `<img>` with `absolute` positioning, `right-2 top-2`, sized ~16-20 (64-80px), with `opacity-30` and `object-cover rounded-xl`, inside the existing `relative overflow-hidden` card container.
+```tsx
+<div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} overflow-hidden shadow-lg relative`}>
+  {cat.bgImage ? (
+    <img src={cat.bgImage} alt="" className="w-full h-full object-cover opacity-80" />
+  ) : (
+    <cat.icon size={24} className="text-white absolute inset-0 m-auto" />
+  )}
+</div>
+```
 
-### File modified
+### Single file modified
 - `src/views/DashboardView.tsx`
 
