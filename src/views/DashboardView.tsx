@@ -11,8 +11,6 @@ import {
 import { BrandLogo } from '@/components/BrandLogo';
 import airbnbImg from '@/assets/checklist/airbnb.jpg';
 import residencialImg from '@/assets/checklist/residencial.jpg';
-import deepcleanImg from '@/assets/checklist/deepclean.jpg';
-import moveinoutImg from '@/assets/checklist/moveinout.jpg';
 import posobraImg from '@/assets/checklist/posobra.jpg';
 import comercialImg from '@/assets/checklist/comercial.jpg';
 import { openAddressInMaps } from '@/lib/utils';
@@ -95,13 +93,13 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
 
   // Checklist templates - computed from real data
   const checklistTemplates = useMemo(() => {
-    const templates: { title: string; icon: string; border: string; template: ChecklistSection[]; bgImage?: string }[] = [
-      { title: 'Airbnb Premium', icon: '🏠', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE, bgImage: airbnbImg },
-      { title: 'Residencial', icon: '🏡', border: 'border-l-emerald-400', template: STANDARD_CHECKLIST_TEMPLATE, bgImage: residencialImg },
-      { title: 'Deep Clean', icon: '🧹', border: 'border-l-blue-400', template: DEEP_CLEAN_CHECKLIST_TEMPLATE, bgImage: deepcleanImg },
-      { title: 'Move-in/out', icon: '📦', border: 'border-l-purple-400', template: MOVE_IN_OUT_CHECKLIST_TEMPLATE, bgImage: moveinoutImg },
+    const templates: { title: string; icon: string; border: string; template: ChecklistSection[] }[] = [
+      { title: 'Airbnb Premium', icon: '🏠', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE },
+      { title: 'Residencial', icon: '🏡', border: 'border-l-emerald-400', template: STANDARD_CHECKLIST_TEMPLATE },
+      { title: 'Deep Clean', icon: '🧹', border: 'border-l-blue-400', template: DEEP_CLEAN_CHECKLIST_TEMPLATE },
+      { title: 'Move-in/out', icon: '📦', border: 'border-l-purple-400', template: MOVE_IN_OUT_CHECKLIST_TEMPLATE },
       { title: 'Recorrente', icon: '🔄', border: 'border-l-teal-400', template: RECURRING_CHECKLIST_TEMPLATE },
-      { title: 'Pós-obra', icon: '🔨', border: 'border-l-amber-400', template: POST_CONSTRUCTION_CHECKLIST_TEMPLATE, bgImage: posobraImg },
+      { title: 'Pós-obra', icon: '🔨', border: 'border-l-amber-400', template: POST_CONSTRUCTION_CHECKLIST_TEMPLATE },
       { title: 'Comercial', icon: '🏢', border: 'border-l-slate-400', template: COMMERCIAL_CHECKLIST_TEMPLATE },
     ];
     return templates.map(t => ({
@@ -265,15 +263,11 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08 }}
                 onClick={() => setSelectedTemplate(idx)}
-                className={`min-w-[160px] lg:min-w-0 glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95 relative overflow-hidden`}
+                className={`min-w-[130px] lg:min-w-0 glass-panel-subtle rounded-2xl p-3 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-2 ${tmpl.border} active:scale-95`}
               >
-                {tmpl.bgImage ? (
-                  <img src={tmpl.bgImage} alt="" className="absolute right-1 top-1 w-20 h-20 opacity-30 object-cover rounded-xl pointer-events-none" />
-                ) : (
-                  <span className="text-3xl mb-2 block">{tmpl.icon}</span>
-                )}
-                <h4 className="font-bold text-foreground text-sm mb-1 relative">{tmpl.title}</h4>
-                <p className="text-[10px] text-muted-foreground relative">{tmpl.rooms} seções • {tmpl.tasks} tarefas</p>
+                <span className="text-2xl mb-1 block">{tmpl.icon}</span>
+                <h4 className="font-bold text-foreground text-xs mb-0.5">{tmpl.title}</h4>
+                <p className="text-[10px] text-muted-foreground">{tmpl.rooms} seções • {tmpl.tasks} tarefas</p>
               </motion.div>
             ))}
           </div>
