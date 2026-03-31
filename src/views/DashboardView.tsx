@@ -265,15 +265,11 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + idx * 0.08 }}
                 onClick={() => setSelectedTemplate(idx)}
-                className={`min-w-[160px] lg:min-w-0 glass-panel-subtle rounded-2xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-4 ${tmpl.border} active:scale-95 relative overflow-hidden`}
+                className={`min-w-[130px] lg:min-w-0 glass-panel-subtle rounded-2xl p-3 cursor-pointer hover:-translate-y-1 transition-all duration-300 border-l-2 ${tmpl.border} active:scale-95`}
               >
-                {tmpl.bgImage ? (
-                  <img src={tmpl.bgImage} alt="" className="absolute right-1 top-1 w-20 h-20 opacity-30 object-cover rounded-xl pointer-events-none" />
-                ) : (
-                  <span className="text-3xl mb-2 block">{tmpl.icon}</span>
-                )}
-                <h4 className="font-bold text-foreground text-sm mb-1 relative">{tmpl.title}</h4>
-                <p className="text-[10px] text-muted-foreground relative">{tmpl.rooms} seções • {tmpl.tasks} tarefas</p>
+                <span className="text-2xl mb-1 block">{tmpl.icon}</span>
+                <h4 className="font-bold text-foreground text-xs mb-0.5">{tmpl.title}</h4>
+                <p className="text-[10px] text-muted-foreground">{tmpl.rooms} seções • {tmpl.tasks} tarefas</p>
               </motion.div>
             ))}
           </div>
