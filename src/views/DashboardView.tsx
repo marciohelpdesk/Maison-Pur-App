@@ -9,6 +9,11 @@ import {
   Calendar as CalendarIcon
 } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
+import airbnbImg from '@/assets/checklist/airbnb.jpg';
+import residencialImg from '@/assets/checklist/residencial.jpg';
+import deepcleanImg from '@/assets/checklist/deepclean.jpg';
+import moveinoutImg from '@/assets/checklist/moveinout.jpg';
+import posobraImg from '@/assets/checklist/posobra.jpg';
 import { openAddressInMaps } from '@/lib/utils';
 import {
   AIRBNB_CHECKLIST_TEMPLATE,
