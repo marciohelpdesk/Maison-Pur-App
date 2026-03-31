@@ -14,6 +14,7 @@ import residencialImg from '@/assets/checklist/residencial.jpg';
 import deepcleanImg from '@/assets/checklist/deepclean.jpg';
 import moveinoutImg from '@/assets/checklist/moveinout.jpg';
 import posobraImg from '@/assets/checklist/posobra.jpg';
+import comercialImg from '@/assets/checklist/comercial.jpg';
 import { openAddressInMaps } from '@/lib/utils';
 import {
   AIRBNB_CHECKLIST_TEMPLATE,
@@ -89,7 +90,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
     { icon: Home, label: 'Airbnb', color: 'from-orange-400 to-amber-300', bgImage: airbnbImg, description: 'Limpeza profissional para propriedades de aluguel por temporada. Preparação completa entre hóspedes incluindo troca de roupa de cama, reposição de amenities e verificação de inventário.' },
     { icon: Building2, label: 'Residencial', color: 'from-emerald-400 to-teal-300', bgImage: residencialImg, description: 'Limpeza regular de casas e apartamentos. Manutenção periódica com foco em higienização profunda de todos os ambientes.' },
     { icon: Sparkles, label: 'Pós-obra', color: 'from-amber-400 to-yellow-300', bgImage: posobraImg, description: 'Limpeza especializada após reformas e construções. Remoção de resíduos, poeira fina e preparação do espaço para uso imediato.' },
-    { icon: Briefcase, label: 'Comercial', color: 'from-slate-500 to-slate-400', description: 'Limpeza de escritórios e espaços comerciais. Manutenção profissional com horários flexíveis para não interferir nas operações.' },
+    { icon: Briefcase, label: 'Comercial', color: 'from-slate-500 to-slate-400', bgImage: comercialImg, description: 'Limpeza de escritórios e espaços comerciais. Manutenção profissional com horários flexíveis para não interferir nas operações.' },
   ];
 
   // Checklist templates - computed from real data
