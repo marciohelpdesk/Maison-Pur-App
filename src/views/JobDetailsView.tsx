@@ -48,6 +48,7 @@ interface JobDetailsViewProps {
   onStartJob: (jobId: string) => void;
   onUpdateJob: (job: Job) => void;
   onDeleteJob: (jobId: string) => void;
+  onEditCompletedJob?: (jobId: string) => void;
 }
 
 export const JobDetailsView = ({ 
@@ -57,7 +58,8 @@ export const JobDetailsView = ({
   onBack, 
   onStartJob, 
   onUpdateJob, 
-  onDeleteJob 
+  onDeleteJob,
+  onEditCompletedJob,
 }: JobDetailsViewProps) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
@@ -293,6 +295,19 @@ export const JobDetailsView = ({
           >
             <FileDown size={18} />
             Baixar Relatório
+          </Button>
+        )}
+
+        {/* Edit Completed Job Button */}
+        {job.status === JobStatus.COMPLETED && onEditCompletedJob && (
+          <Button 
+            variant="outline"
+            className="w-full gap-2" 
+            size="lg"
+            onClick={() => onEditCompletedJob(job.id)}
+          >
+            <Edit2 size={18} />
+            Editar Relatório
           </Button>
         )}
 

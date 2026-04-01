@@ -43,6 +43,18 @@ export default function JobDetails() {
     updateJob(updatedJob);
   };
 
+  const handleEditCompletedJob = (jobId: string) => {
+    const targetJob = jobs.find(j => j.id === jobId);
+    if (targetJob) {
+      updateJob({
+        ...targetJob,
+        status: JobStatus.IN_PROGRESS,
+        currentStep: 'CHECKLIST',
+      });
+      navigate(`/execution/${jobId}`);
+    }
+  };
+
   const handleDeleteJob = (jobId: string) => {
     deleteJob(jobId);
     navigate('/agenda');
@@ -66,6 +78,7 @@ export default function JobDetails() {
       onStartJob={handleStartJob}
       onUpdateJob={handleUpdateJob}
       onDeleteJob={handleDeleteJob}
+      onEditCompletedJob={handleEditCompletedJob}
     />
   );
 }

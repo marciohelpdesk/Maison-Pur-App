@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useReports, CleaningReport } from '@/hooks/useReports';
 import { useJobs } from '@/hooks/useJobs';
@@ -7,7 +8,7 @@ import { PageLoader } from '@/lib/routes';
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Share2, Eye, Trash2, Plus, Clock, CheckCircle, Link2, ExternalLink, Sparkles } from 'lucide-react';
+import { FileText, Share2, Eye, Trash2, Plus, Clock, CheckCircle, Link2, ExternalLink, Sparkles, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -17,10 +18,11 @@ import { format } from 'date-fns';
 
 export default function Reports() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
   const { reports, isLoading, createReport, updateReport, deleteReport, isCreating } = useReports(user?.id);
-  const { jobs } = useJobs(user?.id);
+  const { jobs, updateJob } = useJobs(user?.id);
   const { properties } = useProperties(user?.id);
   const [generatingForJob, setGeneratingForJob] = useState<string | null>(null);
 
@@ -122,6 +124,20 @@ export default function Reports() {
     } catch (error) {
       console.error('Error deleting report:', error);
       toast.error('Erro ao excluir relatório');
+    }
+  };
+
+  const handleEditReport = (report: CleaningReport) => {
+    const job = jobs.find(j => j.id === report.job_id);
+    if (job) {
+      updateJob({
+        ...job,
+        status: JobStatus.IN_PROGRESS,
+        currentStep: 'CHECKLIST',
+      });
+      navigate(`/execution/${job.id}`);
+    } else {
+      toast.error('Job não encontrado para este relatório');
     }
   };
 
@@ -249,6 +265,15 @@ export default function Reports() {
                     </Button>
                   </>
                 }
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEditReport(report)}
+                  className="rounded-xl h-9"
+                  title="Editar relatório"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </Button>
                 <Button
                   size="sm"
                   variant="ghost"

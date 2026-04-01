@@ -20,7 +20,7 @@ export default function Execution() {
   const { jobs, updateJob, isLoading: jobsLoading } = useJobs(user?.id);
   const job = jobs.find(j => j.id === jobId);
   const { inventory, isLoading: inventoryLoading } = useInventory(user?.id, job?.propertyId);
-  const { createReport } = useReports(user?.id);
+  const { createReport, reports, deleteReport } = useReports(user?.id);
   const { profile } = useProfile(user?.id);
   const { properties } = useProperties(user?.id);
 
@@ -37,6 +37,16 @@ export default function Execution() {
       endTime: Date.now()
     };
     updateJob(finalJob);
+
+    // Delete existing report for this job (re-edit scenario)
+    try {
+      const existingReport = reports.find(r => r.job_id === finalJob.id);
+      if (existingReport) {
+        await deleteReport(existingReport.id);
+      }
+    } catch (err) {
+      console.error('Error deleting old report:', err);
+    }
 
     // Auto-generate report
     try {
