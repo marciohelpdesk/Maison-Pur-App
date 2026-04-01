@@ -94,7 +94,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
   // Checklist templates - computed from real data
   const checklistTemplates = useMemo(() => {
     const templates: { title: string; icon: string; border: string; template: ChecklistSection[] }[] = [
-      { title: 'Airbnb Premium', icon: '🏠', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE },
+      { title: 'Airbnb ', icon: '🏠', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE },
       { title: 'Residencial', icon: '🏡', border: 'border-l-emerald-400', template: STANDARD_CHECKLIST_TEMPLATE },
       { title: 'Deep Clean', icon: '🧹', border: 'border-l-blue-400', template: DEEP_CLEAN_CHECKLIST_TEMPLATE },
       { title: 'Move-in/out', icon: '📦', border: 'border-l-purple-400', template: MOVE_IN_OUT_CHECKLIST_TEMPLATE },
