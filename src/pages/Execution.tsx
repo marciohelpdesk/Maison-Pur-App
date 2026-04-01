@@ -20,7 +20,7 @@ export default function Execution() {
   const { jobs, updateJob, isLoading: jobsLoading } = useJobs(user?.id);
   const job = jobs.find(j => j.id === jobId);
   const { inventory, isLoading: inventoryLoading } = useInventory(user?.id, job?.propertyId);
-  const { createReport } = useReports(user?.id);
+  const { createReport, reports, deleteReport } = useReports(user?.id);
   const { profile } = useProfile(user?.id);
   const { properties } = useProperties(user?.id);
 
