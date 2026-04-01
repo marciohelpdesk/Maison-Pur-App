@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useReports, CleaningReport } from '@/hooks/useReports';
 import { useJobs } from '@/hooks/useJobs';
@@ -7,7 +8,7 @@ import { PageLoader } from '@/lib/routes';
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Share2, Eye, Trash2, Plus, Clock, CheckCircle, Link2, ExternalLink, Sparkles } from 'lucide-react';
+import { FileText, Share2, Eye, Trash2, Plus, Clock, CheckCircle, Link2, ExternalLink, Sparkles, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
