@@ -38,6 +38,16 @@ export default function Execution() {
     };
     updateJob(finalJob);
 
+    // Delete existing report for this job (re-edit scenario)
+    try {
+      const existingReport = reports.find(r => r.job_id === finalJob.id);
+      if (existingReport) {
+        await deleteReport(existingReport.id);
+      }
+    } catch (err) {
+      console.error('Error deleting old report:', err);
+    }
+
     // Auto-generate report
     try {
       const allDamages = finalJob.damages || [];

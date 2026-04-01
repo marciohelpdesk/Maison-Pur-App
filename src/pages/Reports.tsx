@@ -267,6 +267,15 @@ export default function Reports() {
                 }
                 <Button
                   size="sm"
+                  variant="outline"
+                  onClick={() => handleEditReport(report)}
+                  className="rounded-xl h-9"
+                  title="Editar relatório"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  size="sm"
                   variant="ghost"
                   onClick={() => handleDelete(report.id)}
                   className="rounded-xl h-9 text-destructive hover:text-destructive">
