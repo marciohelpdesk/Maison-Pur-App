@@ -298,6 +298,19 @@ export const JobDetailsView = ({
           </Button>
         )}
 
+        {/* Edit Completed Job Button */}
+        {job.status === JobStatus.COMPLETED && onEditCompletedJob && (
+          <Button 
+            variant="outline"
+            className="w-full gap-2" 
+            size="lg"
+            onClick={() => onEditCompletedJob(job.id)}
+          >
+            <Edit2 size={18} />
+            Editar Relatório
+          </Button>
+        )}
+
         {/* Start Job Button */}
         {job.status === JobStatus.SCHEDULED && (
           <Button 
