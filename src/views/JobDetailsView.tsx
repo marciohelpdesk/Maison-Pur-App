@@ -58,7 +58,8 @@ export const JobDetailsView = ({
   onBack, 
   onStartJob, 
   onUpdateJob, 
-  onDeleteJob 
+  onDeleteJob,
+  onEditCompletedJob,
 }: JobDetailsViewProps) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
