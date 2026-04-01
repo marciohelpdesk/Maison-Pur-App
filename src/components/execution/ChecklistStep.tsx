@@ -503,7 +503,7 @@ const RoomPhotosSection = ({ sectionId, sectionTitle, userId, jobId, checklist, 
   return (
     <div className="mt-8">
       <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" disabled={isLoading} />
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" multiple onChange={handleFileSelect} className="hidden" disabled={isLoading} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" disabled={isLoading} />
 
       <div className="glass-panel p-4 rounded-2xl">
         <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
