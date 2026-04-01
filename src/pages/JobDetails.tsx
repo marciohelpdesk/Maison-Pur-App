@@ -78,6 +78,7 @@ export default function JobDetails() {
       onStartJob={handleStartJob}
       onUpdateJob={handleUpdateJob}
       onDeleteJob={handleDeleteJob}
+      onEditCompletedJob={handleEditCompletedJob}
     />
   );
 }

@@ -18,10 +18,11 @@ import { format } from 'date-fns';
 
 export default function Reports() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
   const { reports, isLoading, createReport, updateReport, deleteReport, isCreating } = useReports(user?.id);
-  const { jobs } = useJobs(user?.id);
+  const { jobs, updateJob } = useJobs(user?.id);
   const { properties } = useProperties(user?.id);
   const [generatingForJob, setGeneratingForJob] = useState<string | null>(null);
 
