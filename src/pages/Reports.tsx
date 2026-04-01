@@ -127,6 +127,20 @@ export default function Reports() {
     }
   };
 
+  const handleEditReport = (report: CleaningReport) => {
+    const job = jobs.find(j => j.id === report.job_id);
+    if (job) {
+      updateJob({
+        ...job,
+        status: JobStatus.IN_PROGRESS,
+        currentStep: 'CHECKLIST',
+      });
+      navigate(`/execution/${job.id}`);
+    } else {
+      toast.error('Job não encontrado para este relatório');
+    }
+  };
+
   if (isLoading) return <PageLoader />;
 
   return (
