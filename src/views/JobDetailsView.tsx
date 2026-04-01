@@ -48,6 +48,7 @@ interface JobDetailsViewProps {
   onStartJob: (jobId: string) => void;
   onUpdateJob: (job: Job) => void;
   onDeleteJob: (jobId: string) => void;
+  onEditCompletedJob?: (jobId: string) => void;
 }
 
 export const JobDetailsView = ({ 
