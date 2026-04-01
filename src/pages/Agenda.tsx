@@ -19,13 +19,17 @@ export default function Agenda() {
   const handleStartJob = (jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
     if (job) {
-      updateJob({
-        ...job,
-        status: JobStatus.IN_PROGRESS,
-        startTime: Date.now(),
-        currentStep: 'BEFORE_PHOTOS'
-      });
-      navigate(`/execution/${jobId}`);
+      if (job.status === JobStatus.IN_PROGRESS) {
+        navigate(`/execution/${jobId}`);
+      } else {
+        updateJob({
+          ...job,
+          status: JobStatus.IN_PROGRESS,
+          startTime: Date.now(),
+          currentStep: 'BEFORE_PHOTOS'
+        });
+        navigate(`/execution/${jobId}`);
+      }
     }
   };
 

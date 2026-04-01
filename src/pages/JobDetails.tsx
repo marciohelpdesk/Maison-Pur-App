@@ -25,13 +25,17 @@ export default function JobDetails() {
   const handleStartJob = (jobId: string) => {
     const targetJob = jobs.find(j => j.id === jobId);
     if (targetJob) {
-      updateJob({
-        ...targetJob,
-        status: JobStatus.IN_PROGRESS,
-        startTime: Date.now(),
-        currentStep: 'BEFORE_PHOTOS'
-      });
-      navigate(`/execution/${jobId}`);
+      if (targetJob.status === JobStatus.IN_PROGRESS) {
+        navigate(`/execution/${jobId}`);
+      } else {
+        updateJob({
+          ...targetJob,
+          status: JobStatus.IN_PROGRESS,
+          startTime: Date.now(),
+          currentStep: 'BEFORE_PHOTOS'
+        });
+        navigate(`/execution/${jobId}`);
+      }
     }
   };
 

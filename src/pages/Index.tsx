@@ -100,14 +100,19 @@ const Index = () => {
   const startJob = useCallback((jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
     if (job) {
-      updateJob({
-        ...job,
-        status: JobStatus.IN_PROGRESS,
-        startTime: Date.now(),
-        currentStep: 'BEFORE_PHOTOS'
-      });
-      setActiveJobId(jobId);
-      setView('EXECUTION');
+      if (job.status === JobStatus.IN_PROGRESS) {
+        setActiveJobId(jobId);
+        setView('EXECUTION');
+      } else {
+        updateJob({
+          ...job,
+          status: JobStatus.IN_PROGRESS,
+          startTime: Date.now(),
+          currentStep: 'BEFORE_PHOTOS'
+        });
+        setActiveJobId(jobId);
+        setView('EXECUTION');
+      }
     }
   }, [jobs, updateJob]);
 
