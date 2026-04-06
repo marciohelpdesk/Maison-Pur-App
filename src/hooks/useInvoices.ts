@@ -131,12 +131,10 @@ export function usePublicInvoice(token?: string) {
     queryKey: ['public-invoice', token],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('public_token', token!)
-        .single();
+        .rpc('get_invoice_by_token', { p_token: token! });
       if (error) throw error;
-      const d = data as any;
+      const d = (data as any[])?.[0];
+      if (!d) throw new Error('Invoice not found');
       return {
         ...d,
         property_ids: d.property_ids || [],

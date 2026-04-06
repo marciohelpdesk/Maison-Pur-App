@@ -125,12 +125,10 @@ export function usePublicEstimate(token?: string) {
     queryKey: ['public-estimate', token],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from(ESTIMATES_TABLE)
-        .select('*')
-        .eq('public_token', token!)
-        .single();
+        .rpc('get_estimate_by_token', { p_token: token! });
       if (error) throw error;
-      const d = data as any;
+      const d = (data as any[])?.[0];
+      if (!d) throw new Error('Estimate not found');
       return {
         ...d,
         property_ids: d.property_ids || [],
