@@ -80,7 +80,12 @@ export const PhotoCaptureStep = ({
     const newUrls = results.filter((url): url is string => url !== null);
 
     if (newUrls.length > 0) {
-      onPhotosChange([...photos, ...newUrls]);
+      // Use ref to read the latest photos, avoiding stale closure
+      const currentPhotos = photosRef.current;
+      const merged = [...currentPhotos, ...newUrls];
+      // Deduplicate by URL
+      const unique = [...new Set(merged)];
+      onPhotosChange(unique);
       toast({
         title: t('exec.photo.uploaded'),
         description: `${newUrls.length} ${t('exec.photo.photosCaptured')}`,
@@ -100,7 +105,7 @@ export const PhotoCaptureStep = ({
     if (e.target) {
       e.target.value = '';
     }
-  }, [photos, processAndUploadFile, onPhotosChange, toast, t]);
+  }, [processAndUploadFile, onPhotosChange, toast, t]);
 
   const handleRemovePhoto = async (index: number) => {
     const photoUrl = photos[index];

@@ -478,7 +478,9 @@ const RoomPhotosSection = ({ sectionId, sectionTitle, userId, jobId, checklist, 
     if (newUrls.length > 0) {
       const updated = checklist.map((s, idx) => {
         if (idx !== activeRoomIdx) return s;
-        return { ...s, roomPhotos: [...roomPhotos, ...newUrls] } as any;
+        const allPhotos = [...((s as any).roomPhotos || []), ...newUrls];
+        const uniquePhotos = [...new Set(allPhotos)];
+        return { ...s, roomPhotos: uniquePhotos } as any;
       });
       onChecklistChange(updated);
       toast({ title: `${newUrls.length} foto(s) adicionada(s)`, description: `Fotos do ${sectionTitle} salvas` });
