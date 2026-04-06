@@ -166,6 +166,14 @@ export const routes = [
         element: <Finance />,
       },
       {
+        path: 'kpi',
+        element: <KpiDashboard />,
+      },
+      {
+        path: 'expenses',
+        element: <Expenses />,
+      },
+      {
         path: 'reports',
         element: <Reports />,
       },

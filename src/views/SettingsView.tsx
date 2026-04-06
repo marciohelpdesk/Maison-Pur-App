@@ -98,6 +98,44 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
           </div>
           <ChevronRight size={20} className="text-muted-foreground" />
         </motion.button>
+
+        {/* KPI Dashboard Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.11 }}
+          onClick={() => navigate('/kpi')}
+          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <ChevronRight size={20} className="text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium">KPI Dashboard</p>
+              <p className="text-xs text-muted-foreground">Revenue, jobs & performance metrics</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-muted-foreground" />
+        </motion.button>
+
+        {/* Expenses Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          onClick={() => navigate('/expenses')}
+          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <Wallet size={20} className="text-destructive" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium">Expenses</p>
+              <p className="text-xs text-muted-foreground">Track costs & calculate profit</p>
+            </div>
+          </div>
+          <ChevronRight size={20} className="text-muted-foreground" />
+        </motion.button>
         
         {/* Team Management Section */}
         <motion.div
