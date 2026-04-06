@@ -84,7 +84,7 @@ export default function Execution() {
         };
       });
 
-      const photos = [
+      const rawPhotos = [
         ...finalJob.photosBefore.map((url, i) => ({ photo_url: url, photo_type: 'before' as const, display_order: i })),
         ...finalJob.photosAfter.map((url, i) => ({ photo_url: url, photo_type: 'after' as const, display_order: i })),
         ...(finalJob.damages || []).filter(d => d.photoUrl).map((d, i) => ({ photo_url: d.photoUrl!, photo_type: 'damage' as const, display_order: i, caption: d.description })),
@@ -112,6 +112,11 @@ export default function Execution() {
             }))
         ),
       ];
+
+      // Deduplicate by photo_url to prevent the same image appearing multiple times
+      const photos = rawPhotos.filter(
+        (p, i, arr) => arr.findIndex(x => x.photo_url === p.photo_url) === i
+      );
 
       const totalTasks = finalJob.checklist.reduce((acc, s) => acc + s.items.length, 0);
       const completedTasks = finalJob.checklist.reduce((acc, s) => acc + s.items.filter(it => it.completed).length, 0);

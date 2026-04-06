@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, X, Image as ImageIcon, ArrowRight, Upload, Loader2, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,12 @@ export const PhotoCaptureStep = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const { uploadPhoto, deletePhoto, isUploading } = usePhotoUpload();
   const { toast } = useToast();
+
+  // Keep a ref to the latest photos to avoid stale closures during async uploads
+  const photosRef = useRef(photos);
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
 
   const category = type === 'before' ? 'jobs-before' : 'jobs-after';
 
@@ -74,7 +80,12 @@ export const PhotoCaptureStep = ({
     const newUrls = results.filter((url): url is string => url !== null);
 
     if (newUrls.length > 0) {
-      onPhotosChange([...photos, ...newUrls]);
+      // Use ref to read the latest photos, avoiding stale closure
+      const currentPhotos = photosRef.current;
+      const merged = [...currentPhotos, ...newUrls];
+      // Deduplicate by URL
+      const unique = [...new Set(merged)];
+      onPhotosChange(unique);
       toast({
         title: t('exec.photo.uploaded'),
         description: `${newUrls.length} ${t('exec.photo.photosCaptured')}`,
@@ -94,7 +105,7 @@ export const PhotoCaptureStep = ({
     if (e.target) {
       e.target.value = '';
     }
-  }, [photos, processAndUploadFile, onPhotosChange, toast, t]);
+  }, [processAndUploadFile, onPhotosChange, toast, t]);
 
   const handleRemovePhoto = async (index: number) => {
     const photoUrl = photos[index];
