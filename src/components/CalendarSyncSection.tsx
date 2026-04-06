@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarSync, Copy, Check, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CalendarSyncSectionProps {
   userId: string | undefined;
@@ -13,9 +14,25 @@ interface CalendarSyncSectionProps {
 export const CalendarSyncSection = ({ userId }: CalendarSyncSectionProps) => {
   const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
+  const [icalToken, setIcalToken] = useState<string | null>(null);
   
-  const icalUrl = userId 
-    ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ical-feed?user_id=${userId}`
+  useEffect(() => {
+    if (!userId) return;
+    const fetchToken = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('ical_token')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (data?.ical_token) {
+        setIcalToken(data.ical_token);
+      }
+    };
+    fetchToken();
+  }, [userId]);
+
+  const icalUrl = icalToken 
+    ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ical-feed?token=${icalToken}`
     : '';
 
   const handleCopy = async () => {

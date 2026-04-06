@@ -17,14 +17,12 @@ interface Job {
   type: string;
 }
 
-// Format date to iCal format (YYYYMMDDTHHMMSS)
 function formatICalDate(dateStr: string, timeStr: string): string {
   const [year, month, day] = dateStr.split('-');
   const [hour, minute] = timeStr.split(':');
   return `${year}${month}${day}T${hour}${minute}00`;
 }
 
-// Escape special characters for iCal
 function escapeICalText(text: string): string {
   return text
     .replace(/\\/g, '\\\\')
@@ -33,23 +31,29 @@ function escapeICalText(text: string): string {
     .replace(/\n/g, '\\n');
 }
 
-// Generate a unique UID for each event
 function generateUID(jobId: string): string {
   return `${jobId}@pur-checkclean.lovable.app`;
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const url = new URL(req.url);
-    const userId = url.searchParams.get('user_id');
+    const token = url.searchParams.get('token');
     
-    if (!userId) {
-      return new Response('Missing user_id parameter', { 
+    if (!token) {
+      return new Response('Missing token parameter', { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+      });
+    }
+
+    // Validate token format (should be 64 hex chars)
+    if (!/^[a-f0-9]{64}$/.test(token)) {
+      return new Response('Invalid token', { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
       });
@@ -58,6 +62,22 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Look up user by ical_token
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('ical_token', token)
+      .maybeSingle();
+
+    if (profileError || !profile) {
+      return new Response('Invalid or expired token', { 
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+      });
+    }
+
+    const userId = profile.user_id;
 
     // Fetch jobs for the user
     const { data: jobs, error } = await supabase
@@ -75,7 +95,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate iCal content
     const now = new Date();
     const timestamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     
