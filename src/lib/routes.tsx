@@ -16,6 +16,8 @@ const JobDetails = lazy(() => import('@/pages/JobDetails'));
 const Execution = lazy(() => import('@/pages/Execution'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Finance = lazy(() => import('@/pages/Finance'));
+const KpiDashboard = lazy(() => import('@/pages/KpiDashboard'));
+const Expenses = lazy(() => import('@/pages/Expenses'));
 const Reports = lazy(() => import('@/pages/Reports'));
 const Invoices = lazy(() => import('@/pages/Invoices'));
 const Estimates = lazy(() => import('@/pages/Estimates'));
@@ -162,6 +164,14 @@ export const routes = [
       {
         path: 'finance',
         element: <Finance />,
+      },
+      {
+        path: 'kpi',
+        element: <KpiDashboard />,
+      },
+      {
+        path: 'expenses',
+        element: <Expenses />,
       },
       {
         path: 'reports',
