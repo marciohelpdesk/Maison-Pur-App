@@ -35,6 +35,12 @@ export const PhotoCaptureStep = ({
   const { uploadPhoto, deletePhoto, isUploading } = usePhotoUpload();
   const { toast } = useToast();
 
+  // Keep a ref to the latest photos to avoid stale closures during async uploads
+  const photosRef = useRef(photos);
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
+
   const category = type === 'before' ? 'jobs-before' : 'jobs-after';
 
   const processAndUploadFile = useCallback(async (file: File): Promise<string | null> => {
