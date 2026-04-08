@@ -41,6 +41,49 @@ Deno.serve(async (req) => {
     const { email, action, memberId } = await req.json();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
+    // ── RESET PASSWORD ──
+    if (action === "reset-password") {
+      if (!memberId) {
+        return new Response(JSON.stringify({ error: "memberId required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: member } = await adminClient
+        .from("team_members")
+        .select("member_user_id")
+        .eq("id", memberId)
+        .eq("admin_id", callingUserId)
+        .single();
+
+      if (!member) {
+        return new Response(JSON.stringify({ error: "Member not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const newPassword = `Clean${Math.random().toString(36).slice(2, 10)}!${Math.floor(Math.random() * 100)}`;
+
+      const { error: updateErr } = await adminClient.auth.admin.updateUserById(
+        member.member_user_id,
+        { password: newPassword }
+      );
+
+      if (updateErr) {
+        return new Response(JSON.stringify({ error: updateErr.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, tempPassword: newPassword }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
     // ── REVOKE MEMBER ──
     if (action === "remove") {
       if (!memberId) {
