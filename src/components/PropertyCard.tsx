@@ -7,10 +7,11 @@ import { Property } from '@/types';
 interface PropertyCardProps {
   property: Property;
   onClick: (id: string) => void;
+  hidePrice?: boolean;
 }
 
 export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
-  ({ property, onClick }, ref) => {
+  ({ property, onClick, hidePrice }, ref) => {
     const statusConfig: Record<string, { label: string; color: string; icon: string }> = {
       READY: { label: 'Ativa', color: 'bg-success', icon: '✓' },
       NEEDS_CLEANING: { label: 'Manutenção', color: 'bg-warning', icon: '⚠' },
@@ -68,7 +69,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
                 <Bath size={11} /> {property.bathrooms}
               </span>
             )}
-            {property.basePrice && (
+            {!hidePrice && property.basePrice && (
               <span className="ml-auto px-2.5 py-1 rounded-lg bg-primary/90 backdrop-blur-sm text-[11px] font-bold text-primary-foreground shadow-sm">
                 ${property.basePrice}
               </span>

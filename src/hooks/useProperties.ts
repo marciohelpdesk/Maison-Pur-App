@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Property, Room, ChecklistSection } from '@/types';
 import { Json } from '@/integrations/supabase/types';
+import { useRole } from '@/hooks/useRole';
 
 interface DbProperty {
   id: string;
@@ -77,10 +78,12 @@ const mapPropertyToDb = (property: Partial<Property>, userId: string): Partial<D
 
 export const useProperties = (userId: string | undefined) => {
   const queryClient = useQueryClient();
+  const { isCleaner } = useRole(userId);
 
   const query = useQuery({
-    queryKey: ['properties'],
+    queryKey: ['properties', isCleaner],
     queryFn: async (): Promise<Property[]> => {
+      // Both admin and cleaner: just select all, RLS handles filtering
       const { data, error } = await supabase
         .from('properties')
         .select('*')
