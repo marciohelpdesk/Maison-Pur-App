@@ -1,6 +1,7 @@
 import { lazy, Suspense, ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
@@ -86,6 +87,18 @@ export const PublicOnly = ({ children }: { children: ReactNode }) => {
   }
 
   return <>{children}</>;
+};
+
+// Admin-only route guard - redirects cleaners to dashboard
+export const RequireAdmin = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
+  const { isCleaner, isLoading } = useRole(user?.id);
+
+  if (isLoading) return <PageLoader />;
+  if (isCleaner) return <Navigate to="/dashboard" replace />;
+
+  return <>{children}</>;
+};
 };
 
 // Protected layout shell - keeps background/nav mounted across route changes
