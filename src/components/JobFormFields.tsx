@@ -1,24 +1,19 @@
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, MapPin, Briefcase, DollarSign, Users } from 'lucide-react';
-import { Property, Employee } from '@/types';
+import { Property } from '@/types';
+import { TeamMemberInfo } from '@/hooks/useTeamMembers';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  Popover, PopoverContent, PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export const JOB_TYPES = ['Standard', 'Deep Clean', 'Move-out'] as const;
 export const TIME_SLOTS = [
@@ -44,11 +39,11 @@ interface JobFormFieldsProps {
   formData: JobFormData;
   onChange: (data: Partial<JobFormData>) => void;
   properties: Property[];
-  employees?: Employee[];
+  teamMembers?: TeamMemberInfo[];
   disablePropertyChange?: boolean;
 }
 
-export const JobFormFields = ({ formData, onChange, properties, employees = [], disablePropertyChange }: JobFormFieldsProps) => {
+export const JobFormFields = ({ formData, onChange, properties, teamMembers = [], disablePropertyChange }: JobFormFieldsProps) => {
   const selectedProperty = properties.find(p => p.id === formData.propertyId);
 
   const getInitials = (name: string) => {
@@ -66,19 +61,13 @@ export const JobFormFields = ({ formData, onChange, properties, employees = [], 
           <MapPin className="w-3.5 h-3.5" />
           Property
         </Label>
-        <Select 
-          value={formData.propertyId} 
-          onValueChange={(v) => onChange({ propertyId: v })}
-          disabled={disablePropertyChange}
-        >
+        <Select value={formData.propertyId} onValueChange={(v) => onChange({ propertyId: v })} disabled={disablePropertyChange}>
           <SelectTrigger className={selectTriggerClass}>
             <SelectValue placeholder="Select a property" />
           </SelectTrigger>
           <SelectContent>
             {properties.map(property => (
-              <SelectItem key={property.id} value={property.id}>
-                {property.name}
-              </SelectItem>
+              <SelectItem key={property.id} value={property.id}>{property.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -105,29 +94,19 @@ export const JobFormFields = ({ formData, onChange, properties, employees = [], 
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                inputClass,
-                !formData.selectedDate && "text-muted-foreground"
-              )}
+              className={cn("w-full justify-start text-left font-normal", inputClass, !formData.selectedDate && "text-muted-foreground")}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {formData.selectedDate ? format(formData.selectedDate, "PPP") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={formData.selectedDate}
-              onSelect={(date) => onChange({ selectedDate: date })}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
+            <Calendar mode="single" selected={formData.selectedDate} onSelect={(date) => onChange({ selectedDate: date })} initialFocus className={cn("p-3 pointer-events-auto")} />
           </PopoverContent>
         </Popover>
       </div>
 
-      {/* Time Window Selection */}
+      {/* Time Window */}
       <div className="space-y-1.5">
         <Label className="field-label flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5" />
@@ -137,30 +116,18 @@ export const JobFormFields = ({ formData, onChange, properties, employees = [], 
           <div className="space-y-1">
             <p className="text-[10px] text-muted-foreground ml-1">Check-out (início)</p>
             <Select value={formData.checkoutTime || formData.selectedTime} onValueChange={(v) => onChange({ checkoutTime: v, selectedTime: v })}>
-              <SelectTrigger className={selectTriggerClass}>
-                <SelectValue placeholder="Check-out" />
-              </SelectTrigger>
+              <SelectTrigger className={selectTriggerClass}><SelectValue placeholder="Check-out" /></SelectTrigger>
               <SelectContent className="max-h-[200px]">
-                {TIME_SLOTS.map(time => (
-                  <SelectItem key={time} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
+                {TIME_SLOTS.map(time => (<SelectItem key={time} value={time}>{time}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
             <p className="text-[10px] text-muted-foreground ml-1">Check-in (prazo)</p>
             <Select value={formData.checkinDeadline || ''} onValueChange={(v) => onChange({ checkinDeadline: v })}>
-              <SelectTrigger className={selectTriggerClass}>
-                <SelectValue placeholder="Check-in" />
-              </SelectTrigger>
+              <SelectTrigger className={selectTriggerClass}><SelectValue placeholder="Check-in" /></SelectTrigger>
               <SelectContent className="max-h-[200px]">
-                {TIME_SLOTS.map(time => (
-                  <SelectItem key={time} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
+                {TIME_SLOTS.map(time => (<SelectItem key={time} value={time}>{time}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -173,19 +140,10 @@ export const JobFormFields = ({ formData, onChange, properties, employees = [], 
           <Briefcase className="w-3.5 h-3.5" />
           Job Type
         </Label>
-        <Select 
-          value={formData.jobType} 
-          onValueChange={(v) => onChange({ jobType: v as typeof JOB_TYPES[number] })}
-        >
-          <SelectTrigger className={selectTriggerClass}>
-            <SelectValue />
-          </SelectTrigger>
+        <Select value={formData.jobType} onValueChange={(v) => onChange({ jobType: v as typeof JOB_TYPES[number] })}>
+          <SelectTrigger className={selectTriggerClass}><SelectValue /></SelectTrigger>
           <SelectContent>
-            {JOB_TYPES.map(type => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
+            {JOB_TYPES.map(type => (<SelectItem key={type} value={type}>{type}</SelectItem>))}
           </SelectContent>
         </Select>
       </div>
@@ -205,32 +163,31 @@ export const JobFormFields = ({ formData, onChange, properties, employees = [], 
         />
       </div>
 
-      {/* Employee Assignment */}
-      {employees.length > 0 && (
+      {/* Team Member Assignment */}
+      {teamMembers.length > 0 && (
         <div className="space-y-1.5">
           <Label className="field-label flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5" />
-            Assign To (optional)
+            Atribuir a (opcional)
           </Label>
           <Select 
             value={formData.assignedTo || "unassigned"} 
             onValueChange={(v) => onChange({ assignedTo: v === "unassigned" ? "" : v })}
           >
             <SelectTrigger className={selectTriggerClass}>
-              <SelectValue placeholder="Select team member" />
+              <SelectValue placeholder="Selecionar membro" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
-              {employees.map(employee => (
-                <SelectItem key={employee.id} value={employee.id}>
+              <SelectItem value="unassigned">Não atribuído</SelectItem>
+              {teamMembers.map(member => (
+                <SelectItem key={member.member_user_id} value={member.member_user_id}>
                   <div className="flex items-center gap-2">
                     <Avatar className="w-5 h-5">
-                      <AvatarImage src={employee.avatar} />
                       <AvatarFallback className="text-[10px]">
-                        {getInitials(employee.name)}
+                        {getInitials(member.name || member.email || '??')}
                       </AvatarFallback>
                     </Avatar>
-                    {employee.name}
+                    {member.name || member.email || member.member_user_id.slice(0, 8)}
                   </div>
                 </SelectItem>
               ))}

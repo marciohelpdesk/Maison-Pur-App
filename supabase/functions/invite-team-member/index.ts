@@ -38,14 +38,10 @@ Deno.serve(async (req) => {
     }
 
     const callingUserId = claimsData.claims.sub;
-
-    // Parse request body
     const { email, action, memberId } = await req.json();
-
-    // Admin client for privileged operations
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Handle remove member action
+    // ── REVOKE MEMBER ──
     if (action === "remove") {
       if (!memberId) {
         return new Response(JSON.stringify({ error: "memberId required" }), {
@@ -54,7 +50,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Get member info before deleting
+      // Get member info
       const { data: member } = await adminClient
         .from("team_members")
         .select("member_user_id")
@@ -69,10 +65,13 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Delete team membership
-      await adminClient.from("team_members").delete().eq("id", memberId);
+      // Mark membership as revoked (don't delete)
+      await adminClient
+        .from("team_members")
+        .update({ status: "revoked" })
+        .eq("id", memberId);
 
-      // Update invite status
+      // Revoke invite status
       const { data: memberUser } = await adminClient.auth.admin.getUserById(member.member_user_id);
       if (memberUser?.user?.email) {
         await adminClient
@@ -82,12 +81,29 @@ Deno.serve(async (req) => {
           .eq("email", memberUser.user.email);
       }
 
+      // Unassign future jobs from this cleaner
+      const today = new Date().toISOString().split("T")[0];
+      await adminClient
+        .from("jobs")
+        .update({ assigned_to: null })
+        .eq("user_id", callingUserId)
+        .eq("assigned_to", member.member_user_id)
+        .gte("date", today)
+        .in("status", ["Scheduled", "scheduled"]);
+
+      // Remove cleaner role
+      await adminClient
+        .from("user_roles")
+        .delete()
+        .eq("user_id", member.member_user_id)
+        .eq("role", "cleaner");
+
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Handle invite action
+    // ── INVITE MEMBER ──
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return new Response(JSON.stringify({ error: "Valid email required" }), {
         status: 400,
@@ -97,7 +113,7 @@ Deno.serve(async (req) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Check if already invited
+    // Check if already active
     const { data: existingInvite } = await adminClient
       .from("team_invites")
       .select("id, status")
@@ -116,7 +132,7 @@ Deno.serve(async (req) => {
     // Generate temporary password
     const tempPassword = `Clean${Math.random().toString(36).slice(2, 10)}!${Math.floor(Math.random() * 100)}`;
 
-    // Create user account
+    // Try creating user
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email: normalizedEmail,
       password: tempPassword,
@@ -125,9 +141,7 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
-      // User might already exist
       if (createError.message?.includes("already been registered")) {
-        // Get existing user
         const { data: { users } } = await adminClient.auth.admin.listUsers();
         const existingUser = users?.find((u) => u.email === normalizedEmail);
 
@@ -138,9 +152,9 @@ Deno.serve(async (req) => {
             { onConflict: "user_id,role" }
           );
 
-          // Create team membership
+          // Create or reactivate team membership
           await adminClient.from("team_members").upsert(
-            { admin_id: callingUserId, member_user_id: existingUser.id },
+            { admin_id: callingUserId, member_user_id: existingUser.id, status: "active" },
             { onConflict: "admin_id,member_user_id" }
           );
 
@@ -177,6 +191,7 @@ Deno.serve(async (req) => {
     await adminClient.from("team_members").insert({
       admin_id: callingUserId,
       member_user_id: newUser.user.id,
+      status: "active",
     });
 
     // Record invite

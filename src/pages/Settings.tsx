@@ -3,18 +3,16 @@ import { SettingsView as SettingsContent } from '@/views/SettingsView';
 import { DashboardSkeleton } from '@/components/skeletons/DashboardSkeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { useEmployees } from '@/hooks/useEmployees';
 import { useRole } from '@/hooks/useRole';
-import { UserProfile, Employee } from '@/types';
+import { UserProfile } from '@/types';
 
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { profile, updateProfile, isLoading: profileLoading } = useProfile(user?.id);
-  const { employees, addEmployee, deleteEmployee, isLoading: employeesLoading } = useEmployees(user?.id);
   const { isAdmin, isLoading: roleLoading } = useRole(user?.id);
 
-  const isLoading = profileLoading || employeesLoading || roleLoading;
+  const isLoading = profileLoading || roleLoading;
 
   const userProfile: UserProfile = profile || {
     name: user?.email?.split('@')[0] || 'User',
@@ -33,14 +31,6 @@ export default function Settings() {
     navigate('/finance');
   };
 
-  const handleAddEmployee = (employee: Employee) => {
-    addEmployee(employee);
-  };
-
-  const handleDeleteEmployee = (employeeId: string) => {
-    deleteEmployee(employeeId);
-  };
-
   const handleUpdateProfile = (updatedProfile: UserProfile) => {
     updateProfile(updatedProfile);
   };
@@ -53,11 +43,8 @@ export default function Settings() {
     <SettingsContent
       userId={user?.id}
       userProfile={userProfile}
-      employees={employees}
       onLogout={handleLogout}
       onViewFinance={handleViewFinance}
-      onAddEmployee={handleAddEmployee}
-      onDeleteEmployee={handleDeleteEmployee}
       onUpdateProfile={handleUpdateProfile}
       isAdmin={isAdmin}
     />

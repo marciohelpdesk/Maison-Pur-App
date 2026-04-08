@@ -3,7 +3,8 @@ import { JobDetailsView as JobDetailsContent } from '@/views/JobDetailsView';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobs } from '@/hooks/useJobs';
 import { useProperties } from '@/hooks/useProperties';
-import { useEmployees } from '@/hooks/useEmployees';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useRole } from '@/hooks/useRole';
 import { Job, JobStatus } from '@/types';
 import { PageLoader } from '@/lib/routes';
 
@@ -13,13 +14,18 @@ export default function JobDetails() {
   const { user } = useAuth();
   const { jobs, updateJob, deleteJob, isLoading: jobsLoading } = useJobs(user?.id);
   const { properties, isLoading: propertiesLoading } = useProperties(user?.id);
-  const { employees, isLoading: employeesLoading } = useEmployees(user?.id);
+  const { members: teamMembers, isLoading: teamLoading } = useTeamMembers(user?.id);
+  const { isCleaner } = useRole(user?.id);
 
-  const isLoading = jobsLoading || propertiesLoading || employeesLoading;
+  const isLoading = jobsLoading || propertiesLoading || teamLoading;
   const job = jobs.find(j => j.id === id);
 
   const handleBack = () => {
-    navigate('/agenda');
+    if (isCleaner) {
+      navigate('/dashboard');
+    } else {
+      navigate('/agenda');
+    }
   };
 
   const handleStartJob = (jobId: string) => {
@@ -65,7 +71,7 @@ export default function JobDetails() {
   }
 
   if (!job) {
-    navigate('/agenda');
+    navigate(isCleaner ? '/dashboard' : '/agenda');
     return null;
   }
 
@@ -73,7 +79,8 @@ export default function JobDetails() {
     <JobDetailsContent
       job={job}
       properties={properties}
-      employees={employees}
+      teamMembers={teamMembers}
+      isCleaner={isCleaner}
       onBack={handleBack}
       onStartJob={handleStartJob}
       onUpdateJob={handleUpdateJob}

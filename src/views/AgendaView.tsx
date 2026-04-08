@@ -10,7 +10,8 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { openAddressInMaps } from '@/lib/utils';
-import { Job, JobStatus, Property, Employee } from '@/types';
+import { Job, JobStatus, Property } from '@/types';
+import { TeamMemberInfo } from '@/hooks/useTeamMembers';
 import { DayView } from '@/components/calendar/DayView';
 import { WeekView } from '@/components/calendar/WeekView';
 import { MonthView } from '@/components/calendar/MonthView';
@@ -29,7 +30,7 @@ import { toast } from 'sonner';
 interface AgendaViewProps {
   jobs: Job[];
   properties: Property[];
-  employees?: Employee[];
+  teamMembers?: TeamMemberInfo[];
   onStartJob?: (jobId: string) => void;
   onViewJob: (jobId: string) => void;
   onRescheduleJob?: (jobId: string, newDate: string, newTime?: string) => void;
@@ -39,7 +40,7 @@ interface AgendaViewProps {
 
 type CalendarView = 'day' | 'week' | 'month';
 
-export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onViewJob, onRescheduleJob, onAddJob, onDeleteJob }: AgendaViewProps) => {
+export const AgendaView = ({ jobs, properties, teamMembers = [], onStartJob, onViewJob, onRescheduleJob, onAddJob, onDeleteJob }: AgendaViewProps) => {
   const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date()));
@@ -180,7 +181,7 @@ export const AgendaView = ({ jobs, properties, employees = [], onStartJob, onVie
         open={showAddJobModal}
         onOpenChange={setShowAddJobModal}
         properties={properties}
-        employees={employees}
+        teamMembers={teamMembers}
         onAddJob={handleAddJob} />
       
       

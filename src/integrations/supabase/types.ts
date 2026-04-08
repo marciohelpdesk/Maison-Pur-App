@@ -757,18 +757,21 @@ export type Database = {
           created_at: string
           id: string
           member_user_id: string
+          status: string
         }
         Insert: {
           admin_id: string
           created_at?: string
           id?: string
           member_user_id: string
+          status?: string
         }
         Update: {
           admin_id?: string
           created_at?: string
           id?: string
           member_user_id?: string
+          status?: string
         }
         Relationships: []
       }
