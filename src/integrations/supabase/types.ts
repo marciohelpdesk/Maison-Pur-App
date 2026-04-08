@@ -721,6 +721,57 @@ export type Database = {
           },
         ]
       }
+      team_invites: {
+        Row: {
+          admin_id: string
+          created_at: string
+          email: string
+          id: string
+          invite_token: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          email: string
+          id?: string
+          invite_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          invite_token?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          admin_id: string
+          created_at: string
+          id: string
+          member_user_id: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          id?: string
+          member_user_id: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          id?: string
+          member_user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -819,7 +870,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "cleaner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -947,7 +998,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "cleaner"],
     },
   },
 } as const
