@@ -102,13 +102,12 @@ export const useJobs = (userId: string | undefined) => {
         .select('*')
         .order('date', { ascending: true });
       
-      // Cleaners: don't filter by user_id, let RLS handle it (assigned_to = auth.uid())
+      // Cleaners: RLS filters by assigned_to + active membership
       if (!isCleaner) {
         q = q.eq('user_id', userId);
       }
       
       const { data, error } = await q;
-      
       if (error) throw error;
       return (data as DbJob[]).map(mapDbToJob);
     },
@@ -127,22 +126,6 @@ export const useJobs = (userId: string | undefined) => {
         .single();
       
       if (error) throw error;
-      
-      // Send push notification for new job
-      try {
-        await supabase.functions.invoke('push-notifications', {
-          body: {
-            action: 'send',
-            title: '📋 New Job Scheduled',
-            message: `${job.clientName} - ${job.address} on ${job.date} at ${job.time}`,
-            url: '/agenda',
-          },
-        });
-      } catch (e) {
-        // Don't block job creation if push fails
-        console.warn('Push notification failed:', e);
-      }
-      
       return mapDbToJob(data as DbJob);
     },
     onSuccess: () => {
@@ -157,12 +140,13 @@ export const useJobs = (userId: string | undefined) => {
       const { id, ...rest } = job;
       const dbData = mapJobToDb(rest, userId);
       
-      const { error } = await supabase
-        .from('jobs')
-        .update(dbData)
-        .eq('id', id)
-        .eq('user_id', userId);
+      // For cleaners, don't filter by user_id (RLS handles it)
+      let q = supabase.from('jobs').update(dbData).eq('id', id);
+      if (!isCleaner) {
+        q = q.eq('user_id', userId);
+      }
       
+      const { error } = await q;
       if (error) throw error;
     },
     onSuccess: () => {
