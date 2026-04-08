@@ -1,71 +1,48 @@
 
 
-## Sistema de Equipe com Acesso por Convite
+## Corrigir Experiencia do Cleaner — Acesso Restrito e Dados Filtrados
 
-### Situacao Atual
-Hoje os "employees" sao apenas nomes registrados localmente — nao tem conta real no app. O dono faz tudo sozinho.
+### Problemas Identificados
 
-### Arquitetura Proposta
+1. **useJobs filtra por `user_id`**: O codigo JS faz `.eq('user_id', userId)` — como o cleaner nao e o dono do job, nao retorna nada. O RLS permite via `assigned_to`, mas o filtro JS bloqueia.
+2. **useProperties sem filtro de role**: Cleaner consegue acessar `/properties` e ver precos (`basePrice`) nos cards.
+3. **Rotas nao protegidas**: Cleaner pode navegar para `/properties`, `/finance`, `/invoices` etc. digitando a URL.
+4. **Dashboard mostra dados financeiros**: Earnings do mes, precos nos jobs — nao devem aparecer para cleaners.
 
-O admin (voce) convida funcionarios por email. Eles recebem uma conta real no app com **permissoes limitadas**.
+### Plano de Implementacao
 
-```text
-┌─────────────────────────────────────────┐
-│  ADMIN (owner)                          │
-│  - Tudo: properties, finance, KPIs...   │
-│  - Convida membros da equipe            │
-│  - Atribui jobs a membros               │
-└─────────────────────────────────────────┘
-         │ convite por email
-         ▼
-┌─────────────────────────────────────────┐
-│  CLEANER (membro da equipe)             │
-│  - Ve APENAS jobs atribuidos a si       │
-│  - Acesso basico: endereco, checklist   │
-│  - Pode executar job e gerar relatorio  │
-│  - NAO ve: financeiro, precos, KPIs     │
-└─────────────────────────────────────────┘
-```
+**1. Corrigir useJobs para Cleaners**
+- Detectar role do usuario via `useRole`
+- Se cleaner: remover o filtro `.eq('user_id', userId)` e deixar o RLS fazer o trabalho (so retorna jobs assigned ao cleaner)
+- Se admin: manter filtro atual
 
-### Etapas de Implementacao
+**2. Corrigir useProperties para Cleaners**  
+- Se cleaner: remover filtro `.eq('user_id', userId)` — o RLS ja restringe a properties vinculadas aos jobs atribuidos
+- Nao precisa de query especial, o RLS ja cuida
 
-**1. Banco de Dados — Convites de Equipe**
-- Nova tabela `team_invites` (admin_id, email, status, invite_token)
-- Nova tabela `team_members` (admin_id, member_user_id) — vincula a conta do funcionario ao admin
-- Edge function `invite-team-member` que cria a conta via Supabase Admin API e envia email com senha temporaria
+**3. Esconder precos no PropertyCard**
+- Receber prop `hidePrice` no PropertyCard
+- Quando cleaner, nao renderizar o badge de `$basePrice`
 
-**2. RLS baseado em papel**
-- Membros com role `cleaner` so veem jobs onde `assigned_to` = seu ID e que pertencem ao seu admin
-- Properties: acesso somente leitura a campos basicos (endereco, checklist_template, access_code) dos imoveis dos jobs atribuidos
-- Bloquear acesso a: invoices, estimates, expenses, KPI, finance
+**4. Criar componente RequireRole para rotas**
+- Componente que verifica role e redireciona cleaner para `/dashboard` se tentar acessar rota admin-only
+- Aplicar nas rotas: `/properties`, `/finance`, `/kpi`, `/expenses`, `/invoices`, `/estimates`
 
-**3. Frontend — Tela do Admin**
-- Em Settings > Team: botao "Convidar Membro" com campo de email
-- Lista de membros ativos com status (pendente/ativo)
-- Opcao de remover acesso
+**5. Dashboard simplificado para Cleaner**
+- Esconder secao de earnings (`monthEarnings`)
+- Esconder precos nos job cards
+- Manter: jobs do dia, next job, checklist templates, execucao
 
-**4. Frontend — Experiencia do Cleaner**
-- Ao fazer login, detecta role `cleaner`
-- Dashboard simplificado: so mostra "Seus Jobs de Hoje"
-- Menu reduzido: Dashboard (jobs do dia) + Execucao
-- Sem acesso a: Properties (gestao), Finance, KPIs, Estimates, Invoices
-- Pode ver info basica da propriedade ao abrir o job (endereco, codigo acesso, wifi, checklist)
+**6. Ajustar DashboardView**
+- Receber prop `isCleaner` 
+- Condicionar exibicao de valores financeiros
 
-**5. Fluxo Completo**
-1. Admin vai em Settings > Team > "Convidar"
-2. Digita email do funcionario
-3. Sistema cria conta + envia email com senha temporaria
-4. Funcionario faz login → ve apenas seus jobs do dia
-5. Funcionario executa o job (fotos, checklist, relatorio)
-6. Admin ve o resultado no seu dashboard
-
-### Detalhes Tecnicos
-
-- **Roles**: usar a tabela `user_roles` existente com novo enum `cleaner`
-- **team_members**: vincula cleaner ao admin para saber de quem sao os jobs/properties
-- **Jobs RLS**: cleaner ve jobs onde `assigned_to` = seu member_id E `user_id` = seu admin_id
-- **Properties RLS**: cleaner ve somente properties vinculadas aos seus jobs atribuidos (via subquery)
-- **Edge Function**: usa `SUPABASE_SERVICE_ROLE_KEY` para criar conta do cleaner via `auth.admin.createUser()`
-- **Route Guard**: componente `RequireRole` que verifica role e redireciona cleaners tentando acessar rotas bloqueadas
-- **Nav condicional**: sidebar/bottom nav esconde itens baseado no role do usuario
+### Arquivos Modificados
+- `src/hooks/useJobs.ts` — query condicional por role
+- `src/hooks/useProperties.ts` — query condicional por role  
+- `src/components/PropertyCard.tsx` — prop `hidePrice`
+- `src/views/DashboardView.tsx` — esconder financeiro
+- `src/views/PropertiesView.tsx` — passar `hidePrice`
+- `src/pages/Dashboard.tsx` — passar `isCleaner`
+- `src/lib/routes.tsx` — RequireRole wrapper nas rotas admin-only
 
