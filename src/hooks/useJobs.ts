@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Job, JobStatus, ChecklistSection, DamageReport, InventoryUsage, LostAndFoundItem, ExecutionStep } from '@/types';
 import { Json } from '@/integrations/supabase/types';
+import { useRole } from '@/hooks/useRole';
 
 interface DbJob {
   id: string;
@@ -89,17 +90,24 @@ const mapJobToDb = (job: Partial<Job>, userId: string): Partial<DbJob> => ({
 
 export const useJobs = (userId: string | undefined) => {
   const queryClient = useQueryClient();
+  const { isCleaner } = useRole(userId);
 
   const query = useQuery({
-    queryKey: ['jobs', userId],
+    queryKey: ['jobs', userId, isCleaner],
     queryFn: async (): Promise<Job[]> => {
       if (!userId) return [];
       
-      const { data, error } = await supabase
+      let q = supabase
         .from('jobs')
         .select('*')
-        .eq('user_id', userId)
         .order('date', { ascending: true });
+      
+      // Cleaners: don't filter by user_id, let RLS handle it (assigned_to = auth.uid())
+      if (!isCleaner) {
+        q = q.eq('user_id', userId);
+      }
+      
+      const { data, error } = await q;
       
       if (error) throw error;
       return (data as DbJob[]).map(mapDbToJob);
