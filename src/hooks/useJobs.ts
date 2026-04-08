@@ -111,7 +111,7 @@ export const useJobs = (userId: string | undefined) => {
       if (error) throw error;
       return (data as DbJob[]).map(mapDbToJob);
     },
-    enabled: !!userId,
+    enabled: !!userId && !roleLoading,
   });
 
   const addJob = useMutation({

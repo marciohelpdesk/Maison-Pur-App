@@ -92,7 +92,7 @@ export const useProperties = (userId: string | undefined) => {
       if (error) throw error;
       return (data as DbProperty[]).map(mapDbToProperty);
     },
-    enabled: !!userId,
+    enabled: !!userId && !roleLoading,
   });
 
   const addProperty = useMutation({
