@@ -82,7 +82,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // ── REVOKE MEMBER ──
     if (action === "remove") {
