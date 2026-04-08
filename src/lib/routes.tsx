@@ -99,7 +99,6 @@ export const RequireAdmin = ({ children }: { children: ReactNode }) => {
 
   return <>{children}</>;
 };
-};
 
 // Protected layout shell - keeps background/nav mounted across route changes
 export const ProtectedLayout = () => (
