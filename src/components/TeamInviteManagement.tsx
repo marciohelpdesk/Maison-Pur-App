@@ -250,7 +250,6 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
     </div>
   );
 };
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const [email, setEmail] = useState('');
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [copiedPassword, setCopiedPassword] = useState(false);
