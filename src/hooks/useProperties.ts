@@ -78,7 +78,7 @@ const mapPropertyToDb = (property: Partial<Property>, userId: string): Partial<D
 
 export const useProperties = (userId: string | undefined) => {
   const queryClient = useQueryClient();
-  const { isCleaner } = useRole(userId);
+  const { isCleaner, isLoading: roleLoading } = useRole(userId);
 
   const query = useQuery({
     queryKey: ['properties', isCleaner],
@@ -92,7 +92,7 @@ export const useProperties = (userId: string | undefined) => {
       if (error) throw error;
       return (data as DbProperty[]).map(mapDbToProperty);
     },
-    enabled: !!userId,
+    enabled: !!userId && !roleLoading,
   });
 
   const addProperty = useMutation({

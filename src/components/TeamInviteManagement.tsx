@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, User, Mail, Copy, Check } from 'lucide-react';
+import { Plus, Trash2, User, Mail, Copy, Check, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,8 +26,9 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
   const [email, setEmail] = useState('');
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [copiedPassword, setCopiedPassword] = useState(false);
+  const [resetPasswordResult, setResetPasswordResult] = useState<string | null>(null);
 
-  const { inviteMember, removeMember, isInviting } = useTeamInvites(userId);
+  const { inviteMember, removeMember, resetPassword, isInviting } = useTeamInvites(userId);
   const { members, isLoading, refetch } = useTeamMembers(userId);
 
   const handleInvite = async () => {
@@ -49,9 +50,17 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
     if (success) refetch();
   };
 
-  const handleCopyPassword = () => {
-    if (tempPassword) {
-      navigator.clipboard.writeText(tempPassword);
+  const handleResetPassword = async (member: TeamMemberInfo) => {
+    const result = await resetPassword(member.id);
+    if (result.success && result.tempPassword) {
+      setResetPasswordResult(result.tempPassword);
+    }
+  };
+
+  const handleCopyPassword = (pw?: string) => {
+    const text = pw || tempPassword;
+    if (text) {
+      navigator.clipboard.writeText(text);
       setCopiedPassword(true);
       setTimeout(() => setCopiedPassword(false), 2000);
     }
@@ -110,30 +119,42 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
                 </div>
               </div>
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                    <Trash2 size={16} />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-[300px] rounded-2xl">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Revogar Acesso</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      O membro perderá acesso ao app e seus jobs futuros serão desatribuídos.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleRemove(member)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Revogar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  title="Resetar Senha"
+                  onClick={() => handleResetPassword(member)}
+                >
+                  <KeyRound size={16} />
+                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                      <Trash2 size={16} />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-[300px] rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Revogar Acesso</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        O membro perderá acesso ao app e seus jobs futuros serão desatribuídos.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleRemove(member)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Revogar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -147,6 +168,7 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
         )}
       </div>
 
+      {/* Invite Modal */}
       <Dialog open={showInviteModal} onOpenChange={handleCloseModal}>
         <DialogContent className="max-w-[340px] rounded-2xl">
           <DialogHeader>
@@ -187,7 +209,7 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
                 <p className="text-xs text-muted-foreground">Envie essa senha temporária para o membro:</p>
                 <div className="flex items-center gap-2 bg-background p-2 rounded-lg">
                   <code className="flex-1 text-sm font-mono">{tempPassword}</code>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleCopyPassword}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopyPassword()}>
                     {copiedPassword ? <Check size={14} /> : <Copy size={14} />}
                   </Button>
                 </div>
@@ -197,6 +219,32 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
               </Button>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Modal */}
+      <Dialog open={!!resetPasswordResult} onOpenChange={() => { setResetPasswordResult(null); setCopiedPassword(false); }}>
+        <DialogContent className="max-w-[340px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-primary" />
+              Nova Senha Temporária
+            </DialogTitle>
+            <DialogDescription>
+              Envie essa nova senha para o membro da equipe.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 bg-muted p-3 rounded-lg">
+              <code className="flex-1 text-sm font-mono">{resetPasswordResult}</code>
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopyPassword(resetPasswordResult!)}>
+                {copiedPassword ? <Check size={14} /> : <Copy size={14} />}
+              </Button>
+            </div>
+            <Button className="w-full" onClick={() => { setResetPasswordResult(null); setCopiedPassword(false); }}>
+              Fechar
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

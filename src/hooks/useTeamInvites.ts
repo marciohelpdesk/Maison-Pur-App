@@ -66,5 +66,22 @@ export const useTeamInvites = (userId?: string) => {
     }
   };
 
-  return { inviteMember, removeMember, isInviting };
+  const resetPassword = async (memberId: string): Promise<{ success: boolean; tempPassword?: string }> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('invite-team-member', {
+        body: { action: 'reset-password', memberId },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success('Senha resetada com sucesso!');
+      return { success: true, tempPassword: data?.tempPassword };
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao resetar senha');
+      return { success: false };
+    }
+  };
+
+  return { inviteMember, removeMember, resetPassword, isInviting };
 };
