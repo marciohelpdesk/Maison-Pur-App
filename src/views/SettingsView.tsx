@@ -5,6 +5,7 @@ import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil, 
 import { UserProfile, Employee } from '@/types';
 import { PageHeader } from '@/components/PageHeader';
 import { TeamManagement } from '@/components/TeamManagement';
+import { TeamInviteManagement } from '@/components/TeamInviteManagement';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { CalendarSyncSection } from '@/components/CalendarSyncSection';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -23,9 +24,10 @@ interface SettingsViewProps {
   onAddEmployee: (employee: Employee) => void;
   onDeleteEmployee: (employeeId: string) => void;
   onUpdateProfile: (profile: UserProfile) => void;
+  isAdmin?: boolean;
 }
 
-export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewFinance, onAddEmployee, onDeleteEmployee, onUpdateProfile }: SettingsViewProps) => {
+export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewFinance, onAddEmployee, onDeleteEmployee, onUpdateProfile, isAdmin = true }: SettingsViewProps) => {
   const { t, language, setLanguage } = useLanguage();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [activeSheet, setActiveSheet] = useState<'notifications' | 'privacy' | 'help' | null>(null);
@@ -79,117 +81,126 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
           </span>
         </motion.div>
 
-        {/* Earnings Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          onClick={onViewFinance}
-          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
-          
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-              <Wallet size={20} className="text-success" />
-            </div>
-            <div className="text-left">
-              <p className="font-medium">{t('settings.earnings')}</p>
-              <p className="text-xs text-muted-foreground">{t('settings.earningsDesc')}</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="text-muted-foreground" />
-        </motion.button>
+        {/* Admin-only sections */}
+        {isAdmin && (
+          <>
+            {/* Earnings Button */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              onClick={onViewFinance}
+              className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                  <Wallet size={20} className="text-success" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">{t('settings.earnings')}</p>
+                  <p className="text-xs text-muted-foreground">{t('settings.earningsDesc')}</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-muted-foreground" />
+            </motion.button>
 
-        {/* KPI Dashboard Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.11 }}
-          onClick={() => navigate('/kpi')}
-          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <ChevronRight size={20} className="text-primary" />
-            </div>
-            <div className="text-left">
-              <p className="font-medium">KPI Dashboard</p>
-              <p className="text-xs text-muted-foreground">Revenue, jobs & performance metrics</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="text-muted-foreground" />
-        </motion.button>
+            {/* KPI Dashboard Button */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.11 }}
+              onClick={() => navigate('/kpi')}
+              className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ChevronRight size={20} className="text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">KPI Dashboard</p>
+                  <p className="text-xs text-muted-foreground">Revenue, jobs & performance metrics</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-muted-foreground" />
+            </motion.button>
 
-        {/* Expenses Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 }}
-          onClick={() => navigate('/expenses')}
-          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-              <Wallet size={20} className="text-destructive" />
-            </div>
-            <div className="text-left">
-              <p className="font-medium">Expenses</p>
-              <p className="text-xs text-muted-foreground">Track costs & calculate profit</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="text-muted-foreground" />
-        </motion.button>
-        
-        {/* Team Management Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="glass-panel p-4 mb-4">
-          
-          <TeamManagement
-            employees={employees}
-            onAddEmployee={onAddEmployee}
-            onDeleteEmployee={onDeleteEmployee} />
-          
-        </motion.div>
+            {/* Expenses Button */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 }}
+              onClick={() => navigate('/expenses')}
+              className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                  <Wallet size={20} className="text-destructive" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Expenses</p>
+                  <p className="text-xs text-muted-foreground">Track costs & calculate profit</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-muted-foreground" />
+            </motion.button>
 
-        {/* Invoice Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.16 }}
-          onClick={() => navigate('/invoices')}
-          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
-          
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Receipt size={20} className="text-primary" />
-            </div>
-            <div className="text-left">
-              <p className="font-medium">Invoices</p>
-              <p className="text-xs text-muted-foreground">Create & manage invoices</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="text-muted-foreground" />
-        </motion.button>
+            {/* Team Management Section (legacy local employees) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="glass-panel p-4 mb-4">
+              <TeamManagement
+                employees={employees}
+                onAddEmployee={onAddEmployee}
+                onDeleteEmployee={onDeleteEmployee} />
+            </motion.div>
 
-        {/* Estimates Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.17 }}
-          onClick={() => navigate('/estimates')}
-          className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
-          
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-              <ClipboardList size={20} className="text-blue-600" />
-            </div>
-            <div className="text-left">
-              <p className="font-medium">Estimates</p>
-              <p className="text-xs text-muted-foreground">Create & send quotes</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="text-muted-foreground" />
-        </motion.button>
+            {/* Team Invite Management (real accounts) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.155 }}
+              className="glass-panel p-4 mb-4">
+              <TeamInviteManagement userId={userId} />
+            </motion.div>
+
+            {/* Invoice Button */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.16 }}
+              onClick={() => navigate('/invoices')}
+              className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Receipt size={20} className="text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Invoices</p>
+                  <p className="text-xs text-muted-foreground">Create & manage invoices</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-muted-foreground" />
+            </motion.button>
+
+            {/* Estimates Button */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.17 }}
+              onClick={() => navigate('/estimates')}
+              className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ClipboardList size={20} className="text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Estimates</p>
+                  <p className="text-xs text-muted-foreground">Create & send quotes</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-muted-foreground" />
+            </motion.button>
+          </>
+        )}
 
         {/* Calendar Sync Section */}
         <CalendarSyncSection userId={userId} />

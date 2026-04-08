@@ -4,23 +4,27 @@ import { BrandLogo } from '@/components/BrandLogo';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useRole } from '@/hooks/useRole';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-  { path: '/dashboard', icon: Home, label: 'Dashboard' },
-  { path: '/agenda', icon: Calendar, label: 'Agenda' },
-  { path: '/properties', icon: Building2, label: 'Propriedades' },
-  { path: '/reports', icon: FileText, label: 'Relatórios' },
-  { path: '/invoices', icon: Receipt, label: 'Faturas' },
-  { path: '/estimates', icon: ClipboardList, label: 'Orçamentos' },
-  { path: '/finance', icon: DollarSign, label: 'Financeiro' },
-  { path: '/settings', icon: Settings, label: 'Configurações' },
+const allNavItems = [
+  { path: '/dashboard', icon: Home, label: 'Dashboard', adminOnly: false },
+  { path: '/agenda', icon: Calendar, label: 'Agenda', adminOnly: true },
+  { path: '/properties', icon: Building2, label: 'Propriedades', adminOnly: true },
+  { path: '/reports', icon: FileText, label: 'Relatórios', adminOnly: true },
+  { path: '/invoices', icon: Receipt, label: 'Faturas', adminOnly: true },
+  { path: '/estimates', icon: ClipboardList, label: 'Orçamentos', adminOnly: true },
+  { path: '/finance', icon: DollarSign, label: 'Financeiro', adminOnly: true },
+  { path: '/settings', icon: Settings, label: 'Configurações', adminOnly: false },
 ];
 
 export const DesktopSidebar = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { profile } = useProfile(user?.id);
+  const { isAdmin } = useRole(user?.id);
+
+  const navItems = allNavItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] z-40 flex flex-col border-r border-border bg-card/80 backdrop-blur-xl">
