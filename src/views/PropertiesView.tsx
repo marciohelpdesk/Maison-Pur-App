@@ -5,6 +5,7 @@ import { PropertyCard } from '@/components/PropertyCard';
 import { AddPropertyModal } from '@/components/AddPropertyModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PropertiesViewProps {
@@ -18,6 +19,7 @@ type FilterType = 'all' | 'READY' | 'NEEDS_CLEANING' | 'OCCUPIED';
 export const PropertiesView = ({ properties, onViewProperty, onAddProperty }: PropertiesViewProps) => {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { isCleaner } = useRole(user?.id);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -139,8 +141,8 @@ export const PropertiesView = ({ properties, onViewProperty, onAddProperty }: Pr
           <PropertyCard
             key={property.id}
             property={property}
-            onClick={onViewProperty} />
-
+            onClick={onViewProperty}
+            hidePrice={isCleaner} />
           )}
         </AnimatePresence>
         

@@ -37,9 +37,10 @@ interface DashboardViewProps {
   onStartJob: (jobId: string) => void;
   onViewJob: (jobId: string) => void;
   userProfile: { name: string; avatar: string };
+  isCleaner?: boolean;
 }
 
-export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, userProfile }: DashboardViewProps) => {
+export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, userProfile, isCleaner = false }: DashboardViewProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -365,7 +366,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                               <Bath size={12} /> {property.bathrooms}
                             </span>
                           )}
-                          {job.price && (
+                          {!isCleaner && job.price && (
                             <span className="text-xs font-semibold text-primary">${job.price}</span>
                           )}
                         </div>
@@ -423,6 +424,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
         </section>
 
         {/* Weekly Performance + Quick Actions side by side on desktop */}
+        {!isCleaner && (
         <div className="lg:grid lg:grid-cols-2 lg:gap-6 space-y-6 lg:space-y-0">
           <WeeklyProgress jobs={jobs} />
 
@@ -455,6 +457,7 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
             </div>
           </section>
         </div>
+        )}
       </div>
 
       {/* Category Info Drawer */}

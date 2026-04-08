@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useProperties } from '@/hooks/useProperties';
 import { useJobs } from '@/hooks/useJobs';
+import { useRole } from '@/hooks/useRole';
 import { UserProfile, JobStatus } from '@/types';
 
 export default function Dashboard() {
@@ -13,8 +14,9 @@ export default function Dashboard() {
   const { profile, isLoading: profileLoading } = useProfile(user?.id);
   const { properties, isLoading: propertiesLoading } = useProperties(user?.id);
   const { jobs, updateJob, isLoading: jobsLoading } = useJobs(user?.id);
+  const { isCleaner, isLoading: roleLoading } = useRole(user?.id);
 
-  const isLoading = profileLoading || propertiesLoading || jobsLoading;
+  const isLoading = profileLoading || propertiesLoading || jobsLoading || roleLoading;
 
   const userProfile: UserProfile = profile || {
     name: user?.email?.split('@')[0] || 'User',
@@ -61,6 +63,7 @@ export default function Dashboard() {
       onStartJob={handleStartJob}
       onViewJob={handleViewJob}
       userProfile={userProfile}
+      isCleaner={isCleaner}
     />
   );
 }
