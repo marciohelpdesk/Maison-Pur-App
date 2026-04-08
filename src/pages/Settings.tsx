@@ -4,6 +4,7 @@ import { DashboardSkeleton } from '@/components/skeletons/DashboardSkeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useEmployees } from '@/hooks/useEmployees';
+import { useRole } from '@/hooks/useRole';
 import { UserProfile, Employee } from '@/types';
 
 export default function Settings() {
@@ -11,8 +12,9 @@ export default function Settings() {
   const { user, signOut } = useAuth();
   const { profile, updateProfile, isLoading: profileLoading } = useProfile(user?.id);
   const { employees, addEmployee, deleteEmployee, isLoading: employeesLoading } = useEmployees(user?.id);
+  const { isAdmin, isLoading: roleLoading } = useRole(user?.id);
 
-  const isLoading = profileLoading || employeesLoading;
+  const isLoading = profileLoading || employeesLoading || roleLoading;
 
   const userProfile: UserProfile = profile || {
     name: user?.email?.split('@')[0] || 'User',
@@ -57,6 +59,7 @@ export default function Settings() {
       onAddEmployee={handleAddEmployee}
       onDeleteEmployee={handleDeleteEmployee}
       onUpdateProfile={handleUpdateProfile}
+      isAdmin={isAdmin}
     />
   );
 }
