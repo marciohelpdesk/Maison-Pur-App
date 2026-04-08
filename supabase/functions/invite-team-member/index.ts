@@ -1,5 +1,9 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.97.0";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.97.0/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -8,29 +12,32 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Missing authorization" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Validate the calling user
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+    // Validate calling user via getClaims
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user: callingUser }, error: userError } = await userClient.auth.getUser();
-    if (userError || !callingUser) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const callingUserId = claimsData.claims.sub;
 
     // Parse request body
     const { email, action, memberId } = await req.json();
@@ -52,7 +59,7 @@ Deno.serve(async (req) => {
         .from("team_members")
         .select("member_user_id")
         .eq("id", memberId)
-        .eq("admin_id", callingUser.id)
+        .eq("admin_id", callingUserId)
         .single();
 
       if (!member) {
@@ -71,7 +78,7 @@ Deno.serve(async (req) => {
         await adminClient
           .from("team_invites")
           .update({ status: "revoked" })
-          .eq("admin_id", callingUser.id)
+          .eq("admin_id", callingUserId)
           .eq("email", memberUser.user.email);
       }
 
@@ -94,7 +101,7 @@ Deno.serve(async (req) => {
     const { data: existingInvite } = await adminClient
       .from("team_invites")
       .select("id, status")
-      .eq("admin_id", callingUser.id)
+      .eq("admin_id", callingUserId)
       .eq("email", normalizedEmail)
       .in("status", ["pending", "accepted"])
       .maybeSingle();
@@ -114,7 +121,7 @@ Deno.serve(async (req) => {
       email: normalizedEmail,
       password: tempPassword,
       email_confirm: true,
-      user_metadata: { invited_by: callingUser.id },
+      user_metadata: { invited_by: callingUserId },
     });
 
     if (createError) {
@@ -133,13 +140,13 @@ Deno.serve(async (req) => {
 
           // Create team membership
           await adminClient.from("team_members").upsert(
-            { admin_id: callingUser.id, member_user_id: existingUser.id },
+            { admin_id: callingUserId, member_user_id: existingUser.id },
             { onConflict: "admin_id,member_user_id" }
           );
 
           // Record invite
           await adminClient.from("team_invites").insert({
-            admin_id: callingUser.id,
+            admin_id: callingUserId,
             email: normalizedEmail,
             status: "accepted",
           });
@@ -168,13 +175,13 @@ Deno.serve(async (req) => {
 
     // Create team membership
     await adminClient.from("team_members").insert({
-      admin_id: callingUser.id,
+      admin_id: callingUserId,
       member_user_id: newUser.user.id,
     });
 
     // Record invite
     await adminClient.from("team_invites").insert({
-      admin_id: callingUser.id,
+      admin_id: callingUserId,
       email: normalizedEmail,
       status: "accepted",
     });
