@@ -90,7 +90,7 @@ const mapJobToDb = (job: Partial<Job>, userId: string): Partial<DbJob> => ({
 
 export const useJobs = (userId: string | undefined) => {
   const queryClient = useQueryClient();
-  const { isCleaner } = useRole(userId);
+  const { isCleaner, isLoading: roleLoading } = useRole(userId);
 
   const query = useQuery({
     queryKey: ['jobs', userId, isCleaner],
