@@ -1,22 +1,29 @@
 import { Home, Calendar, Building2, Settings, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 
 interface NavItem {
   path: string;
   icon: typeof Home;
+  adminOnly: boolean;
 }
 
-const navItems: NavItem[] = [
-  { path: '/dashboard', icon: Home },
-  { path: '/agenda', icon: Calendar },
-  { path: '/reports', icon: FileText },
-  { path: '/properties', icon: Building2 },
-  { path: '/settings', icon: Settings },
+const allNavItems: NavItem[] = [
+  { path: '/dashboard', icon: Home, adminOnly: false },
+  { path: '/agenda', icon: Calendar, adminOnly: true },
+  { path: '/reports', icon: FileText, adminOnly: true },
+  { path: '/properties', icon: Building2, adminOnly: true },
+  { path: '/settings', icon: Settings, adminOnly: false },
 ];
 
 export const BottomNavRouter = () => {
   const location = useLocation();
+  const { user } = useAuth();
+  const { isAdmin } = useRole(user?.id);
+
+  const navItems = allNavItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <nav className="relative z-50 px-6 pb-6 pb-safe shrink-0">
