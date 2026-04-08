@@ -5,21 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -42,7 +32,6 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
 
   const handleInvite = async () => {
     if (!email.trim()) return;
-
     const result = await inviteMember(email.trim());
     if (result.success) {
       if (result.tempPassword) {
@@ -75,16 +64,17 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
     setCopiedPassword(false);
   };
 
-  const getInitials = (id: string) => {
-    return id.slice(0, 2).toUpperCase();
+  const getInitials = (name?: string) => {
+    if (!name) return '??';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-medium text-foreground">Equipe (Convites)</h3>
-          <p className="text-xs text-muted-foreground">{members.length} membros</p>
+          <h3 className="font-medium text-foreground">Equipe</h3>
+          <p className="text-xs text-muted-foreground">{members.length} membros ativos</p>
         </div>
         <Button size="sm" onClick={() => setShowInviteModal(true)} className="gap-1.5">
           <Plus size={16} />
@@ -106,12 +96,17 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
               <div className="flex items-center gap-3">
                 <Avatar className="w-10 h-10">
                   <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                    {getInitials(member.member_user_id)}
+                    {getInitials(member.name || member.email)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <span className="font-medium text-sm block">{member.member_user_id.slice(0, 8)}...</span>
-                  <Badge variant="secondary" className="text-[10px]">Cleaner</Badge>
+                  <span className="font-medium text-sm block">
+                    {member.name || member.email || member.member_user_id.slice(0, 8)}
+                  </span>
+                  {member.email && (
+                    <span className="text-xs text-muted-foreground">{member.email}</span>
+                  )}
+                  <Badge variant="secondary" className="text-[10px] ml-1">Cleaner</Badge>
                 </div>
               </div>
 
@@ -123,9 +118,9 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-[300px] rounded-2xl">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Remover Membro</AlertDialogTitle>
+                    <AlertDialogTitle>Revogar Acesso</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Remover este membro da equipe? Ele perderá acesso aos jobs atribuídos.
+                      O membro perderá acesso ao app e seus jobs futuros serão desatribuídos.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -134,7 +129,7 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
                       onClick={() => handleRemove(member)}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      Remover
+                      Revogar
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -146,7 +141,7 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
         {!isLoading && members.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <User className="w-10 h-10 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Nenhum membro convidado</p>
+            <p className="text-sm">Nenhum membro na equipe</p>
             <p className="text-xs">Convide membros por email para atribuir jobs</p>
           </div>
         )}
@@ -160,7 +155,7 @@ export const TeamInviteManagement = ({ userId }: TeamInviteManagementProps) => {
               Convidar Membro
             </DialogTitle>
             <DialogDescription>
-              O membro receberá uma conta com acesso limitado.
+              O membro receberá uma conta com acesso limitado aos jobs atribuídos.
             </DialogDescription>
           </DialogHeader>
 

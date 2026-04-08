@@ -64,8 +64,22 @@ export const RequireAuth = ({ children }: { children: ReactNode }) => {
   }
   
   if (!user) {
-    // Redirect to login while saving intended destination
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Revocation guard — signs out revoked cleaners
+export const RevokedGuard = ({ children }: { children: ReactNode }) => {
+  const { user, signOut } = useAuth();
+  const { isRevoked, isLoading } = useRole(user?.id);
+
+  if (isLoading) return <PageLoader />;
+  
+  if (isRevoked) {
+    signOut();
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
@@ -81,7 +95,6 @@ export const PublicOnly = ({ children }: { children: ReactNode }) => {
   }
   
   if (user) {
-    // Redirect to dashboard or previous intended destination
     const from = (location.state as any)?.from?.pathname || '/dashboard';
     return <Navigate to={from} replace />;
   }
@@ -100,14 +113,16 @@ export const RequireAdmin = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
-// Protected layout shell - keeps background/nav mounted across route changes
+// Protected layout shell
 export const ProtectedLayout = () => (
   <RequireAuth>
-    <ResponsiveLayout>
-      <Suspense fallback={<PageLoader />}>
-        <Outlet />
-      </Suspense>
-    </ResponsiveLayout>
+    <RevokedGuard>
+      <ResponsiveLayout>
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
+      </ResponsiveLayout>
+    </RevokedGuard>
   </RequireAuth>
 );
 
@@ -120,135 +135,56 @@ const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
 
 // Route definitions
 export const routes = [
-  // Public routes (redirect if logged in)
+  // Public routes
   {
     path: '/login',
     element: (
       <PublicOnly>
-        <SuspenseWrapper>
-          <Login />
-        </SuspenseWrapper>
+        <SuspenseWrapper><Login /></SuspenseWrapper>
       </PublicOnly>
     ),
   },
   {
     path: '/reset-password',
-    element: (
-      <SuspenseWrapper>
-        <ResetPassword />
-      </SuspenseWrapper>
-    ),
+    element: <SuspenseWrapper><ResetPassword /></SuspenseWrapper>,
   },
 
-  // Protected routes (layout kept mounted)
+  // Protected routes
   {
     path: '/',
     element: <ProtectedLayout />,
     children: [
-      {
-        index: true,
-        element: <Navigate to="/dashboard" replace />,
-      },
-      {
-        path: 'dashboard',
-        element: <Dashboard />,
-      },
-      {
-        path: 'agenda',
-        element: <Agenda />,
-      },
-      {
-        path: 'properties',
-        element: <Properties />,
-      },
-      {
-        path: 'properties/:id',
-        element: <PropertyDetails />,
-      },
-      {
-        path: 'jobs/:id',
-        element: <JobDetails />,
-      },
-      {
-        path: 'settings',
-        element: <Settings />,
-      },
-      {
-        path: 'finance',
-        element: <RequireAdmin><Finance /></RequireAdmin>,
-      },
-      {
-        path: 'kpi',
-        element: <RequireAdmin><KpiDashboard /></RequireAdmin>,
-      },
-      {
-        path: 'expenses',
-        element: <RequireAdmin><Expenses /></RequireAdmin>,
-      },
-      {
-        path: 'reports',
-        element: <RequireAdmin><Reports /></RequireAdmin>,
-      },
-      {
-        path: 'invoices',
-        element: <RequireAdmin><Invoices /></RequireAdmin>,
-      },
-      {
-        path: 'estimates',
-        element: <RequireAdmin><Estimates /></RequireAdmin>,
-      },
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'agenda', element: <RequireAdmin><Agenda /></RequireAdmin> },
+      { path: 'properties', element: <RequireAdmin><Properties /></RequireAdmin> },
+      { path: 'properties/:id', element: <RequireAdmin><PropertyDetails /></RequireAdmin> },
+      { path: 'jobs/:id', element: <JobDetails /> },
+      { path: 'settings', element: <Settings /> },
+      { path: 'finance', element: <RequireAdmin><Finance /></RequireAdmin> },
+      { path: 'kpi', element: <RequireAdmin><KpiDashboard /></RequireAdmin> },
+      { path: 'expenses', element: <RequireAdmin><Expenses /></RequireAdmin> },
+      { path: 'reports', element: <RequireAdmin><Reports /></RequireAdmin> },
+      { path: 'invoices', element: <RequireAdmin><Invoices /></RequireAdmin> },
+      { path: 'estimates', element: <RequireAdmin><Estimates /></RequireAdmin> },
     ],
   },
 
-  // Execution is a special flow with its own layout
+  // Execution flow
   {
     path: '/execution/:jobId',
     element: (
       <RequireAuth>
-        <SuspenseWrapper>
-          <Execution />
-        </SuspenseWrapper>
+        <RevokedGuard>
+          <SuspenseWrapper><Execution /></SuspenseWrapper>
+        </RevokedGuard>
       </RequireAuth>
-  ),
-  },
-
-  // Public report viewer (no auth)
-  {
-    path: '/r/:token',
-    element: (
-      <SuspenseWrapper>
-        <PublicReport />
-      </SuspenseWrapper>
     ),
   },
 
-  // Public invoice viewer (no auth)
-  {
-    path: '/invoice/:token',
-    element: (
-      <SuspenseWrapper>
-        <PublicInvoice />
-      </SuspenseWrapper>
-    ),
-  },
-
-  // Public estimate viewer (no auth)
-  {
-    path: '/estimate/:token',
-    element: (
-      <SuspenseWrapper>
-        <PublicEstimate />
-      </SuspenseWrapper>
-    ),
-  },
-
-  // 404 catch-all
-  {
-    path: '*',
-    element: (
-      <SuspenseWrapper>
-        <NotFound />
-      </SuspenseWrapper>
-    ),
-  },
+  // Public viewers
+  { path: '/r/:token', element: <SuspenseWrapper><PublicReport /></SuspenseWrapper> },
+  { path: '/invoice/:token', element: <SuspenseWrapper><PublicInvoice /></SuspenseWrapper> },
+  { path: '/estimate/:token', element: <SuspenseWrapper><PublicEstimate /></SuspenseWrapper> },
+  { path: '*', element: <SuspenseWrapper><NotFound /></SuspenseWrapper> },
 ];
