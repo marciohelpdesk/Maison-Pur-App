@@ -24,9 +24,10 @@ interface SettingsViewProps {
   onAddEmployee: (employee: Employee) => void;
   onDeleteEmployee: (employeeId: string) => void;
   onUpdateProfile: (profile: UserProfile) => void;
+  isAdmin?: boolean;
 }
 
-export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewFinance, onAddEmployee, onDeleteEmployee, onUpdateProfile }: SettingsViewProps) => {
+export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewFinance, onAddEmployee, onDeleteEmployee, onUpdateProfile, isAdmin = true }: SettingsViewProps) => {
   const { t, language, setLanguage } = useLanguage();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [activeSheet, setActiveSheet] = useState<'notifications' | 'privacy' | 'help' | null>(null);
