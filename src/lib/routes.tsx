@@ -175,27 +175,27 @@ export const routes = [
       },
       {
         path: 'finance',
-        element: <Finance />,
+        element: <RequireAdmin><Finance /></RequireAdmin>,
       },
       {
         path: 'kpi',
-        element: <KpiDashboard />,
+        element: <RequireAdmin><KpiDashboard /></RequireAdmin>,
       },
       {
         path: 'expenses',
-        element: <Expenses />,
+        element: <RequireAdmin><Expenses /></RequireAdmin>,
       },
       {
         path: 'reports',
-        element: <Reports />,
+        element: <RequireAdmin><Reports /></RequireAdmin>,
       },
       {
         path: 'invoices',
-        element: <Invoices />,
+        element: <RequireAdmin><Invoices /></RequireAdmin>,
       },
       {
         path: 'estimates',
-        element: <Estimates />,
+        element: <RequireAdmin><Estimates /></RequireAdmin>,
       },
     ],
   },
