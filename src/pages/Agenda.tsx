@@ -4,7 +4,7 @@ import { AgendaSkeleton } from '@/components/skeletons/DashboardSkeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useProperties } from '@/hooks/useProperties';
 import { useJobs } from '@/hooks/useJobs';
-import { useEmployees } from '@/hooks/useEmployees';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { Job, JobStatus } from '@/types';
 
 export default function Agenda() {
@@ -12,9 +12,9 @@ export default function Agenda() {
   const { user } = useAuth();
   const { properties, isLoading: propertiesLoading } = useProperties(user?.id);
   const { jobs, addJob, updateJob, deleteJob, isLoading: jobsLoading } = useJobs(user?.id);
-  const { employees, isLoading: employeesLoading } = useEmployees(user?.id);
+  const { members: teamMembers, isLoading: teamLoading } = useTeamMembers(user?.id);
 
-  const isLoading = propertiesLoading || jobsLoading || employeesLoading;
+  const isLoading = propertiesLoading || jobsLoading || teamLoading;
 
   const handleStartJob = (jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
@@ -45,11 +45,7 @@ export default function Agenda() {
   const handleRescheduleJob = (jobId: string, newDate: string, newTime?: string) => {
     const job = jobs.find(j => j.id === jobId);
     if (job) {
-      updateJob({
-        ...job,
-        date: newDate,
-        time: newTime || job.time
-      });
+      updateJob({ ...job, date: newDate, time: newTime || job.time });
     }
   };
 
@@ -69,7 +65,7 @@ export default function Agenda() {
     <AgendaContent
       jobs={jobs}
       properties={properties}
-      employees={employees}
+      teamMembers={teamMembers}
       onStartJob={handleStartJob}
       onViewJob={handleViewJob}
       onRescheduleJob={handleRescheduleJob}

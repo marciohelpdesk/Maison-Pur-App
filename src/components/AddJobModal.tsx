@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { Briefcase, X, Plus } from 'lucide-react';
-import { Job, JobStatus, Property, Employee } from '@/types';
+import { Job, JobStatus, Property } from '@/types';
+import { TeamMemberInfo } from '@/hooks/useTeamMembers';
 import { STANDARD_CHECKLIST_TEMPLATE } from '@/data/checklist';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { JobFormFields, JobFormData } from '@/components/JobFormFields';
@@ -18,11 +15,11 @@ interface AddJobModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   properties: Property[];
-  employees?: Employee[];
+  teamMembers?: TeamMemberInfo[];
   onAddJob: (job: Job) => void;
 }
 
-export const AddJobModal = ({ open, onOpenChange, properties, employees = [], onAddJob }: AddJobModalProps) => {
+export const AddJobModal = ({ open, onOpenChange, properties, teamMembers = [], onAddJob }: AddJobModalProps) => {
   const { t } = useLanguage();
   const [formData, setFormData] = useState<JobFormData>({
     propertyId: '',
@@ -94,7 +91,6 @@ export const AddJobModal = ({ open, onOpenChange, properties, employees = [], on
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-panel border-0 max-w-[95%] sm:max-w-[380px] rounded-2xl max-h-[90vh] p-0 overflow-hidden">
-        {/* Header */}
         <DialogHeader className="p-5 pb-3">
           <DialogTitle className="flex items-center gap-3 text-lg">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
@@ -112,25 +108,16 @@ export const AddJobModal = ({ open, onOpenChange, properties, employees = [], on
             formData={formData}
             onChange={handleFormChange}
             properties={properties}
-            employees={employees}
+            teamMembers={teamMembers}
           />
         </div>
 
-        {/* Footer */}
         <div className="flex gap-2 p-5 pt-3 border-t border-border/50">
-          <Button
-            variant="outline"
-            className="flex-1 h-11 rounded-xl"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => onOpenChange(false)}>
             <X className="w-4 h-4 mr-1.5" />
             {t('common.cancel')}
           </Button>
-          <Button
-            className="flex-1 h-11 rounded-xl bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/25"
-            onClick={handleSubmit}
-            disabled={!isValid}
-          >
+          <Button className="flex-1 h-11 rounded-xl bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/25" onClick={handleSubmit} disabled={!isValid}>
             <Plus className="w-4 h-4 mr-1.5" />
             {t('jobModal.create')}
           </Button>
