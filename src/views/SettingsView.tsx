@@ -5,6 +5,7 @@ import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil, 
 import { UserProfile, Employee } from '@/types';
 import { PageHeader } from '@/components/PageHeader';
 import { TeamManagement } from '@/components/TeamManagement';
+import { TeamInviteManagement } from '@/components/TeamInviteManagement';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { CalendarSyncSection } from '@/components/CalendarSyncSection';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -137,7 +138,7 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
           <ChevronRight size={20} className="text-muted-foreground" />
         </motion.button>
         
-        {/* Team Management Section */}
+        {/* Team Management Section (legacy local employees) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -148,6 +149,17 @@ export const SettingsView = ({ userId, userProfile, employees, onLogout, onViewF
             employees={employees}
             onAddEmployee={onAddEmployee}
             onDeleteEmployee={onDeleteEmployee} />
+          
+        </motion.div>
+
+        {/* Team Invite Management (real accounts) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.155 }}
+          className="glass-panel p-4 mb-4">
+          
+          <TeamInviteManagement userId={userId} />
           
         </motion.div>
 
