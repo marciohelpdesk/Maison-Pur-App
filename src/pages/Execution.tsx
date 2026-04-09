@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ExecutionView as ExecutionContent } from '@/views/ExecutionView';
 import { useAuth } from '@/hooks/useAuth';
@@ -181,13 +182,14 @@ export default function Execution() {
     navigate('/dashboard');
   };
 
-  if (isLoading) {
-    return <PageLoader />;
-  }
+  useEffect(() => {
+    if (!isLoading && !job) {
+      navigate('/dashboard');
+    }
+  }, [isLoading, job, navigate]);
 
-  if (!job) {
-    navigate('/dashboard');
-    return null;
+  if (isLoading || !job) {
+    return <PageLoader />;
   }
 
   return (
