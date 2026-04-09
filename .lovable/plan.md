@@ -1,26 +1,51 @@
 
+Objetivo: remover com segurança o job travado “Mahalo” e fechar as brechas que podem recriar esse problema em novos agendamentos.
 
-## Corrigir Execution Travada em Jobs Atribuidos a Membros Removidos
+Diagnóstico confirmado
+- O job atual “Mahalo” travado é `d45c56c7-decb-4634-aa18-27da4817edfc`.
+- Ele está `IN_PROGRESS`, com `assigned_to = null`, `current_step = BEFORE_PHOTOS` e sem progresso salvo relevante: sem fotos, sem danos, sem itens perdidos, sem inventário usado e sem relatório vinculado.
+- Existem outros jobs “Mahalo” antigos já `COMPLETED` com relatório publicado; eles não devem ser tocados.
+- O motivo de você não conseguir recuperar esse job pela interface é que hoje o admin só pode editar/excluir jobs com status `SCHEDULED`.
+- Há também uma causa raiz para recorrência: a revogação de acesso está limpando jobs usando status diferentes dos realmente salvos no app (`SCHEDULED` / `IN_PROGRESS`), então alguns jobs podem continuar presos.
+- Ainda existe um redirect durante render em `JobDetails.tsx`, o que pode gerar comportamento instável quando um job some após exclusão/reset.
 
-### Problema
-O job "Mahalo" esta com status `IN_PROGRESS` e `assigned_to` apontando para um usuario (`968df217...`) que nao existe mais na tabela `team_members`. O admin (dono do job) consegue ver o job via RLS, mas ao abrir `/execution/:jobId`, a pagina chama `navigate()` durante o render (linha 188-191), causando o erro React "Cannot update a component while rendering a different component" e travando a tela — sem botao de cancelar nem prosseguir.
+Plano de correção
+1. Limpeza pontual do Mahalo
+- Excluir apenas o job travado `d45c56c7-decb-4634-aa18-27da4817edfc`.
+- Não apagar os Mahalo concluídos nem seus relatórios.
+- Como esse job travado não tem relatório nem anexos registrados no banco, a exclusão é segura e não deve deixar referência quebrada.
 
-### Correcoes
+2. Dar controle real ao admin em jobs travados
+- Em `src/views/JobDetailsView.tsx`, adicionar ações de recuperação para jobs `IN_PROGRESS` quando o usuário for admin:
+  - Continuar
+  - Resetar para agendado
+  - Excluir job
+- Manter confirmação antes de resetar ou excluir.
 
-**1. Corrigir navigate durante render em `Execution.tsx`**
-- Mover o redirect `if (!job) navigate('/dashboard')` para dentro de um `useEffect`
-- Isso elimina o erro React e permite que a pagina renderize corretamente mesmo durante carregamento
+3. Tornar a exclusão robusta
+- Em `src/hooks/useJobs.ts`, transformar a exclusão em fluxo completo:
+  - apagar relatórios ligados ao job, se existirem
+  - apagar `report_rooms` e `report_photos`
+  - limpar PDF/URLs rastreadas do job quando houver
+  - só depois apagar o registro do job
+- Fazer a UI navegar apenas após sucesso real da exclusão.
 
-**2. Permitir admin cancelar/resetar jobs travados**
-- O admin e dono do job (`user_id` = admin), entao ele deve conseguir ver e interagir normalmente
-- Adicionar um botao visivel para o admin poder resetar o status do job para `SCHEDULED` e limpar `assigned_to` quando o membro atribuido nao existe mais na equipe
-- Ou simplesmente garantir que o fluxo de execucao funcione normalmente para o admin mesmo quando `assigned_to` aponta para alguem removido
+4. Corrigir a causa raiz da revogação
+- Em `supabase/functions/invite-team-member/index.ts`, ajustar a limpeza de jobs revogados para os status reais usados pelo app (`SCHEDULED` e `IN_PROGRESS`) ou remover esse filtro frágil.
+- Assim novos jobs atribuídos a membros removidos não ficarão presos.
 
-**3. Limpar assigned_to de jobs com membros inexistentes**
-- Na revogacao (edge function), ja limpamos jobs futuros — mas jobs IN_PROGRESS ficaram com o assigned_to antigo
-- Adicionar logica na edge function para tambem limpar `assigned_to` de jobs IN_PROGRESS ao revogar
+5. Blindar a tela de detalhes
+- Em `src/pages/JobDetails.tsx`, mover o redirect de `!job` para `useEffect`, igual já foi feito em `Execution.tsx`.
+- Isso evita travamento/comportamento estranho logo após excluir ou resetar um job.
 
-### Arquivos
-- `src/pages/Execution.tsx` — useEffect para redirect + tratamento de job sem assignee valido
-- `supabase/functions/invite-team-member/index.ts` — limpar assigned_to de jobs IN_PROGRESS na revogacao
+Validação final
+- Confirmar que o Mahalo travado desaparece da agenda/dashboard.
+- Criar um novo job, atribuir a um membro, revogar esse membro e validar que o job não fica preso.
+- Testar reset e exclusão de um job `IN_PROGRESS` pelo admin.
+- Confirmar que jobs concluídos e relatórios antigos continuam intactos.
 
+Arquivos principais
+- `src/views/JobDetailsView.tsx`
+- `src/pages/JobDetails.tsx`
+- `src/hooks/useJobs.ts`
+- `supabase/functions/invite-team-member/index.ts`
