@@ -123,13 +123,13 @@ Deno.serve(async (req) => {
           .eq("email", memberUser.user.email);
       }
 
-      // Unassign ALL jobs from this cleaner (future + in progress)
+      // Unassign ALL non-completed jobs from this cleaner
       await adminClient
         .from("jobs")
         .update({ assigned_to: null })
         .eq("user_id", callingUserId)
         .eq("assigned_to", member.member_user_id)
-        .in("status", ["Scheduled", "scheduled", "In Progress", "in_progress"]);
+        .in("status", ["SCHEDULED", "IN_PROGRESS"]);
 
       // Remove cleaner role
       await adminClient

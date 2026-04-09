@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { JobDetailsView as JobDetailsContent } from '@/views/JobDetailsView';
 import { useAuth } from '@/hooks/useAuth';
@@ -70,9 +71,14 @@ export default function JobDetails() {
     return <PageLoader />;
   }
 
+  useEffect(() => {
+    if (!isLoading && !job) {
+      navigate(isCleaner ? '/dashboard' : '/agenda');
+    }
+  }, [isLoading, job, navigate, isCleaner]);
+
   if (!job) {
-    navigate(isCleaner ? '/dashboard' : '/agenda');
-    return null;
+    return <PageLoader />;
   }
 
   return (

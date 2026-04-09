@@ -92,7 +92,18 @@ export const JobDetailsView = ({
     }
   };
 
-  const isEditable = job.status === JobStatus.SCHEDULED && !isCleaner;
+  const isEditable = (job.status === JobStatus.SCHEDULED || job.status === JobStatus.IN_PROGRESS) && !isCleaner;
+
+  const handleResetToScheduled = () => {
+    onUpdateJob({
+      ...job,
+      status: JobStatus.SCHEDULED,
+      startTime: undefined,
+      currentStep: undefined,
+      assignedTo: undefined,
+    });
+    toast.success('Job resetado para agendado');
+  };
 
   return (
     <div className="flex flex-col h-full relative z-10 overflow-y-auto hide-scrollbar pb-32">
@@ -119,6 +130,23 @@ export const JobDetailsView = ({
               <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)} className="gap-1.5">
                 <Edit2 size={14} /> Edit
               </Button>
+              {job.status === JobStatus.IN_PROGRESS && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1.5"><ArrowLeft size={14} /> Reset</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-[340px] rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Resetar Job</AlertDialogTitle>
+                      <AlertDialogDescription>Isso vai voltar o job para "Agendado" e remover a atribuição. Deseja continuar?</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetToScheduled}>Resetar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm" className="gap-1.5"><Trash2 size={14} /></Button>
