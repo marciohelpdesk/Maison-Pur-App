@@ -21,6 +21,12 @@ export default function JobDetails() {
   const isLoading = jobsLoading || propertiesLoading || teamLoading;
   const job = jobs.find(j => j.id === id);
 
+  useEffect(() => {
+    if (!isLoading && !job) {
+      navigate(isCleaner ? '/dashboard' : '/agenda');
+    }
+  }, [isLoading, job, navigate, isCleaner]);
+
   const handleBack = () => {
     if (isCleaner) {
       navigate('/dashboard');
@@ -67,17 +73,7 @@ export default function JobDetails() {
     navigate('/agenda');
   };
 
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  useEffect(() => {
-    if (!isLoading && !job) {
-      navigate(isCleaner ? '/dashboard' : '/agenda');
-    }
-  }, [isLoading, job, navigate, isCleaner]);
-
-  if (!job) {
+  if (isLoading || !job) {
     return <PageLoader />;
   }
 
