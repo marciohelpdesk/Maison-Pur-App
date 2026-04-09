@@ -1,51 +1,35 @@
 
-Objetivo: remover com segurança o job travado “Mahalo” e fechar as brechas que podem recriar esse problema em novos agendamentos.
 
-Diagnóstico confirmado
-- O job atual “Mahalo” travado é `d45c56c7-decb-4634-aa18-27da4817edfc`.
-- Ele está `IN_PROGRESS`, com `assigned_to = null`, `current_step = BEFORE_PHOTOS` e sem progresso salvo relevante: sem fotos, sem danos, sem itens perdidos, sem inventário usado e sem relatório vinculado.
-- Existem outros jobs “Mahalo” antigos já `COMPLETED` com relatório publicado; eles não devem ser tocados.
-- O motivo de você não conseguir recuperar esse job pela interface é que hoje o admin só pode editar/excluir jobs com status `SCHEDULED`.
-- Há também uma causa raiz para recorrência: a revogação de acesso está limpando jobs usando status diferentes dos realmente salvos no app (`SCHEDULED` / `IN_PROGRESS`), então alguns jobs podem continuar presos.
-- Ainda existe um redirect durante render em `JobDetails.tsx`, o que pode gerar comportamento instável quando um job some após exclusão/reset.
+## Corrigir Acesso ao Checklist na Pagina de Execucao
 
-Plano de correção
-1. Limpeza pontual do Mahalo
-- Excluir apenas o job travado `d45c56c7-decb-4634-aa18-27da4817edfc`.
-- Não apagar os Mahalo concluídos nem seus relatórios.
-- Como esse job travado não tem relatório nem anexos registrados no banco, a exclusão é segura e não deve deixar referência quebrada.
+### Diagnostico
 
-2. Dar controle real ao admin em jobs travados
-- Em `src/views/JobDetailsView.tsx`, adicionar ações de recuperação para jobs `IN_PROGRESS` quando o usuário for admin:
-  - Continuar
-  - Resetar para agendado
-  - Excluir job
-- Manter confirmação antes de resetar ou excluir.
+Apos investigacao detalhada do codigo, dados e logs:
 
-3. Tornar a exclusão robusta
-- Em `src/hooks/useJobs.ts`, transformar a exclusão em fluxo completo:
-  - apagar relatórios ligados ao job, se existirem
-  - apagar `report_rooms` e `report_photos`
-  - limpar PDF/URLs rastreadas do job quando houver
-  - só depois apagar o registro do job
-- Fazer a UI navegar apenas após sucesso real da exclusão.
+- Os 3 jobs de hoje (Mahalo, Lake Shore, Ocean Pearl) estao corretamente no banco com status `IN_PROGRESS`, `current_step: BEFORE_PHOTOS`, e checklist valido (5 secoes, ~27 itens cada)
+- A autenticacao esta funcionando (login OK, role = "user"/admin)
+- Nao ha erros de runtime no console
 
-4. Corrigir a causa raiz da revogação
-- Em `supabase/functions/invite-team-member/index.ts`, ajustar a limpeza de jobs revogados para os status reais usados pelo app (`SCHEDULED` e `IN_PROGRESS`) ou remover esse filtro frágil.
-- Assim novos jobs atribuídos a membros removidos não ficarão presos.
+O problema mais provavel e uma **condicao de corrida** no fluxo de execucao: quando `updateJob.mutate()` atualiza o job (ao mudar de step ou marcar itens), o `onSuccess` invalida o cache do react-query, causando um refetch. Durante esse refetch, o react-query pode brevemente retornar `isLoading = true` (se o query key mudou) ou o `job` pode ficar `undefined` por um instante. Isso aciona o `useEffect` que redireciona para `/dashboard`, expulsando o usuario da tela de execucao.
 
-5. Blindar a tela de detalhes
-- Em `src/pages/JobDetails.tsx`, mover o redirect de `!job` para `useEffect`, igual já foi feito em `Execution.tsx`.
-- Isso evita travamento/comportamento estranho logo após excluir ou resetar um job.
+Alem disso, a barra de progresso no card do dashboard nao tem largura definida (sempre 100%).
 
-Validação final
-- Confirmar que o Mahalo travado desaparece da agenda/dashboard.
-- Criar um novo job, atribuir a um membro, revogar esse membro e validar que o job não fica preso.
-- Testar reset e exclusão de um job `IN_PROGRESS` pelo admin.
-- Confirmar que jobs concluídos e relatórios antigos continuam intactos.
+### Correcoes
 
-Arquivos principais
-- `src/views/JobDetailsView.tsx`
-- `src/pages/JobDetails.tsx`
-- `src/hooks/useJobs.ts`
-- `supabase/functions/invite-team-member/index.ts`
+**1. Tornar a Execution resiliente a refetches (Execution.tsx)**
+- Usar `optimisticUpdates` no react-query para que o `updateJob` atualize o cache imediatamente sem causar loading/undefined
+- OU guardar o `job` em um `useRef` para nunca perder a referencia durante refetches
+- Ajustar o `useEffect` de redirect para incluir um delay/guard adicional (nao redirecionar se ja teve um job valido antes)
+
+**2. Evitar que invalidateQueries cause perda do job (useJobs.ts)**
+- Usar `optimistic update` no `updateJob` mutation: atualizar o cache do react-query imediatamente via `queryClient.setQueryData`, antes do refetch
+- Isso garante que durante o refetch, `jobs` nunca fica vazio e `job` nunca fica `undefined`
+
+**3. Corrigir barra de progresso no dashboard (DashboardView.tsx)**
+- Adicionar `style={{ width: ... }}` na barra de progresso do card de job para refletir o progresso real
+
+### Arquivos
+- `src/pages/Execution.tsx` — guardar referencia do job, redirect mais seguro
+- `src/hooks/useJobs.ts` — optimistic update no updateJob mutation
+- `src/views/DashboardView.tsx` — fix na largura da barra de progresso
+
