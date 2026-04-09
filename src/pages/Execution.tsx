@@ -17,7 +17,7 @@ import { BackgroundEffects } from '@/components/BackgroundEffects';
 export default function Execution() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { jobs, updateJob, isLoading: jobsLoading } = useJobs(user?.id);
   const jobFromQuery = jobs.find(j => j.id === jobId);
   
