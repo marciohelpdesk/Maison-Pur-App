@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ExecutionView as ExecutionContent } from '@/views/ExecutionView';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +19,17 @@ export default function Execution() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { jobs, updateJob, isLoading: jobsLoading } = useJobs(user?.id);
-  const job = jobs.find(j => j.id === jobId);
+  const jobFromQuery = jobs.find(j => j.id === jobId);
+  
+  // Keep a stable ref to avoid losing the job during react-query refetches
+  const jobRef = useRef(jobFromQuery);
+  if (jobFromQuery) {
+    jobRef.current = jobFromQuery;
+  }
+  const job = jobFromQuery ?? jobRef.current;
+  const hadJobRef = useRef(false);
+  if (job) hadJobRef.current = true;
+
   const { inventory, isLoading: inventoryLoading } = useInventory(user?.id, job?.propertyId);
   const { createReport, reports, deleteReport } = useReports(user?.id);
   const { profile } = useProfile(user?.id);
@@ -183,7 +193,9 @@ export default function Execution() {
   };
 
   useEffect(() => {
-    if (!isLoading && !job) {
+    // Only redirect if loading finished AND we never had a valid job
+    // (prevents redirect during react-query refetches)
+    if (!isLoading && !job && !hadJobRef.current) {
       navigate('/dashboard');
     }
   }, [isLoading, job, navigate]);

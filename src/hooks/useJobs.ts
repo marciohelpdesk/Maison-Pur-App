@@ -148,8 +148,28 @@ export const useJobs = (userId: string | undefined) => {
       
       const { error } = await q;
       if (error) throw error;
+      return job;
     },
-    onSuccess: () => {
+    onMutate: async (updatedJob: Job) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['jobs', userId, isCleaner] });
+      
+      const previousJobs = queryClient.getQueryData<Job[]>(['jobs', userId, isCleaner]);
+      
+      // Optimistically update the cache immediately
+      queryClient.setQueryData<Job[]>(['jobs', userId, isCleaner], (old) =>
+        old?.map(j => j.id === updatedJob.id ? updatedJob : j) ?? []
+      );
+      
+      return { previousJobs };
+    },
+    onError: (_err, _job, context) => {
+      // Roll back on error
+      if (context?.previousJobs) {
+        queryClient.setQueryData(['jobs', userId, isCleaner], context.previousJobs);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs', userId] });
     },
   });

@@ -385,7 +385,15 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
                               </span>
                             </div>
                             <div className="h-2 bg-muted rounded-full overflow-hidden">
-                              <div className="h-full bg-gradient-to-r from-primary to-success rounded-full relative">
+                              <div 
+                                className="h-full bg-gradient-to-r from-primary to-success rounded-full relative transition-all duration-500"
+                                style={{ width: (() => {
+                                  const cl = job.checklist as any[];
+                                  const total = cl.reduce((a: number, s: any) => a + (s.items?.length || 0), 0);
+                                  const done = cl.reduce((a: number, s: any) => a + (s.items?.filter((i: any) => i.completed)?.length || 0), 0);
+                                  return total > 0 ? `${Math.round((done/total)*100)}%` : '0%';
+                                })() }}
+                              >
                                 <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 animate-pulse" />
                               </div>
                             </div>
