@@ -158,6 +158,20 @@ export const useJobs = (userId: string | undefined) => {
     mutationFn: async (jobId: string) => {
       if (!userId) throw new Error('No user ID');
       
+      // Clean up related reports, rooms, and photos
+      const { data: reports } = await supabase
+        .from('cleaning_reports')
+        .select('id')
+        .eq('job_id', jobId)
+        .eq('user_id', userId);
+      
+      if (reports && reports.length > 0) {
+        const reportIds = reports.map(r => r.id);
+        await supabase.from('report_photos').delete().in('report_id', reportIds);
+        await supabase.from('report_rooms').delete().in('report_id', reportIds);
+        await supabase.from('cleaning_reports').delete().in('id', reportIds);
+      }
+      
       const { error } = await supabase
         .from('jobs')
         .delete()
