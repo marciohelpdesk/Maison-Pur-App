@@ -1,35 +1,63 @@
 
 
-## Corrigir Acesso ao Checklist na Pagina de Execucao
+## Corrigir Bug: Pagina de Execucao Redireciona Antes dos Dados Carregarem
 
-### Diagnostico
+### Causa Raiz Identificada
 
-Apos investigacao detalhada do codigo, dados e logs:
+O problema esta no TanStack Query v5 combinado com o `useRole` que usa `useState/useEffect` (nao e cacheado).
 
-- Os 3 jobs de hoje (Mahalo, Lake Shore, Ocean Pearl) estao corretamente no banco com status `IN_PROGRESS`, `current_step: BEFORE_PHOTOS`, e checklist valido (5 secoes, ~27 itens cada)
-- A autenticacao esta funcionando (login OK, role = "user"/admin)
-- Nao ha erros de runtime no console
+Quando o usuario navega para `/execution/:jobId`:
 
-O problema mais provavel e uma **condicao de corrida** no fluxo de execucao: quando `updateJob.mutate()` atualiza o job (ao mudar de step ou marcar itens), o `onSuccess` invalida o cache do react-query, causando um refetch. Durante esse refetch, o react-query pode brevemente retornar `isLoading = true` (se o query key mudou) ou o `job` pode ficar `undefined` por um instante. Isso aciona o `useEffect` que redireciona para `/dashboard`, expulsando o usuario da tela de execucao.
+1. O `useRole()` dentro de `useJobs` comeca com `isLoading=true`, o que desabilita a query de jobs (`enabled: false`)
+2. No TanStack Query v5, uma query desabilitada sem cache retorna `query.isLoading = false` (porque `isLoading = isPending && isFetching = true && false = false`)
+3. Portanto `jobsLoading = false` E `jobs = []` E `job = undefined`
+4. O `useEffect` de redirect verifica: `!isLoading && !job && !hadJobRef.current` = `true` → redireciona para `/dashboard`
+5. O usuario e expulso ANTES da query de jobs ter chance de executar
 
-Alem disso, a barra de progresso no card do dashboard nao tem largura definida (sempre 100%).
+Se houver cache do Dashboard, os dados persistem e o bug nao ocorre. Mas se o cache foi limpo (invalido, expirado, ou navegacao direta), o redirect dispara prematuramente.
 
 ### Correcoes
 
-**1. Tornar a Execution resiliente a refetches (Execution.tsx)**
-- Usar `optimisticUpdates` no react-query para que o `updateJob` atualize o cache imediatamente sem causar loading/undefined
-- OU guardar o `job` em um `useRef` para nunca perder a referencia durante refetches
-- Ajustar o `useEffect` de redirect para incluir um delay/guard adicional (nao redirecionar se ja teve um job valido antes)
+**1. `src/hooks/useJobs.ts` — Incluir roleLoading no isLoading retornado**
 
-**2. Evitar que invalidateQueries cause perda do job (useJobs.ts)**
-- Usar `optimistic update` no `updateJob` mutation: atualizar o cache do react-query imediatamente via `queryClient.setQueryData`, antes do refetch
-- Isso garante que durante o refetch, `jobs` nunca fica vazio e `job` nunca fica `undefined`
+Mudar a linha 210 de:
+```typescript
+isLoading: query.isLoading,
+```
+Para:
+```typescript
+isLoading: query.isLoading || roleLoading,
+```
 
-**3. Corrigir barra de progresso no dashboard (DashboardView.tsx)**
-- Adicionar `style={{ width: ... }}` na barra de progresso do card de job para refletir o progresso real
+Isso garante que enquanto o role esta carregando (e a query esta desabilitada), os consumidores veem `isLoading=true` e nao tomam decisoes baseadas em dados ausentes.
+
+**2. `src/pages/Execution.tsx` — Remover inventoryLoading do gate principal**
+
+O inventario so e necessario no step INVENTORY_CHECK. Nao deve bloquear a renderizacao da pagina inteira. Mudar:
+```typescript
+const isLoading = jobsLoading || inventoryLoading;
+```
+Para:
+```typescript
+const isLoading = jobsLoading;
+```
+
+Isso elimina mais um motivo de atraso na renderizacao.
+
+**3. `src/pages/Execution.tsx` — Fortalecer guard de redirect**
+
+Adicionar verificacao extra no useEffect para nao redirecionar se `jobsLoading` acabou de mudar:
+```typescript
+useEffect(() => {
+  if (!isLoading && !job && !hadJobRef.current) {
+    navigate('/dashboard');
+  }
+}, [isLoading, job, navigate]);
+```
+
+Manter o guard `hadJobRef` que ja existe para cobrir o caso de refetches.
 
 ### Arquivos
-- `src/pages/Execution.tsx` — guardar referencia do job, redirect mais seguro
-- `src/hooks/useJobs.ts` — optimistic update no updateJob mutation
-- `src/views/DashboardView.tsx` — fix na largura da barra de progresso
+- `src/hooks/useJobs.ts` — linha 210: incluir `roleLoading`
+- `src/pages/Execution.tsx` — remover `inventoryLoading` do gate, manter guards
 
