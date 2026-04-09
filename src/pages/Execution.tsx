@@ -35,7 +35,7 @@ export default function Execution() {
   const { profile } = useProfile(user?.id);
   const { properties } = useProperties(user?.id);
 
-  const isLoading = jobsLoading || inventoryLoading;
+  const isLoading = jobsLoading;
 
   const handleUpdateJob = (updatedJob: Job) => {
     updateJob(updatedJob);

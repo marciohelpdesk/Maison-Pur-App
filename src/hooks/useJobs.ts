@@ -207,7 +207,7 @@ export const useJobs = (userId: string | undefined) => {
 
   return {
     jobs: query.data || [],
-    isLoading: query.isLoading,
+    isLoading: query.isLoading || roleLoading,
     error: query.error,
     addJob: addJob.mutate,
     updateJob: updateJob.mutate,
