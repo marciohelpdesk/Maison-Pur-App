@@ -1,63 +1,111 @@
 
 
-## Corrigir Bug: Pagina de Execucao Redireciona Antes dos Dados Carregarem
+## Varredura do Aplicativo: Falhas, Inconsistências e Problemas de Workflow
 
-### Causa Raiz Identificada
+Esta é uma análise de auditoria — não vou alterar código agora. Abaixo, os problemas reais encontrados, agrupados por severidade.
 
-O problema esta no TanStack Query v5 combinado com o `useRole` que usa `useState/useEffect` (nao e cacheado).
+---
 
-Quando o usuario navega para `/execution/:jobId`:
+### 🔴 Críticos (impactam funcionamento ou segurança)
 
-1. O `useRole()` dentro de `useJobs` comeca com `isLoading=true`, o que desabilita a query de jobs (`enabled: false`)
-2. No TanStack Query v5, uma query desabilitada sem cache retorna `query.isLoading = false` (porque `isLoading = isPending && isFetching = true && false = false`)
-3. Portanto `jobsLoading = false` E `jobs = []` E `job = undefined`
-4. O `useEffect` de redirect verifica: `!isLoading && !job && !hadJobRef.current` = `true` → redireciona para `/dashboard`
-5. O usuario e expulso ANTES da query de jobs ter chance de executar
+**1. Nome do cleaner hardcoded no relatório**
+- `src/pages/Execution.tsx` (linhas 144, 162) e `src/pages/Reports.tsx` (linha 80) gravam `cleaner_name: 'Kamila Petters'` em todo relatório gerado.
+- Resultado: quando um membro da equipe (faxineira convidada) finaliza um job, o relatório público mostra o nome da Kamila, não de quem realmente limpou.
+- Correção: ler `profile.name` (do `useProfile`) ou nome do `team_member` autenticado.
 
-Se houver cache do Dashboard, os dados persistem e o bug nao ocorre. Mas se o cache foi limpo (invalido, expirado, ou navegacao direta), o redirect dispara prematuramente.
+**2. Política RLS de DELETE em `properties` com lista de e-mails fixa**
+- A policy `Only admins can delete properties` permite DELETE só para `kamila13petters@gmail.com` e `marcioasoliveira@hotmail.com` (hardcoded no banco).
+- Quebra o modelo de roles (`has_role` / `user_roles`) usado no resto do app. Qualquer novo admin não consegue excluir propriedades; trocar e-mail derruba a regra.
+- Correção: usar `public.has_role(auth.uid(), 'admin')`.
 
-### Correcoes
+**3. `useTeamMembers` mapeia e-mails por índice de array**
+- `src/hooks/useTeamMembers.ts` (linhas 59-64) faz `inviteEmails[idx]` para casar membro com convite. Não há garantia nenhuma de que a ordem de `team_members` bate com a de `team_invites`.
+- Resultado: nomes/e-mails de membros da equipe podem aparecer trocados na UI e em jobs atribuídos.
+- Correção: precisa de uma coluna de ligação (ex.: `team_members.invite_id` ou casar via `auth.users.email` num view/RPC `security definer`).
 
-**1. `src/hooks/useJobs.ts` — Incluir roleLoading no isLoading retornado**
+**4. Inconsistência no enum `JobStatus` vs default do banco**
+- O banco tem `jobs.status DEFAULT 'Scheduled'` (capitalizado), mas o enum no front é `'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED'` (caixa alta).
+- Hoje só existem `IN_PROGRESS` e `COMPLETED` no banco. Se algum INSERT cair no default (faltar status no payload), o job vira `'Scheduled'` e some de todos os filtros (`j.status === JobStatus.SCHEDULED` retorna `false`).
+- Correção: alinhar default no banco para `'SCHEDULED'` (migration).
 
-Mudar a linha 210 de:
-```typescript
-isLoading: query.isLoading,
-```
-Para:
-```typescript
-isLoading: query.isLoading || roleLoading,
-```
+**5. Sem realtime nem refetch ao alternar entre abas**
+- Mudanças feitas por outro membro do time (ex.: admin atribui job no desktop) só aparecem para a faxineira no celular após pull-to-refresh manual ou login novo.
+- Não há `supabase.channel(...).on('postgres_changes')` em `useJobs`/`useProperties`.
 
-Isso garante que enquanto o role esta carregando (e a query esta desabilitada), os consumidores veem `isLoading=true` e nao tomam decisoes baseadas em dados ausentes.
+---
 
-**2. `src/pages/Execution.tsx` — Remover inventoryLoading do gate principal**
+### 🟠 Workflow / lógica destoante
 
-O inventario so e necessario no step INVENTORY_CHECK. Nao deve bloquear a renderizacao da pagina inteira. Mudar:
-```typescript
-const isLoading = jobsLoading || inventoryLoading;
-```
-Para:
-```typescript
-const isLoading = jobsLoading;
-```
+**6. Três caminhos diferentes de “iniciar job”**
+- `Dashboard.tsx`, `Agenda.tsx` e `JobDetails.tsx` têm cada um sua própria função `handleStartJob` praticamente idêntica (muda status para `IN_PROGRESS`, seta `startTime`, navega para `/execution/:id`).
+- Risco: divergência futura (já aconteceu — `JobDetails` tem também `handleEditCompletedJob` que pula para `'CHECKLIST'`, enquanto os outros começam em `'BEFORE_PHOTOS'`).
+- Correção: extrair para um único hook `useStartJob()`.
 
-Isso elimina mais um motivo de atraso na renderizacao.
+**7. `queryKey` inconsistente no `useJobs`**
+- A query usa `['jobs', userId, isCleaner]`, mas as invalidações usam só `['jobs', userId]` (sem `isCleaner`). Funciona por prefix-match do TanStack, mas é frágil.
+- O `cancelQueries` do optimistic update usa a chave completa — então em um cenário de race, a invalidação pode disparar refetch antes do optimistic settle.
 
-**3. `src/pages/Execution.tsx` — Fortalecer guard de redirect**
+**8. `useProperties` não tem `userId` no `queryKey`**
+- `queryKey: ['properties', isCleaner]`. Se o usuário trocar de conta sem reload (logout/login), o cache da conta anterior pode vazar para a nova.
 
-Adicionar verificacao extra no useEffect para nao redirecionar se `jobsLoading` acabou de mudar:
-```typescript
-useEffect(() => {
-  if (!isLoading && !job && !hadJobRef.current) {
-    navigate('/dashboard');
-  }
-}, [isLoading, job, navigate]);
-```
+**9. Geração de relatório no `handleComplete` agrupa por título de seção via `includes()`**
+- `src/pages/Execution.tsx` linhas 67-96: associa damages e lost&found a cômodos comparando `description.includes(section.title.toLowerCase())`. Isso é frágil (ex.: dano descrito como “quarto principal” pode bater com seção “Quarto”, ou nenhuma) e o fallback joga tudo para a primeira seção.
+- Resultado: relatórios com danos em locais errados.
 
-Manter o guard `hadJobRef` que ja existe para cobrir o caso de refetches.
+**10. Segurança: ausência total de validação de “limite de fotos”**
+- `PhotoCaptureStep` usa `minPhotos={0}`. Não há regra para impedir que um cleaner finalize um job sem nenhuma foto. Como o relatório é o produto entregue ao cliente, vale ao menos exigir mínimo configurável por tipo de job.
 
-### Arquivos
-- `src/hooks/useJobs.ts` — linha 210: incluir `roleLoading`
-- `src/pages/Execution.tsx` — remover `inventoryLoading` do gate, manter guards
+**11. `Reports.tsx` também cria relatórios manualmente com `cleaner_name` hardcoded**
+- Mesma falha do item 1, mas em fluxo separado — confirma falta de função utilitária única para criar relatório.
 
+---
+
+### 🟡 Organização / manutenibilidade
+
+**12. Lógica de progresso do checklist duplicada 3+ vezes**
+- Cálculo `total / completed` aparece em `DashboardView.tsx` (duas vezes nas linhas 379-395), `ExecutionView.tsx`, `JobDetailsView.tsx` e provavelmente outros.
+- Correção: helper `getChecklistProgress(job)` em `src/lib/`.
+
+**13. `Execution.tsx` é gigante (225 linhas de glue + lógica de PDF/relatório)**
+- Toda a lógica de geração de relatório + upload de PDF deveria viver num hook (`useFinalizeJob`) ou serviço, não no componente de página.
+
+**14. `useRole` não usa TanStack Query**
+- É `useState/useEffect` puro, sem cache. Toda página que chama `useRole(user.id)` refaz duas queries (`user_roles` + `team_members`). Quatro componentes podem disparar simultaneamente.
+- Correção: migrar para `useQuery` com `queryKey: ['role', userId]`.
+
+**15. Imagens estáticas no `DashboardView` são importadas sempre**
+- `airbnb.jpg`, `residencial.jpg`, `posobra.jpg`, `comercial.jpg` carregadas no bundle inicial mesmo que o usuário nunca abra o dashboard. Considerar lazy import.
+
+**16. `getInvoiceByToken` / `getEstimateByToken` são `SECURITY DEFINER` retornando `SETOF`**
+- Funcionam, mas expõem **todos os campos** da tabela (incluindo `client_email`, `client_phone`) para qualquer um com o token. Aceitável se o token é o segredo, mas vale documentar.
+
+**17. `handle_new_user` insere role `'user'`, nunca `'admin'`**
+- Combinado com a policy hardcoded de DELETE de propriedades (item 2), nenhum usuário novo recebe role `'admin'` automaticamente. Precisa de processo manual.
+
+---
+
+### 🟢 Pontos positivos confirmados
+
+- RLS bem desenhada em `jobs`, `cleaning_reports`, `report_rooms`, `report_photos` (cleaners enxergam só jobs atribuídos via `team_members.status = 'active'`).
+- `useAuth` segue o padrão correto: `onAuthStateChange` antes de `getSession`.
+- Lazy loading de páginas via `React.lazy` no `routes.tsx`.
+- Optimistic update em `updateJob` com rollback (recém-adicionado).
+- Guard contra redirect prematuro em `Execution.tsx` com `hadJobRef` (recém-adicionado).
+
+---
+
+### Recomendação de ordem de correção
+
+Se você aprovar implementação, sugiro este lote por impacto:
+
+1. **Item 1 + 11** — `cleaner_name` real (10 min).
+2. **Item 2** — RLS de DELETE properties via `has_role` (migration, 5 min).
+3. **Item 3** — Refazer `useTeamMembers` casando por user_id real (30 min, requer view ou RPC).
+4. **Item 4** — Migration alinhando default de `jobs.status` (2 min).
+5. **Item 6 + 12** — Consolidar `useStartJob` e helper de progresso (20 min).
+6. **Item 14** — Migrar `useRole` para `useQuery` (15 min).
+7. **Item 9** — Repensar associação dano→cômodo (perguntar UX desejado).
+
+Itens 5, 8, 10, 13, 15 podem entrar num lote de “qualidade” depois.
+
+Diga quais lotes quer que eu execute (pode ser “todos”, “só os críticos”, ou listar números específicos) que eu sigo.
