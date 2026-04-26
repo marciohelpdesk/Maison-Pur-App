@@ -1,63 +1,46 @@
 
+## Checklist Completo por Padrão (Remover ao Invés de Adicionar)
 
-## Corrigir Bug: Pagina de Execucao Redireciona Antes dos Dados Carregarem
+### Princípio
+Hoje os 7 templates (`STANDARD`, `AIRBNB`, `DEEP_CLEAN`, `MOVE_IN_OUT`, `RECURRING`, `COMMERCIAL`, `POST_CONSTRUCTION` em `src/data/checklist.ts`) só cobrem cozinha, sala, quarto, banheiro e poucas áreas extras. Você quer o oposto: **toda casa começa com a lista cheia**, e o cleaner apaga as seções que não existem (sem piscina, sem sauna, etc.).
 
-### Causa Raiz Identificada
+### O que vou adicionar a TODOS os templates
 
-O problema esta no TanStack Query v5 combinado com o `useRole` que usa `useState/useEffect` (nao e cacheado).
+Novas seções padrão, com tarefas detalhadas em cada uma:
 
-Quando o usuario navega para `/execution/:jobId`:
+1. **Laundry Room** — máquina, secadora, filtro, dobrar toalhas, reabastecer detergente, limpar tanque/bancada, esvaziar lixo, mop.
+2. **Pool Area** — skimmer/peneira, bordas, deck, espreguiçadeiras, mesa, organizar boias, conferir nível d'água, foto final.
+3. **Hot Tub / Spa** — limpar borda, conferir tampa, organizar acessórios.
+4. **Sauna / Steam Room** — limpar bancos, conferir pedras/vapor, ventilar, mop do piso.
+5. **Gym / Fitness Area** — desinfetar equipamentos, esteira, halteres, espelho, mop.
+6. **Garage** — varrer, organizar, lixo, foto.
+7. **Outdoor / Backyard / Park Area** — varanda, jardim, móveis externos, churrasqueira/grill, brinquedos infantis, pet area.
+8. **Home Office** — mesa, cadeira, monitor, organização de cabos.
+9. **Kids Room / Playroom** — organizar brinquedos, desinfetar superfícies, lavar pelúcias se necessário.
+10. **Game Room / Entertainment** — mesa de bilhar/ping-pong, console, controles.
+11. **Wine Cellar / Bar** — organizar garrafas, polir taças, limpar bancada.
+12. **Balcony / Terrace** — móveis, vasos, varrer, vidros.
+13. **Elevator / Hallway** (para condomínios/Airbnb compartilhado).
+14. **Pet Area** — bebedouro, comedouro, caminha, foto.
 
-1. O `useRole()` dentro de `useJobs` comeca com `isLoading=true`, o que desabilita a query de jobs (`enabled: false`)
-2. No TanStack Query v5, uma query desabilitada sem cache retorna `query.isLoading = false` (porque `isLoading = isPending && isFetching = true && false = false`)
-3. Portanto `jobsLoading = false` E `jobs = []` E `job = undefined`
-4. O `useEffect` de redirect verifica: `!isLoading && !job && !hadJobRef.current` = `true` → redireciona para `/dashboard`
-5. O usuario e expulso ANTES da query de jobs ter chance de executar
+Cada template (Airbnb, Standard, Deep Clean etc.) recebe essas seções extras com **photoRequired** ativado nos itens-chave (foto da piscina, sauna, garagem, área kids).
 
-Se houver cache do Dashboard, os dados persistem e o bug nao ocorre. Mas se o cache foi limpo (invalido, expirado, ou navegacao direta), o redirect dispara prematuramente.
+### Comportamento esperado na execução
+- Quando o cleaner abre o job, o checklist já vem com TODAS as áreas.
+- Se a casa não tem piscina/sauna/etc., ele clica no ícone de **lixeira da seção** (já existe em `ChecklistTemplateEditor.tsx` e no fluxo dinâmico do execution — ver memória `checklist-dynamic-management`) para remover.
+- Itens removidos não viram tarefas pendentes nem aparecem no relatório PDF.
 
-### Correcoes
+### Verificações que vou confirmar antes de mexer
+- Que o fluxo de execução (`ExecutionView` / `ChecklistStep`) realmente permite excluir seções inteiras de um job em andamento (não só editar template salvo na propriedade). Se não permitir, adiciono o botão de excluir seção com confirmação.
+- Que o relatório PDF (`pdfGenerator.ts`) ignora seções removidas e não conta as tarefas delas no `total_tasks` do `cleaning_reports`.
 
-**1. `src/hooks/useJobs.ts` — Incluir roleLoading no isLoading retornado**
+### Arquivos que serão alterados
+- `src/data/checklist.ts` — adicionar as ~14 novas seções a cada um dos 7 templates exportados.
+- `src/components/execution/ChecklistStep.tsx` — garantir botão de "remover seção" no modo execução (se ainda não existir nesse contexto).
+- `src/views/ExecutionView.tsx` — propagar a remoção para o `updateJob` salvar o checklist sem aquela seção.
 
-Mudar a linha 210 de:
-```typescript
-isLoading: query.isLoading,
-```
-Para:
-```typescript
-isLoading: query.isLoading || roleLoading,
-```
+### Fora de escopo
+- Não vou tocar em propriedades já existentes que tenham `checklist_template` customizado salvo no banco — só os defaults novos. Se quiser que propriedades antigas também recebam as novas seções, me avise que faço uma migration de “merge” opcional.
 
-Isso garante que enquanto o role esta carregando (e a query esta desabilitada), os consumidores veem `isLoading=true` e nao tomam decisoes baseadas em dados ausentes.
-
-**2. `src/pages/Execution.tsx` — Remover inventoryLoading do gate principal**
-
-O inventario so e necessario no step INVENTORY_CHECK. Nao deve bloquear a renderizacao da pagina inteira. Mudar:
-```typescript
-const isLoading = jobsLoading || inventoryLoading;
-```
-Para:
-```typescript
-const isLoading = jobsLoading;
-```
-
-Isso elimina mais um motivo de atraso na renderizacao.
-
-**3. `src/pages/Execution.tsx` — Fortalecer guard de redirect**
-
-Adicionar verificacao extra no useEffect para nao redirecionar se `jobsLoading` acabou de mudar:
-```typescript
-useEffect(() => {
-  if (!isLoading && !job && !hadJobRef.current) {
-    navigate('/dashboard');
-  }
-}, [isLoading, job, navigate]);
-```
-
-Manter o guard `hadJobRef` que ja existe para cobrir o caso de refetches.
-
-### Arquivos
-- `src/hooks/useJobs.ts` — linha 210: incluir `roleLoading`
-- `src/pages/Execution.tsx` — remover `inventoryLoading` do gate, manter guards
-
+### Pergunta
+Quer que eu inclua TODAS as 14 áreas que listei, ou prefere um subconjunto (ex.: tirar "Wine Cellar" e "Elevator" porque não se aplicam ao seu mercado)? Se não responder, sigo com a lista completa.
