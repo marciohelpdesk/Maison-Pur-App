@@ -231,7 +231,7 @@ const STANDARD_BASE_SECTIONS: ChecklistSection[] = [
   }
 ];
 
-export const AIRBNB_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const AIRBNB_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'airbnb-entry',
     title: 'Entry & First Impressions',
@@ -326,7 +326,7 @@ export const AIRBNB_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const DEEP_CLEAN_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const DEEP_CLEAN_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'deep-kitchen',
     title: 'Kitchen (Deep Clean)',
@@ -402,7 +402,7 @@ export const DEEP_CLEAN_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const MOVE_IN_OUT_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const MOVE_IN_OUT_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'move-kitchen',
     title: 'Kitchen (Move Cleaning)',
@@ -482,7 +482,7 @@ export const MOVE_IN_OUT_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const RECURRING_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const RECURRING_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'rec-kitchen',
     title: 'Kitchen',
@@ -539,7 +539,7 @@ export const RECURRING_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const POST_CONSTRUCTION_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const POST_CONSTRUCTION_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'pc-dust',
     title: 'Dust & Debris Removal',
@@ -615,7 +615,7 @@ export const POST_CONSTRUCTION_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const COMMERCIAL_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const COMMERCIAL_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'comm-lobby',
     title: 'Lobby & Reception',
