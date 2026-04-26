@@ -695,6 +695,46 @@ const COMMERCIAL_BASE_SECTIONS: ChecklistSection[] = [
   }
 ];
 
+/**
+ * Final exported templates: each one starts with the base sections specific to
+ * the service type AND every possible extra area (laundry, pool, sauna, gym,
+ * etc.). Cleaners delete sections that don't apply during execution.
+ */
+export const STANDARD_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...STANDARD_BASE_SECTIONS,
+  ...buildExtraAreaSections('std-extra'),
+];
+
+export const AIRBNB_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...AIRBNB_BASE_SECTIONS,
+  ...buildExtraAreaSections('abnb-extra'),
+];
+
+export const DEEP_CLEAN_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...DEEP_CLEAN_BASE_SECTIONS,
+  ...buildExtraAreaSections('deep-extra'),
+];
+
+export const MOVE_IN_OUT_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...MOVE_IN_OUT_BASE_SECTIONS,
+  ...buildExtraAreaSections('move-extra'),
+];
+
+export const RECURRING_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...RECURRING_BASE_SECTIONS,
+  ...buildExtraAreaSections('rec-extra'),
+];
+
+export const POST_CONSTRUCTION_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...POST_CONSTRUCTION_BASE_SECTIONS,
+  ...buildExtraAreaSections('pc-extra'),
+];
+
+export const COMMERCIAL_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...COMMERCIAL_BASE_SECTIONS,
+  ...buildExtraAreaSections('comm-extra'),
+];
+
 export const GUEST_SUPPLIES_3_4BR_TEMPLATE: ChecklistSection[] = [
   {
     id: 'gs34-bath',
