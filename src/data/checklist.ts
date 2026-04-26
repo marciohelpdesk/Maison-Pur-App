@@ -1,6 +1,177 @@
 import { ChecklistSection } from '@/types';
 
-export const STANDARD_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+/**
+ * Extra-area sections appended to every base template so that every property
+ * starts with the FULL list of possible spaces (laundry, pool, sauna, gym,
+ * garage, outdoor, home office, kids room, game room, wine cellar, balcony,
+ * elevator/hallway, pet area). Cleaners remove the sections that don't apply
+ * by tapping the trash icon in the execution checklist.
+ *
+ * The `prefix` argument keeps IDs unique across templates so React keys never
+ * collide when multiple templates are loaded in memory.
+ */
+export const buildExtraAreaSections = (prefix: string): ChecklistSection[] => [
+  {
+    id: `${prefix}-laundry`,
+    title: 'Laundry Room',
+    items: [
+      { id: `${prefix}-lr1`, label: 'Wipe washer and dryer exteriors', completed: false, photoRequired: false },
+      { id: `${prefix}-lr2`, label: 'Clean lint trap and dryer filter', completed: false, photoRequired: true },
+      { id: `${prefix}-lr3`, label: 'Wipe down folding counter / utility sink', completed: false, photoRequired: false },
+      { id: `${prefix}-lr4`, label: 'Refill detergent, fabric softener and stain remover', completed: false, photoRequired: false },
+      { id: `${prefix}-lr5`, label: 'Fold and stock clean towels and sheets', completed: false, photoRequired: false },
+      { id: `${prefix}-lr6`, label: 'Empty trash and replace bag', completed: false, photoRequired: false },
+      { id: `${prefix}-lr7`, label: 'Sweep and mop floor', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-pool`,
+    title: 'Pool Area',
+    items: [
+      { id: `${prefix}-po1`, label: 'Skim leaves and debris from water surface', completed: false, photoRequired: false },
+      { id: `${prefix}-po2`, label: 'Brush pool edges and tile line', completed: false, photoRequired: false },
+      { id: `${prefix}-po3`, label: 'Sweep and rinse pool deck', completed: false, photoRequired: false },
+      { id: `${prefix}-po4`, label: 'Wipe down lounge chairs and side tables', completed: false, photoRequired: false },
+      { id: `${prefix}-po5`, label: 'Organize floats, noodles and pool toys', completed: false, photoRequired: false },
+      { id: `${prefix}-po6`, label: 'Check water level and clarity', completed: false, photoRequired: false },
+      { id: `${prefix}-po7`, label: 'Final pool area photo', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-spa`,
+    title: 'Hot Tub / Spa',
+    items: [
+      { id: `${prefix}-sp1`, label: 'Wipe spa shell and headrests', completed: false, photoRequired: false },
+      { id: `${prefix}-sp2`, label: 'Clean and re-secure cover', completed: false, photoRequired: false },
+      { id: `${prefix}-sp3`, label: 'Check water clarity and skim debris', completed: false, photoRequired: false },
+      { id: `${prefix}-sp4`, label: 'Organize spa accessories and steps', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-sauna`,
+    title: 'Sauna / Steam Room',
+    items: [
+      { id: `${prefix}-sa1`, label: 'Wipe down all wooden benches', completed: false, photoRequired: false },
+      { id: `${prefix}-sa2`, label: 'Inspect sauna stones / steam generator', completed: false, photoRequired: false },
+      { id: `${prefix}-sa3`, label: 'Air out the room (door open)', completed: false, photoRequired: false },
+      { id: `${prefix}-sa4`, label: 'Clean glass door inside and out', completed: false, photoRequired: false },
+      { id: `${prefix}-sa5`, label: 'Sweep and mop floor', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-gym`,
+    title: 'Gym / Fitness Area',
+    items: [
+      { id: `${prefix}-gy1`, label: 'Disinfect machines, benches and handles', completed: false, photoRequired: false },
+      { id: `${prefix}-gy2`, label: 'Wipe treadmill, bike and elliptical screens', completed: false, photoRequired: false },
+      { id: `${prefix}-gy3`, label: 'Re-rack dumbbells and free weights', completed: false, photoRequired: false },
+      { id: `${prefix}-gy4`, label: 'Clean mirrors thoroughly', completed: false, photoRequired: false },
+      { id: `${prefix}-gy5`, label: 'Refresh towels and water if provided', completed: false, photoRequired: false },
+      { id: `${prefix}-gy6`, label: 'Vacuum or mop floor / mats', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-garage`,
+    title: 'Garage',
+    items: [
+      { id: `${prefix}-ga1`, label: 'Sweep garage floor', completed: false, photoRequired: false },
+      { id: `${prefix}-ga2`, label: 'Organize tools, bikes and storage', completed: false, photoRequired: false },
+      { id: `${prefix}-ga3`, label: 'Empty trash and recycling bins', completed: false, photoRequired: false },
+      { id: `${prefix}-ga4`, label: 'Wipe down workbench and surfaces', completed: false, photoRequired: false },
+      { id: `${prefix}-ga5`, label: 'Final garage photo', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-outdoor`,
+    title: 'Outdoor / Backyard',
+    items: [
+      { id: `${prefix}-od1`, label: 'Sweep patio, deck and walkways', completed: false, photoRequired: false },
+      { id: `${prefix}-od2`, label: 'Wipe outdoor furniture and cushions', completed: false, photoRequired: false },
+      { id: `${prefix}-od3`, label: 'Clean grill / BBQ exterior and grates', completed: false, photoRequired: false },
+      { id: `${prefix}-od4`, label: 'Tidy garden, planters and outdoor decor', completed: false, photoRequired: false },
+      { id: `${prefix}-od5`, label: 'Pick up cigarette butts, leaves and trash', completed: false, photoRequired: false },
+      { id: `${prefix}-od6`, label: 'Final exterior photo', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-office`,
+    title: 'Home Office',
+    items: [
+      { id: `${prefix}-of1`, label: 'Dust desk, monitor and shelves', completed: false, photoRequired: false },
+      { id: `${prefix}-of2`, label: 'Wipe keyboard, mouse and peripherals', completed: false, photoRequired: false },
+      { id: `${prefix}-of3`, label: 'Organize cables and chargers', completed: false, photoRequired: false },
+      { id: `${prefix}-of4`, label: 'Empty trash and shredder bin', completed: false, photoRequired: false },
+      { id: `${prefix}-of5`, label: 'Vacuum or mop floor', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-kids`,
+    title: 'Kids Room / Playroom',
+    items: [
+      { id: `${prefix}-ki1`, label: 'Sort and store toys in bins', completed: false, photoRequired: false },
+      { id: `${prefix}-ki2`, label: 'Disinfect tables, chairs and play surfaces', completed: false, photoRequired: false },
+      { id: `${prefix}-ki3`, label: 'Spot-clean plush toys if visibly soiled', completed: false, photoRequired: false },
+      { id: `${prefix}-ki4`, label: 'Make beds / arrange cribs neatly', completed: false, photoRequired: false },
+      { id: `${prefix}-ki5`, label: 'Vacuum rugs and mop hard floors', completed: false, photoRequired: false },
+      { id: `${prefix}-ki6`, label: 'Final playroom photo', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-game`,
+    title: 'Game Room / Entertainment',
+    items: [
+      { id: `${prefix}-gm1`, label: 'Wipe pool / ping-pong / foosball table', completed: false, photoRequired: false },
+      { id: `${prefix}-gm2`, label: 'Organize cues, paddles and game pieces', completed: false, photoRequired: false },
+      { id: `${prefix}-gm3`, label: 'Clean console and controllers', completed: false, photoRequired: false },
+      { id: `${prefix}-gm4`, label: 'Dust TV / projector screen', completed: false, photoRequired: false },
+      { id: `${prefix}-gm5`, label: 'Vacuum / mop floor', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-bar`,
+    title: 'Wine Cellar / Bar',
+    items: [
+      { id: `${prefix}-ba1`, label: 'Wipe bar counter and back-bar shelves', completed: false, photoRequired: false },
+      { id: `${prefix}-ba2`, label: 'Polish wine glasses and tumblers', completed: false, photoRequired: false },
+      { id: `${prefix}-ba3`, label: 'Organize bottles by type', completed: false, photoRequired: false },
+      { id: `${prefix}-ba4`, label: 'Clean ice bucket, shaker and bar tools', completed: false, photoRequired: false },
+      { id: `${prefix}-ba5`, label: 'Sweep and mop floor', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-balcony`,
+    title: 'Balcony / Terrace',
+    items: [
+      { id: `${prefix}-bl1`, label: 'Sweep balcony floor', completed: false, photoRequired: false },
+      { id: `${prefix}-bl2`, label: 'Wipe balcony furniture and railings', completed: false, photoRequired: false },
+      { id: `${prefix}-bl3`, label: 'Clean glass railings or windows', completed: false, photoRequired: false },
+      { id: `${prefix}-bl4`, label: 'Water plants and tidy planters', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-hallway`,
+    title: 'Elevator / Hallway',
+    items: [
+      { id: `${prefix}-hw1`, label: 'Wipe elevator buttons and handrails', completed: false, photoRequired: false },
+      { id: `${prefix}-hw2`, label: 'Clean elevator mirrors and walls', completed: false, photoRequired: false },
+      { id: `${prefix}-hw3`, label: 'Sweep and mop hallway floor', completed: false, photoRequired: false },
+      { id: `${prefix}-hw4`, label: 'Dust hallway tables, art and lamps', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-pet`,
+    title: 'Pet Area',
+    items: [
+      { id: `${prefix}-pe1`, label: 'Wash food and water bowls', completed: false, photoRequired: false },
+      { id: `${prefix}-pe2`, label: 'Shake out and replace pet bed cover', completed: false, photoRequired: false },
+      { id: `${prefix}-pe3`, label: 'Sanitize litter box / pee pad area', completed: false, photoRequired: false },
+      { id: `${prefix}-pe4`, label: 'Sweep loose fur and vacuum pet zone', completed: false, photoRequired: false },
+      { id: `${prefix}-pe5`, label: 'Final pet area photo', completed: false, photoRequired: true },
+    ],
+  },
+];
+
+const STANDARD_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'kitchen',
     title: 'Kitchen',
@@ -60,7 +231,7 @@ export const STANDARD_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const AIRBNB_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const AIRBNB_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'airbnb-entry',
     title: 'Entry & First Impressions',
@@ -155,7 +326,7 @@ export const AIRBNB_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const DEEP_CLEAN_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const DEEP_CLEAN_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'deep-kitchen',
     title: 'Kitchen (Deep Clean)',
@@ -231,7 +402,7 @@ export const DEEP_CLEAN_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const MOVE_IN_OUT_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const MOVE_IN_OUT_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'move-kitchen',
     title: 'Kitchen (Move Cleaning)',
@@ -311,7 +482,7 @@ export const MOVE_IN_OUT_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const RECURRING_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const RECURRING_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'rec-kitchen',
     title: 'Kitchen',
@@ -368,7 +539,7 @@ export const RECURRING_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const POST_CONSTRUCTION_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const POST_CONSTRUCTION_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'pc-dust',
     title: 'Dust & Debris Removal',
@@ -444,7 +615,7 @@ export const POST_CONSTRUCTION_CHECKLIST_TEMPLATE: ChecklistSection[] = [
   }
 ];
 
-export const COMMERCIAL_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+const COMMERCIAL_BASE_SECTIONS: ChecklistSection[] = [
   {
     id: 'comm-lobby',
     title: 'Lobby & Reception',
@@ -522,6 +693,46 @@ export const COMMERCIAL_CHECKLIST_TEMPLATE: ChecklistSection[] = [
       { id: 'cf4', label: 'Complete cleaning log', completed: false, photoRequired: false },
     ]
   }
+];
+
+/**
+ * Final exported templates: each one starts with the base sections specific to
+ * the service type AND every possible extra area (laundry, pool, sauna, gym,
+ * etc.). Cleaners delete sections that don't apply during execution.
+ */
+export const STANDARD_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...STANDARD_BASE_SECTIONS,
+  ...buildExtraAreaSections('std-extra'),
+];
+
+export const AIRBNB_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...AIRBNB_BASE_SECTIONS,
+  ...buildExtraAreaSections('abnb-extra'),
+];
+
+export const DEEP_CLEAN_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...DEEP_CLEAN_BASE_SECTIONS,
+  ...buildExtraAreaSections('deep-extra'),
+];
+
+export const MOVE_IN_OUT_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...MOVE_IN_OUT_BASE_SECTIONS,
+  ...buildExtraAreaSections('move-extra'),
+];
+
+export const RECURRING_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...RECURRING_BASE_SECTIONS,
+  ...buildExtraAreaSections('rec-extra'),
+];
+
+export const POST_CONSTRUCTION_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...POST_CONSTRUCTION_BASE_SECTIONS,
+  ...buildExtraAreaSections('pc-extra'),
+];
+
+export const COMMERCIAL_CHECKLIST_TEMPLATE: ChecklistSection[] = [
+  ...COMMERCIAL_BASE_SECTIONS,
+  ...buildExtraAreaSections('comm-extra'),
 ];
 
 export const GUEST_SUPPLIES_3_4BR_TEMPLATE: ChecklistSection[] = [
