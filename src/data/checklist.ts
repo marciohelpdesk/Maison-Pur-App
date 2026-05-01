@@ -169,6 +169,73 @@ export const buildExtraAreaSections = (prefix: string): ChecklistSection[] => [
       { id: `${prefix}-pe5`, label: 'Final pet area photo', completed: false, photoRequired: true },
     ],
   },
+  {
+    id: `${prefix}-cinema`,
+    title: 'Cinema / Media Room',
+    items: [
+      { id: `${prefix}-ci1`, label: 'Dust projector, screen and speakers', completed: false, photoRequired: false },
+      { id: `${prefix}-ci2`, label: 'Wipe reclining chairs and remotes', completed: false, photoRequired: false },
+      { id: `${prefix}-ci3`, label: 'Clean popcorn machine and snack bar', completed: false, photoRequired: false },
+      { id: `${prefix}-ci4`, label: 'Organize movie collection / streaming devices', completed: false, photoRequired: false },
+      { id: `${prefix}-ci5`, label: 'Vacuum carpet and aisles', completed: false, photoRequired: false },
+    ],
+  },
+  {
+    id: `${prefix}-rooftop`,
+    title: 'Rooftop / Terrace',
+    items: [
+      { id: `${prefix}-ro1`, label: 'Sweep rooftop deck thoroughly', completed: false, photoRequired: false },
+      { id: `${prefix}-ro2`, label: 'Wipe lounge furniture and cushions', completed: false, photoRequired: false },
+      { id: `${prefix}-ro3`, label: 'Clean fire pit / outdoor fireplace', completed: false, photoRequired: false },
+      { id: `${prefix}-ro4`, label: 'Check rooftop jacuzzi water and cover', completed: false, photoRequired: false },
+      { id: `${prefix}-ro5`, label: 'Tidy planters and outdoor decor', completed: false, photoRequired: false },
+      { id: `${prefix}-ro6`, label: 'Final rooftop photo with view', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-dock`,
+    title: 'Dock / Pier / Beach Access',
+    items: [
+      { id: `${prefix}-do1`, label: 'Sweep dock boards and remove debris', completed: false, photoRequired: false },
+      { id: `${prefix}-do2`, label: 'Inspect and wipe life jackets / safety gear', completed: false, photoRequired: false },
+      { id: `${prefix}-do3`, label: 'Tidy beach chairs, umbrellas and toys', completed: false, photoRequired: false },
+      { id: `${prefix}-do4`, label: 'Rinse sand off beach access path', completed: false, photoRequired: false },
+      { id: `${prefix}-do5`, label: 'Final waterfront photo', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-ev`,
+    title: 'EV Charger / Tech Garage',
+    items: [
+      { id: `${prefix}-ev1`, label: 'Wipe EV charger unit and screen', completed: false, photoRequired: false },
+      { id: `${prefix}-ev2`, label: 'Coil and organize charging cable', completed: false, photoRequired: false },
+      { id: `${prefix}-ev3`, label: 'Sweep around charging area', completed: false, photoRequired: false },
+      { id: `${prefix}-ev4`, label: 'Check status indicator (green/working)', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-guesthouse`,
+    title: 'Guest House / In-Law Suite',
+    items: [
+      { id: `${prefix}-gh1`, label: 'Make bed with fresh linens', completed: false, photoRequired: true },
+      { id: `${prefix}-gh2`, label: 'Clean mini-kitchen / kitchenette', completed: false, photoRequired: false },
+      { id: `${prefix}-gh3`, label: 'Sanitize private bathroom', completed: false, photoRequired: false },
+      { id: `${prefix}-gh4`, label: 'Restock towels and toiletries', completed: false, photoRequired: false },
+      { id: `${prefix}-gh5`, label: 'Vacuum / mop floor', completed: false, photoRequired: false },
+      { id: `${prefix}-gh6`, label: 'Final guest house photo', completed: false, photoRequired: true },
+    ],
+  },
+  {
+    id: `${prefix}-mudroom`,
+    title: 'Mudroom / Drop Zone',
+    items: [
+      { id: `${prefix}-mu1`, label: 'Organize hooks, hangers and cubbies', completed: false, photoRequired: false },
+      { id: `${prefix}-mu2`, label: 'Wipe bench and storage surfaces', completed: false, photoRequired: false },
+      { id: `${prefix}-mu3`, label: 'Align shoes and arrange footwear', completed: false, photoRequired: false },
+      { id: `${prefix}-mu4`, label: 'Empty trash and shake out rugs', completed: false, photoRequired: false },
+      { id: `${prefix}-mu5`, label: 'Sweep and mop floor', completed: false, photoRequired: false },
+    ],
+  },
 ];
 
 const STANDARD_BASE_SECTIONS: ChecklistSection[] = [
