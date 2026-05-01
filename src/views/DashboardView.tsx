@@ -17,11 +17,6 @@ import { openAddressInMaps } from '@/lib/utils';
 import {
   AIRBNB_CHECKLIST_TEMPLATE,
   STANDARD_CHECKLIST_TEMPLATE,
-  DEEP_CLEAN_CHECKLIST_TEMPLATE,
-  MOVE_IN_OUT_CHECKLIST_TEMPLATE,
-  RECURRING_CHECKLIST_TEMPLATE,
-  POST_CONSTRUCTION_CHECKLIST_TEMPLATE,
-  COMMERCIAL_CHECKLIST_TEMPLATE,
 } from '@/data/checklist';
 import { ChecklistSection } from '@/types';
 import { Job, JobStatus, Property } from '@/types';
@@ -97,11 +92,6 @@ export const DashboardView = ({ jobs, properties = [], onStartJob, onViewJob, us
     const templates: { title: string; icon: string; border: string; template: ChecklistSection[] }[] = [
       { title: 'Airbnb ', icon: '🏠', border: 'border-l-orange-400', template: AIRBNB_CHECKLIST_TEMPLATE },
       { title: 'Residencial', icon: '🏡', border: 'border-l-emerald-400', template: STANDARD_CHECKLIST_TEMPLATE },
-      { title: 'Deep Clean', icon: '🧹', border: 'border-l-blue-400', template: DEEP_CLEAN_CHECKLIST_TEMPLATE },
-      { title: 'Move-in/out', icon: '📦', border: 'border-l-purple-400', template: MOVE_IN_OUT_CHECKLIST_TEMPLATE },
-      { title: 'Recorrente', icon: '🔄', border: 'border-l-teal-400', template: RECURRING_CHECKLIST_TEMPLATE },
-      { title: 'Pós-obra', icon: '🔨', border: 'border-l-amber-400', template: POST_CONSTRUCTION_CHECKLIST_TEMPLATE },
-      { title: 'Comercial', icon: '🏢', border: 'border-l-slate-400', template: COMMERCIAL_CHECKLIST_TEMPLATE },
     ];
     return templates.map(t => ({
       ...t,
