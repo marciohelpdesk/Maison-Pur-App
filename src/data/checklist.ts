@@ -685,11 +685,6 @@ export const GUEST_SUPPLIES_5_6BR_TEMPLATE: ChecklistSection[] = [
 export type ChecklistPresetKey = 
   | 'standard' 
   | 'airbnb' 
-  | 'deep_clean' 
-  | 'move_in_out' 
-  | 'recurring' 
-  | 'post_construction' 
-  | 'commercial'
   | 'guest_supplies_3_4br'
   | 'guest_supplies_5_6br';
 
@@ -704,26 +699,6 @@ export const CHECKLIST_PRESETS: Record<ChecklistPresetKey, {
   airbnb: {
     labelKey: 'checklist.preset.airbnb',
     template: AIRBNB_CHECKLIST_TEMPLATE,
-  },
-  deep_clean: {
-    labelKey: 'checklist.preset.deepClean',
-    template: DEEP_CLEAN_CHECKLIST_TEMPLATE,
-  },
-  move_in_out: {
-    labelKey: 'checklist.preset.moveInOut',
-    template: MOVE_IN_OUT_CHECKLIST_TEMPLATE,
-  },
-  recurring: {
-    labelKey: 'checklist.preset.recurring',
-    template: RECURRING_CHECKLIST_TEMPLATE,
-  },
-  post_construction: {
-    labelKey: 'checklist.preset.postConstruction',
-    template: POST_CONSTRUCTION_CHECKLIST_TEMPLATE,
-  },
-  commercial: {
-    labelKey: 'checklist.preset.commercial',
-    template: COMMERCIAL_CHECKLIST_TEMPLATE,
   },
   guest_supplies_3_4br: {
     labelKey: 'checklist.preset.guestSupplies3_4br',
