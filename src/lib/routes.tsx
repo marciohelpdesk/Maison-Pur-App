@@ -22,6 +22,7 @@ const Expenses = lazy(() => import('@/pages/Expenses'));
 const Reports = lazy(() => import('@/pages/Reports'));
 const Invoices = lazy(() => import('@/pages/Invoices'));
 const Estimates = lazy(() => import('@/pages/Estimates'));
+const CashFlow = lazy(() => import('@/pages/CashFlow'));
 const PublicReport = lazy(() => import('@/pages/PublicReport'));
 const PublicInvoice = lazy(() => import('@/pages/PublicInvoice'));
 const PublicEstimate = lazy(() => import('@/pages/PublicEstimate'));
@@ -167,6 +168,7 @@ export const routes = [
       { path: 'reports', element: <RequireAdmin><Reports /></RequireAdmin> },
       { path: 'invoices', element: <RequireAdmin><Invoices /></RequireAdmin> },
       { path: 'estimates', element: <RequireAdmin><Estimates /></RequireAdmin> },
+      { path: 'cashflow', element: <RequireAdmin><CashFlow /></RequireAdmin> },
     ],
   },
 

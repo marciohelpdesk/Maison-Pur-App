@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, DollarSign, Calendar, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, TrendingUp, DollarSign, Calendar, CheckCircle2, ChevronDown, ChevronUp, LineChart, BarChart3, ChevronRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
 import { Job, JobStatus } from '@/types';
 import { PageHeader } from '@/components/PageHeader';
@@ -15,6 +16,7 @@ interface FinanceViewProps {
 type TimeRange = 'week' | 'month';
 
 export const FinanceView = ({ jobs, onBack }: FinanceViewProps) => {
+  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
@@ -163,6 +165,36 @@ export const FinanceView = ({ jobs, onBack }: FinanceViewProps) => {
             <p className="text-2xl font-light text-foreground">${monthlyEarnings.toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">{monthlyJobs.length} jobs completed</p>
           </motion.div>
+        </div>
+
+        {/* Quick links */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={() => navigate('/cashflow')}
+            className="glass-panel p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <LineChart size={18} className="text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">Cash Flow</p>
+              <p className="text-[10px] text-muted-foreground truncate">30/60/90-day forecast</p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
+          </button>
+          <button
+            onClick={() => navigate('/kpi')}
+            className="glass-panel p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
+          >
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
+              <BarChart3 size={18} className="text-success" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">KPI Dashboard</p>
+              <p className="text-[10px] text-muted-foreground truncate">Health score & insights</p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
+          </button>
         </div>
 
         {/* Chart + Stats side by side on desktop */}

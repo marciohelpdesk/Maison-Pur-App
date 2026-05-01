@@ -1,17 +1,22 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Briefcase, Clock, Target, ChevronLeft, ChevronRight, PieChart } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Briefcase, Clock, Target, ChevronLeft, ChevronRight, PieChart, LineChart } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, Tooltip, PieChart as RechartsPie, Pie, Cell } from 'recharts';
-import { Job, JobStatus } from '@/types';
+import { Job, JobStatus, Property } from '@/types';
 import { Invoice } from '@/hooks/useInvoices';
 import { Expense } from '@/hooks/useExpenses';
 import { PageHeader } from '@/components/PageHeader';
 import { format, parseISO, startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'date-fns';
+import { calculateHealthScore, buildPropertyProfitability } from '@/lib/financeMetrics';
+import { HealthScoreCard } from '@/components/finance/HealthScoreCard';
+import { PropertyProfitabilityCard } from '@/components/finance/PropertyProfitabilityCard';
+import { useNavigate } from 'react-router-dom';
 
 interface KpiDashboardViewProps {
   jobs: Job[];
   invoices: Invoice[];
   expenses: Expense[];
+  properties: Property[];
   monthlyExpenses: number;
   categoryBreakdown: Record<string, number>;
   onBack: () => void;
@@ -19,7 +24,8 @@ interface KpiDashboardViewProps {
 
 const PIE_COLORS = ['hsl(162, 64%, 50%)', 'hsl(200, 80%, 55%)', 'hsl(38, 90%, 55%)', 'hsl(280, 60%, 55%)', 'hsl(340, 70%, 55%)'];
 
-export const KpiDashboardView = ({ jobs, invoices, expenses, monthlyExpenses, categoryBreakdown, onBack }: KpiDashboardViewProps) => {
+export const KpiDashboardView = ({ jobs, invoices, expenses, properties, monthlyExpenses, categoryBreakdown, onBack }: KpiDashboardViewProps) => {
+  const navigate = useNavigate();
   const [monthOffset, setMonthOffset] = useState(0);
 
   const targetDate = useMemo(() => subMonths(new Date(), monthOffset), [monthOffset]);
@@ -89,6 +95,12 @@ export const KpiDashboardView = ({ jobs, invoices, expenses, monthlyExpenses, ca
     }));
   }, [completedJobs]);
 
+  const healthScore = useMemo(() => calculateHealthScore(jobs, invoices, expenses), [jobs, invoices, expenses]);
+  const propertyProfit = useMemo(
+    () => buildPropertyProfitability(jobs, expenses, invoices, properties.map(p => ({ id: p.id, name: p.name })), monthStr),
+    [jobs, expenses, invoices, properties, monthStr],
+  );
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -126,6 +138,26 @@ export const KpiDashboardView = ({ jobs, invoices, expenses, monthlyExpenses, ca
             <ChevronRight size={18} className={monthOffset === 0 ? 'text-muted-foreground/30' : 'text-foreground'} />
           </button>
         </div>
+
+        {/* Business Health Score */}
+        <HealthScoreCard health={healthScore} />
+
+        {/* Cash Flow shortcut */}
+        <button
+          onClick={() => navigate('/cashflow')}
+          className="w-full glass-panel p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <LineChart size={18} className="text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-medium text-foreground">Cash Flow Forecast</p>
+              <p className="text-[10px] text-muted-foreground">See projected balance for the next 30–90 days</p>
+            </div>
+          </div>
+          <ChevronRight size={18} className="text-muted-foreground" />
+        </button>
 
         {/* Top KPI Cards */}
         <div className="grid grid-cols-2 gap-3">
@@ -214,6 +246,9 @@ export const KpiDashboardView = ({ jobs, invoices, expenses, monthlyExpenses, ca
             </ResponsiveContainer>
           </div>
         </motion.div>
+
+        {/* Profit per Property */}
+        <PropertyProfitabilityCard data={propertyProfit} />
 
         {/* Duration by Type */}
         {durationByType.length > 0 && (
