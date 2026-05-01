@@ -167,6 +167,36 @@ export const FinanceView = ({ jobs, onBack }: FinanceViewProps) => {
           </motion.div>
         </div>
 
+        {/* Quick links */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={() => navigate('/cashflow')}
+            className="glass-panel p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <LineChart size={18} className="text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">Cash Flow</p>
+              <p className="text-[10px] text-muted-foreground truncate">30/60/90-day forecast</p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
+          </button>
+          <button
+            onClick={() => navigate('/kpi')}
+            className="glass-panel p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
+          >
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
+              <BarChart3 size={18} className="text-success" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">KPI Dashboard</p>
+              <p className="text-[10px] text-muted-foreground truncate">Health score & insights</p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
+          </button>
+        </div>
+
         {/* Chart + Stats side by side on desktop */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-4 space-y-6 lg:space-y-0 mb-6">
         {/* Earnings Chart */}
