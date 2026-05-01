@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, DollarSign, Calendar, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, TrendingUp, DollarSign, Calendar, CheckCircle2, ChevronDown, ChevronUp, LineChart, BarChart3, ChevronRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, Tooltip } from 'recharts';
 import { Job, JobStatus } from '@/types';
 import { PageHeader } from '@/components/PageHeader';
@@ -15,6 +16,7 @@ interface FinanceViewProps {
 type TimeRange = 'week' | 'month';
 
 export const FinanceView = ({ jobs, onBack }: FinanceViewProps) => {
+  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
