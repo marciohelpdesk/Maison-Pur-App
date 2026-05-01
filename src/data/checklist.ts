@@ -240,60 +240,101 @@ export const buildExtraAreaSections = (prefix: string): ChecklistSection[] => [
 
 const STANDARD_BASE_SECTIONS: ChecklistSection[] = [
   {
+    id: 'entry',
+    title: 'Entry & Hallway',
+    items: [
+      { id: 'e1', label: 'Clean front door (inside and out) and handle', completed: false, photoRequired: false },
+      { id: 'e2', label: 'Shake out doormat / replace welcome mat', completed: false, photoRequired: false },
+      { id: 'e3', label: 'Wipe entry console, mirror and decor', completed: false, photoRequired: false },
+      { id: 'e4', label: 'Organize shoe rack and coat hooks', completed: false, photoRequired: false },
+      { id: 'e5', label: 'Sweep and mop entry floor', completed: false, photoRequired: false },
+    ]
+  },
+  {
     id: 'kitchen',
     title: 'Kitchen',
     items: [
-      { id: 'k1', label: 'Wipe down all countertops', completed: false, photoRequired: false },
-      { id: 'k2', label: 'Clean stovetop and oven exterior', completed: false, photoRequired: false },
+      { id: 'k1', label: 'Wipe down all countertops and backsplash', completed: false, photoRequired: false },
+      { id: 'k2', label: 'Clean stovetop, burners and oven exterior', completed: false, photoRequired: false },
       { id: 'k3', label: 'Clean microwave inside and out', completed: false, photoRequired: false },
-      { id: 'k4', label: 'Wipe cabinet fronts', completed: false, photoRequired: false },
-      { id: 'k5', label: 'Clean sink and faucet', completed: false, photoRequired: false },
-      { id: 'k6', label: 'Empty and wipe trash can', completed: false, photoRequired: false },
-      { id: 'k7', label: 'Sweep and mop floor', completed: false, photoRequired: true },
+      { id: 'k4', label: 'Clean range hood and filter', completed: false, photoRequired: false },
+      { id: 'k5', label: 'Wipe cabinet fronts and handles', completed: false, photoRequired: false },
+      { id: 'k6', label: 'Clean refrigerator exterior + quick interior wipe', completed: false, photoRequired: false },
+      { id: 'k7', label: 'Run / empty dishwasher and wipe front', completed: false, photoRequired: false },
+      { id: 'k8', label: 'Descale sink and faucet', completed: false, photoRequired: false },
+      { id: 'k9', label: 'Wipe small appliances (toaster, kettle, coffee maker)', completed: false, photoRequired: false },
+      { id: 'k10', label: 'Empty and sanitize trash can', completed: false, photoRequired: false },
+      { id: 'k11', label: 'Wipe light switches and outlets', completed: false, photoRequired: false },
+      { id: 'k12', label: 'Sweep and mop floor + baseboards', completed: false, photoRequired: true },
+    ]
+  },
+  {
+    id: 'dining',
+    title: 'Dining Room',
+    items: [
+      { id: 'd1', label: 'Wipe dining table and chairs', completed: false, photoRequired: false },
+      { id: 'd2', label: 'Polish chandelier / pendant lights', completed: false, photoRequired: false },
+      { id: 'd3', label: 'Dust buffet, sideboard and decor', completed: false, photoRequired: false },
+      { id: 'd4', label: 'Arrange centerpiece neatly', completed: false, photoRequired: false },
+      { id: 'd5', label: 'Vacuum / mop floor', completed: false, photoRequired: false },
     ]
   },
   {
     id: 'living',
     title: 'Living Room',
     items: [
-      { id: 'l1', label: 'Dust all surfaces and shelves', completed: false, photoRequired: false },
-      { id: 'l2', label: 'Vacuum carpet/mop floor', completed: false, photoRequired: false },
-      { id: 'l3', label: 'Fluff and arrange pillows', completed: false, photoRequired: false },
-      { id: 'l4', label: 'Wipe down TV screen and remotes', completed: false, photoRequired: false },
-      { id: 'l5', label: 'Clean mirrors and glass', completed: false, photoRequired: false },
+      { id: 'l1', label: 'Dust all surfaces, shelves and electronics', completed: false, photoRequired: false },
+      { id: 'l2', label: 'Vacuum carpets, rugs and upholstery', completed: false, photoRequired: false },
+      { id: 'l3', label: 'Mop hard floors and wipe baseboards', completed: false, photoRequired: false },
+      { id: 'l4', label: 'Fluff and arrange pillows / throws', completed: false, photoRequired: false },
+      { id: 'l5', label: 'Wipe down TV screen, console and remotes', completed: false, photoRequired: false },
+      { id: 'l6', label: 'Clean mirrors, glass and picture frames', completed: false, photoRequired: false },
+      { id: 'l7', label: 'Dust ceiling fan and light fixtures', completed: false, photoRequired: false },
+      { id: 'l8', label: 'Wipe interior windows and sills', completed: false, photoRequired: false },
+      { id: 'l9', label: 'Water and tidy indoor plants', completed: false, photoRequired: false },
     ]
   },
   {
     id: 'bedroom',
     title: 'Bedroom',
     items: [
-      { id: 'b1', label: 'Change bed sheets and pillowcases', completed: false, photoRequired: true },
-      { id: 'b2', label: 'Make bed neatly', completed: false, photoRequired: false },
-      { id: 'b3', label: 'Dust nightstands and dressers', completed: false, photoRequired: false },
-      { id: 'b4', label: 'Vacuum/mop floors', completed: false, photoRequired: false },
-      { id: 'b5', label: 'Organize closet hangers', completed: false, photoRequired: false },
+      { id: 'b1', label: 'Change bed sheets, pillowcases and duvet cover', completed: false, photoRequired: true },
+      { id: 'b2', label: 'Make bed neatly (hotel-style)', completed: false, photoRequired: false },
+      { id: 'b3', label: 'Dust nightstands, dressers and lamps', completed: false, photoRequired: false },
+      { id: 'b4', label: 'Wipe headboard and mirror', completed: false, photoRequired: false },
+      { id: 'b5', label: 'Dust ceiling fan and light fixtures', completed: false, photoRequired: false },
+      { id: 'b6', label: 'Clean window sills and dust blinds', completed: false, photoRequired: false },
+      { id: 'b7', label: 'Wipe baseboards and door frames', completed: false, photoRequired: false },
+      { id: 'b8', label: 'Organize closet hangers and shoes', completed: false, photoRequired: false },
+      { id: 'b9', label: 'Vacuum / mop floors and under bed', completed: false, photoRequired: false },
     ]
   },
   {
     id: 'bathroom',
     title: 'Bathroom',
     items: [
-      { id: 'ba1', label: 'Scrub and sanitize toilet', completed: false, photoRequired: false },
+      { id: 'ba1', label: 'Scrub and sanitize toilet (including base)', completed: false, photoRequired: false },
       { id: 'ba2', label: 'Clean shower/tub and glass doors', completed: false, photoRequired: false },
-      { id: 'ba3', label: 'Wipe down sink and vanity', completed: false, photoRequired: false },
-      { id: 'ba4', label: 'Replace towels', completed: false, photoRequired: true },
-      { id: 'ba5', label: 'Refill toiletries (soap, shampoo)', completed: false, photoRequired: false },
-      { id: 'ba6', label: 'Clean mirror', completed: false, photoRequired: false },
-      { id: 'ba7', label: 'Mop floor', completed: false, photoRequired: false },
+      { id: 'ba3', label: 'Descale showerhead and faucets', completed: false, photoRequired: false },
+      { id: 'ba4', label: 'Scrub tile grout and shower tracks', completed: false, photoRequired: false },
+      { id: 'ba5', label: 'Wipe sink, vanity and underneath', completed: false, photoRequired: false },
+      { id: 'ba6', label: 'Clean mirror and medicine cabinet', completed: false, photoRequired: false },
+      { id: 'ba7', label: 'Wipe exhaust fan cover', completed: false, photoRequired: false },
+      { id: 'ba8', label: 'Replace towels and bath mat', completed: false, photoRequired: true },
+      { id: 'ba9', label: 'Refill toiletries (soap, shampoo, conditioner)', completed: false, photoRequired: false },
+      { id: 'ba10', label: 'Replace toilet paper roll', completed: false, photoRequired: false },
+      { id: 'ba11', label: 'Empty trash and sanitize can', completed: false, photoRequired: false },
+      { id: 'ba12', label: 'Mop floor + wipe baseboards', completed: false, photoRequired: false },
     ]
   },
   {
     id: 'outdoor',
     title: 'Outdoor',
     items: [
-      { id: 'o1', label: 'Sweep patio/balcony floor', completed: false, photoRequired: false },
-      { id: 'o2', label: 'Wipe outdoor furniture', completed: false, photoRequired: false },
-      { id: 'o3', label: 'Check for cigarette butts/trash', completed: false, photoRequired: false },
+      { id: 'o1', label: 'Sweep patio / balcony floor', completed: false, photoRequired: false },
+      { id: 'o2', label: 'Wipe outdoor furniture and cushions', completed: false, photoRequired: false },
+      { id: 'o3', label: 'Check for cigarette butts, leaves and trash', completed: false, photoRequired: false },
+      { id: 'o4', label: 'Tidy planters and outdoor decor', completed: false, photoRequired: false },
     ]
   }
 ];
