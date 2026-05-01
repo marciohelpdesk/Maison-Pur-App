@@ -1,17 +1,22 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Briefcase, Clock, Target, ChevronLeft, ChevronRight, PieChart } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Briefcase, Clock, Target, ChevronLeft, ChevronRight, PieChart, LineChart } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, Tooltip, PieChart as RechartsPie, Pie, Cell } from 'recharts';
-import { Job, JobStatus } from '@/types';
+import { Job, JobStatus, Property } from '@/types';
 import { Invoice } from '@/hooks/useInvoices';
 import { Expense } from '@/hooks/useExpenses';
 import { PageHeader } from '@/components/PageHeader';
 import { format, parseISO, startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'date-fns';
+import { calculateHealthScore, buildPropertyProfitability } from '@/lib/financeMetrics';
+import { HealthScoreCard } from '@/components/finance/HealthScoreCard';
+import { PropertyProfitabilityCard } from '@/components/finance/PropertyProfitabilityCard';
+import { useNavigate } from 'react-router-dom';
 
 interface KpiDashboardViewProps {
   jobs: Job[];
   invoices: Invoice[];
   expenses: Expense[];
+  properties: Property[];
   monthlyExpenses: number;
   categoryBreakdown: Record<string, number>;
   onBack: () => void;
@@ -19,7 +24,8 @@ interface KpiDashboardViewProps {
 
 const PIE_COLORS = ['hsl(162, 64%, 50%)', 'hsl(200, 80%, 55%)', 'hsl(38, 90%, 55%)', 'hsl(280, 60%, 55%)', 'hsl(340, 70%, 55%)'];
 
-export const KpiDashboardView = ({ jobs, invoices, expenses, monthlyExpenses, categoryBreakdown, onBack }: KpiDashboardViewProps) => {
+export const KpiDashboardView = ({ jobs, invoices, expenses, properties, monthlyExpenses, categoryBreakdown, onBack }: KpiDashboardViewProps) => {
+  const navigate = useNavigate();
   const [monthOffset, setMonthOffset] = useState(0);
 
   const targetDate = useMemo(() => subMonths(new Date(), monthOffset), [monthOffset]);
