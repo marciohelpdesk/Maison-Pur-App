@@ -247,6 +247,9 @@ export const KpiDashboardView = ({ jobs, invoices, expenses, properties, monthly
           </div>
         </motion.div>
 
+        {/* Profit per Property */}
+        <PropertyProfitabilityCard data={propertyProfit} />
+
         {/* Duration by Type */}
         {durationByType.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="glass-panel p-4">
