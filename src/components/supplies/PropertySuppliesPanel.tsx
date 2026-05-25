@@ -495,6 +495,9 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
                     {r.items.map(i => i.name).join(', ')}
                   </p>
                   <div className="flex flex-wrap gap-1.5 mt-2">
+                    <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg text-emerald-700 border-emerald-500/40" onClick={() => downloadPdf(r)}>
+                      <FileDown size={11} /> PDF
+                    </Button>
                     <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" onClick={() => copyLink(r.public_token)}>
                       <Copy size={11} /> Copy link
                     </Button>
