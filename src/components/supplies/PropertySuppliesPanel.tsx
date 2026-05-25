@@ -180,11 +180,8 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
     toast.success('Link copied');
   };
 
-  const shareWhatsApp = (token: string) => {
-    const url = `https://maisonpur.lovable.app/supplies/${token}`;
-    const text = `Maison Pur – Supply request for ${property.name}\n${url}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
+
+
 
   return (
     <div className="space-y-3">
