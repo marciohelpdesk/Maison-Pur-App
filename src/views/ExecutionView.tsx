@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle } from 'lucide-react';
 import { Job, ExecutionStep, ChecklistSection, InventoryItem, DamageReport, SupplyAuditEntry, LostAndFoundItem } from '@/types';
@@ -33,11 +33,24 @@ interface ExecutionViewProps {
 
 const STEP_ORDER: ExecutionStep[] = ['BEFORE_PHOTOS', 'CHECKLIST', 'DAMAGE_REPORT', 'LOST_AND_FOUND', 'SUPPLIES_AUDIT', 'AFTER_PHOTOS', 'SUMMARY'];
 
+const normalizeStep = (s: ExecutionStep | string | undefined): ExecutionStep => {
+  if (s && (STEP_ORDER as string[]).includes(s)) return s as ExecutionStep;
+  if (s === 'INVENTORY_CHECK') return 'SUPPLIES_AUDIT';
+  return 'BEFORE_PHOTOS';
+};
+
 export const ExecutionView = ({ job, inventory, userId, onUpdateJob, onComplete, onCancel }: ExecutionViewProps) => {
   const { t } = useLanguage();
-  const [currentStep, setCurrentStep] = useState<ExecutionStep>(job.currentStep || 'BEFORE_PHOTOS');
+  const [currentStep, setCurrentStep] = useState<ExecutionStep>(normalizeStep(job.currentStep));
   const [completedSteps, setCompletedSteps] = useState<ExecutionStep[]>([]);
   const [showExitDialog, setShowExitDialog] = useState(false);
+
+  // Persist normalized step if job had a legacy/unknown value
+  const didNormalizeRef = useRef(false);
+  if (!didNormalizeRef.current && job.currentStep && job.currentStep !== currentStep) {
+    didNormalizeRef.current = true;
+    onUpdateJob({ ...job, currentStep });
+  }
 
   const currentStepIndex = STEP_ORDER.indexOf(currentStep);
 
