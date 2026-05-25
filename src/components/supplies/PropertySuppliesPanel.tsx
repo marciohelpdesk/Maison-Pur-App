@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useInventory } from '@/hooks/useInventory';
-import { useSupplyRequests, SupplyRequestItem } from '@/hooks/useSupplyRequests';
+import { useSupplyRequests, SupplyRequestItem, SupplyRequest } from '@/hooks/useSupplyRequests';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { AddInventoryItemSheet } from './AddInventoryItemSheet';
 import { SUPPLY_CATEGORIES, SUPPLY_PRESETS, SupplyCategory } from '@/data/supplyPresets';
