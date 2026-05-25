@@ -26,6 +26,8 @@ const CashFlow = lazy(() => import('@/pages/CashFlow'));
 const PublicReport = lazy(() => import('@/pages/PublicReport'));
 const PublicInvoice = lazy(() => import('@/pages/PublicInvoice'));
 const PublicEstimate = lazy(() => import('@/pages/PublicEstimate'));
+const Supplies = lazy(() => import('@/pages/Supplies'));
+const PublicSupplyRequest = lazy(() => import('@/pages/PublicSupplyRequest'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Animated Loading component
@@ -168,6 +170,7 @@ export const routes = [
       { path: 'reports', element: <RequireAdmin><Reports /></RequireAdmin> },
       { path: 'invoices', element: <RequireAdmin><Invoices /></RequireAdmin> },
       { path: 'estimates', element: <RequireAdmin><Estimates /></RequireAdmin> },
+      { path: 'supplies', element: <RequireAdmin><Supplies /></RequireAdmin> },
       { path: 'cashflow', element: <RequireAdmin><CashFlow /></RequireAdmin> },
     ],
   },
@@ -188,5 +191,6 @@ export const routes = [
   { path: '/r/:token', element: <SuspenseWrapper><PublicReport /></SuspenseWrapper> },
   { path: '/invoice/:token', element: <SuspenseWrapper><PublicInvoice /></SuspenseWrapper> },
   { path: '/estimate/:token', element: <SuspenseWrapper><PublicEstimate /></SuspenseWrapper> },
+  { path: '/supplies/:token', element: <SuspenseWrapper><PublicSupplyRequest /></SuspenseWrapper> },
   { path: '*', element: <SuspenseWrapper><NotFound /></SuspenseWrapper> },
 ];
