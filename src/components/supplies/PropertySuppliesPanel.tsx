@@ -47,6 +47,8 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
   const [requestNotes, setRequestNotes] = useState('');
   const [selectedForRequest, setSelectedForRequest] = useState<Record<string, number>>({});
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [pdfBusy, setPdfBusy] = useState<string | null>(null);
+
 
   const lowItems = useMemo(
     () => inventory.filter(i => i.quantity <= i.threshold),
@@ -167,13 +169,18 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
   };
 
   const downloadPdf = async (r: SupplyRequest) => {
+    if (pdfBusy) return;
+    setPdfBusy(r.id);
     try {
       await generateSupplyRequestPdf(r);
     } catch (e: any) {
       console.error('[supply pdf]', e);
       toast.error(e?.message || 'Could not generate PDF');
+    } finally {
+      setPdfBusy(null);
     }
   };
+
 
 
   const copyLink = (token: string) => {
@@ -496,9 +503,10 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
                     {r.items.map(i => i.name).join(', ')}
                   </p>
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg text-emerald-700 border-emerald-500/40" onClick={() => downloadPdf(r)}>
-                      <FileDown size={11} /> PDF
+                    <Button size="sm" variant="outline" disabled={pdfBusy === r.id} className="h-7 text-[11px] gap-1 rounded-lg text-emerald-700 border-emerald-500/40" onClick={() => downloadPdf(r)}>
+                      <FileDown size={11} /> {pdfBusy === r.id ? 'Generating…' : 'PDF'}
                     </Button>
+
                     <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" onClick={() => copyLink(r.public_token)}>
                       <Copy size={11} /> Copy link
                     </Button>
