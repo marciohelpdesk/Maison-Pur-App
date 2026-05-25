@@ -33,11 +33,15 @@ export default function PublicSupplyRequest() {
     );
   }
 
-  const shareWhatsApp = () => {
-    const lines = req.items.map(i => `• ${i.name} — ${i.qty_needed} ${i.unit || ''}`).join('\n');
-    const text = `Maison Pur – Supply request for ${req.property_name}\n\n${lines}\n\n${window.location.href}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  const downloadPdf = async () => {
+    try {
+      await generateSupplyRequestPdf(req!);
+    } catch (e: any) {
+      console.error('[supply pdf]', e);
+      toast.error(e?.message || 'Could not generate PDF');
+    }
   };
+
 
   return (
     <>
