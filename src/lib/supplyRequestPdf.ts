@@ -4,8 +4,10 @@ import type { SupplyRequest } from '@/hooks/useSupplyRequests';
 type RGB = [number, number, number];
 
 const C = {
-  emerald: [16, 122, 87] as RGB,
-  emeraldLight: [220, 240, 230] as RGB,
+  emerald: [45, 80, 22] as RGB,
+  emeraldMid: [74, 124, 46] as RGB,
+  emeraldSoft: [232, 240, 224] as RGB,
+  cream: [248, 246, 241] as RGB,
   stone900: [28, 25, 23] as RGB,
   stone700: [68, 64, 60] as RGB,
   stone500: [120, 113, 108] as RGB,
@@ -21,8 +23,10 @@ const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T | null> =>
     p.then((v) => { clearTimeout(t); resolve(v); }).catch(() => { clearTimeout(t); resolve(null); });
   });
 
-const loadLogo = (): Promise<string | null> =>
-  withTimeout(new Promise<string | null>((resolve) => {
+interface LoadedLogo { dataUrl: string; width: number; height: number; }
+
+const loadLogo = (): Promise<LoadedLogo | null> =>
+  withTimeout(new Promise<LoadedLogo | null>((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -33,7 +37,7 @@ const loadLogo = (): Promise<string | null> =>
         const ctx = c.getContext('2d');
         if (!ctx) return resolve(null);
         ctx.drawImage(img, 0, 0);
-        resolve(c.toDataURL('image/png'));
+        resolve({ dataUrl: c.toDataURL('image/png'), width: img.width, height: img.height });
       } catch { resolve(null); }
     };
     img.onerror = () => resolve(null);
@@ -62,12 +66,10 @@ const loadImage = (url: string): Promise<string | null> =>
   }), 5000);
 
 export async function buildSupplyRequestPdfBlob(req: SupplyRequest): Promise<{ blob: Blob; filename: string }> {
-
-
   const pdf = new jsPDF('p', 'mm', 'a4');
   const W = pdf.internal.pageSize.getWidth();
   const H = pdf.internal.pageSize.getHeight();
-  const M = 16;
+  const M = 18;
   let y = M;
 
   const setText = (c: RGB) => pdf.setTextColor(c[0], c[1], c[2]);
@@ -75,14 +77,17 @@ export async function buildSupplyRequestPdfBlob(req: SupplyRequest): Promise<{ b
   const setDraw = (c: RGB) => pdf.setDrawColor(c[0], c[1], c[2]);
 
   const drawFooter = () => {
+    setDraw(C.stone300);
+    pdf.setLineWidth(0.2);
+    pdf.line(M, H - 14, W - M, H - 14);
     setText(C.stone500);
     pdf.setFontSize(8);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('Maison Pur · maisonpur.lovable.app · +1 (941) 330-4713', W / 2, H - 8, { align: 'center' });
+    pdf.text('Maison Pur · maisonpurusa.com · +1 (941) 330-4713', W / 2, H - 9, { align: 'center' });
   };
 
   const ensure = (need: number) => {
-    if (y + need > H - 20) {
+    if (y + need > H - 22) {
       pdf.addPage();
       y = M;
       drawFooter();
@@ -92,78 +97,89 @@ export async function buildSupplyRequestPdfBlob(req: SupplyRequest): Promise<{ b
   // ===== HEADER =====
   const logo = await loadLogo();
   setFill(C.emerald);
-  pdf.rect(0, 0, W, 4, 'F');
+  pdf.rect(0, 0, W, 3, 'F');
 
+  const logoBoxMax = 24; // mm
+  let headerLeftX = M;
   if (logo) {
-    try { pdf.addImage(logo, 'PNG', M, y, 18, 18); } catch {}
+    const scale = Math.min(logoBoxMax / logo.width, logoBoxMax / logo.height);
+    const w = logo.width * scale;
+    const h = logo.height * scale;
+    const offsetY = (logoBoxMax - h) / 2;
+    try {
+      pdf.addImage(logo.dataUrl, 'PNG', M, y + offsetY, w, h);
+    } catch {}
+    headerLeftX = M + logoBoxMax + 6;
   }
 
   setText(C.stone900);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(20);
-  pdf.text('MAISON PUR', M + 22, y + 9);
+  pdf.setFontSize(18);
+  pdf.text('MAISON PUR', headerLeftX, y + 11);
 
-  setText(C.stone500);
+  setText(C.emeraldMid);
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8.5);
-  pdf.text('Luxury Eco-Friendly Cleaning', M + 22, y + 14);
-  pdf.text('maisonpur.lovable.app · +1 (941) 330-4713', M + 22, y + 18);
+  pdf.text('Luxury Eco-Friendly Cleaning', headerLeftX, y + 16);
 
   setText(C.emerald);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(16);
-  pdf.text('SUPPLY REQUEST', W - M, y + 9, { align: 'right' });
+  pdf.setFontSize(15);
+  pdf.text('SUPPLY REQUEST', W - M, y + 11, { align: 'right' });
 
   setText(C.stone500);
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8.5);
   const shortId = req.id.slice(0, 8).toUpperCase();
-  pdf.text(`#${shortId}`, W - M, y + 14, { align: 'right' });
-  pdf.text(new Date(req.created_at).toLocaleDateString(), W - M, y + 18, { align: 'right' });
+  pdf.text(`#${shortId}  ·  ${new Date(req.created_at).toLocaleDateString()}`, W - M, y + 16, { align: 'right' });
 
-  y += 26;
+  y += 30;
 
   setDraw(C.emerald);
-  pdf.setLineWidth(0.6);
+  pdf.setLineWidth(0.5);
   pdf.line(M, y, W - M, y);
-  y += 6;
+  y += 8;
 
   // ===== PROPERTY BLOCK =====
-  setFill(C.stone100);
-  pdf.roundedRect(M, y, W - M * 2, 18, 2, 2, 'F');
+  setFill(C.cream);
+  pdf.roundedRect(M, y, W - M * 2, 22, 3, 3, 'F');
 
-  setText(C.stone500);
+  setText(C.emeraldMid);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(8);
-  pdf.text('PROPERTY', M + 4, y + 5);
+  pdf.setFontSize(7.5);
+  pdf.text('PROPERTY', M + 5, y + 6);
 
   setText(C.stone900);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(12);
-  pdf.text(req.property_name || 'Property', M + 4, y + 11);
+  pdf.setFontSize(13);
+  pdf.text(req.property_name || 'Property', M + 5, y + 13);
 
   setText(C.stone700);
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
-  pdf.text(req.property_address || '', M + 4, y + 15.5);
+  pdf.text(req.property_address || '', M + 5, y + 18.5);
 
   const statusLabel = req.status.toUpperCase();
-  const badgeW = 30;
-  setFill(req.status === 'fulfilled' ? C.emerald : C.amber);
-  pdf.roundedRect(W - M - badgeW - 4, y + 5, badgeW, 6, 1.5, 1.5, 'F');
+  const badgeW = 32;
+  setFill(req.status === 'fulfilled' ? C.emeraldMid : C.amber);
+  pdf.roundedRect(W - M - badgeW - 5, y + 6, badgeW, 7, 2, 2, 'F');
   setText(C.white);
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7.5);
-  pdf.text(statusLabel, W - M - 4 - badgeW / 2, y + 9, { align: 'center' });
+  pdf.text(statusLabel, W - M - 5 - badgeW / 2, y + 10.7, { align: 'center' });
 
-  y += 24;
+  y += 30;
 
   // ===== ITEMS =====
   setText(C.stone900);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(11);
-  pdf.text(`Items Needed (${req.items.length})`, M, y);
-  y += 5;
+  pdf.setFontSize(12);
+  pdf.text(`Items Needed`, M, y);
+  setText(C.stone500);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  pdf.text(`${req.items.length} total`, W - M, y, { align: 'right' });
+  y += 6;
 
   const groups: Record<string, typeof req.items> = {};
   req.items.forEach((it) => {
@@ -174,100 +190,83 @@ export async function buildSupplyRequestPdfBlob(req: SupplyRequest): Promise<{ b
   const categories = Object.keys(groups).sort();
 
   for (const cat of categories) {
-    ensure(14);
-    setFill(C.emeraldLight);
-    pdf.roundedRect(M, y, W - M * 2, 7, 1.5, 1.5, 'F');
-    setText(C.emerald);
+    ensure(16);
+    setFill(C.emerald);
+    pdf.roundedRect(M, y, W - M * 2, 8, 2, 2, 'F');
+    setText(C.white);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
-    pdf.text(cat.toUpperCase(), M + 3, y + 4.8);
-    setText(C.stone500);
+    pdf.text(cat.toUpperCase(), M + 4, y + 5.5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`${groups[cat].length} item${groups[cat].length > 1 ? 's' : ''}`, W - M - 3, y + 4.8, { align: 'right' });
-    y += 10;
-
-    setText(C.stone500);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(7.5);
-    pdf.text('ITEM', M + 2, y);
-    pdf.text('QTY NEEDED', W - M - 2, y, { align: 'right' });
-    y += 2;
-    setDraw(C.stone300);
-    pdf.setLineWidth(0.2);
-    pdf.line(M, y, W - M, y);
-    y += 3;
+    pdf.setFontSize(8);
+    pdf.text(`${groups[cat].length} item${groups[cat].length > 1 ? 's' : ''}`, W - M - 4, y + 5.5, { align: 'right' });
+    y += 12;
 
     for (const it of groups[cat]) {
-      ensure(it.photo_url ? 26 : 12);
+      const rowH = it.photo_url ? 24 : 14;
+      ensure(rowH);
 
       const rowTop = y;
-      let textX = M + 2;
+      let textX = M + 3;
 
       if (it.photo_url) {
         const img = await loadImage(it.photo_url);
         if (img) {
-          try { pdf.addImage(img, 'JPEG', M + 2, y, 18, 18); } catch {}
-          textX = M + 22;
+          try { pdf.addImage(img, 'JPEG', M + 3, y + 1, 18, 18); } catch {}
+          textX = M + 24;
         }
       }
 
       setText(C.stone900);
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(10);
-      pdf.text(it.name, textX, y + 4);
+      pdf.setFontSize(10.5);
+      pdf.text(it.name, textX, y + 6);
 
       if (it.note) {
         setText(C.stone500);
         pdf.setFont('helvetica', 'italic');
         pdf.setFontSize(8);
-        const noteLines = pdf.splitTextToSize(it.note, W - M * 2 - 30 - (it.photo_url ? 20 : 0));
-        pdf.text(noteLines, textX, y + 9);
+        const noteLines = pdf.splitTextToSize(it.note, W - M * 2 - 40 - (it.photo_url ? 22 : 0));
+        pdf.text(noteLines, textX, y + 11);
       }
 
       setText(C.emerald);
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(11);
-      pdf.text(`${it.qty_needed} ${it.unit || ''}`.trim(), W - M - 2, y + 5, { align: 'right' });
+      pdf.setFontSize(13);
+      pdf.text(`${it.qty_needed}`, W - M - 3, y + 7, { align: 'right' });
+      setText(C.stone500);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7.5);
+      pdf.text((it.unit || 'units').toUpperCase(), W - M - 3, y + 11.5, { align: 'right' });
 
-      y = rowTop + (it.photo_url ? 22 : 9);
+      y = rowTop + rowH;
       setDraw(C.stone100);
       pdf.setLineWidth(0.2);
       pdf.line(M, y, W - M, y);
       y += 2;
     }
 
-    y += 4;
+    y += 5;
   }
 
   // ===== NOTES =====
   if (req.notes && req.notes.trim()) {
-    ensure(24);
-    setFill(C.stone100);
-    pdf.roundedRect(M, y, W - M * 2, 20, 2, 2, 'F');
-    setText(C.stone500);
+    ensure(28);
+    setFill(C.cream);
+    pdf.roundedRect(M, y, W - M * 2, 24, 3, 3, 'F');
+    setFill(C.emeraldMid);
+    pdf.rect(M, y, 1.5, 24, 'F');
+    setText(C.emeraldMid);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(8);
-    pdf.text('NOTES', M + 4, y + 5);
+    pdf.text('NOTES', M + 5, y + 6);
     setText(C.stone700);
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
-    const lines = pdf.splitTextToSize(req.notes, W - M * 2 - 8);
-    pdf.text(lines, M + 4, y + 10);
-    y += 24;
+    pdf.setFontSize(9.5);
+    const lines = pdf.splitTextToSize(req.notes, W - M * 2 - 10);
+    pdf.text(lines, M + 5, y + 12);
+    y += 28;
   }
-
-  // ===== PUBLIC LINK =====
-  ensure(16);
-  const url = `https://maisonpur.lovable.app/supplies/${req.public_token}`;
-  setText(C.stone500);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
-  pdf.text('View live online:', M, y);
-  y += 4;
-  setText(C.emerald);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(9);
-  pdf.textWithLink(url, M, y, { url });
 
   drawFooter();
 
@@ -292,5 +291,3 @@ export async function generateSupplyRequestPdf(
   document.body.removeChild(link);
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
-
-
