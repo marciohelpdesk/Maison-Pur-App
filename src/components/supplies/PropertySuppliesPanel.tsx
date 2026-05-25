@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Plus, Minus, Trash2, Camera, ExternalLink, Copy, CheckCircle2,
-  Pencil, ChefHat, Bath, Bed, WashingMachine, SprayCan, Package,
+  Plus, Minus, Trash2, Camera, ExternalLink, Copy, Send, CheckCircle2,
+  History, Pencil, ChefHat, Bath, Bed, WashingMachine, SprayCan, Package,
   ChevronDown, Check, FileDown,
 } from 'lucide-react';
+
 
 import { Property, InventoryItem } from '@/types';
 import { Button } from '@/components/ui/button';
