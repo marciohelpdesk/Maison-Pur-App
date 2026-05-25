@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   Plus, Minus, Trash2, Camera, Share2, ExternalLink, Copy, Send, CheckCircle2,
   History, Pencil, ChefHat, Bath, Bed, WashingMachine, SprayCan, Package,
-  ChevronDown, Check,
+  ChevronDown, Check, FileDown,
 } from 'lucide-react';
 import { Property, InventoryItem } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { useSupplyRequests, SupplyRequestItem } from '@/hooks/useSupplyRequests'
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { AddInventoryItemSheet } from './AddInventoryItemSheet';
 import { SUPPLY_CATEGORIES, SUPPLY_PRESETS, SupplyCategory } from '@/data/supplyPresets';
+import { generateSupplyRequestPdf } from '@/lib/supplyRequestPdf';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -148,12 +149,27 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
         items,
       },
       {
-        onSuccess: () => {
+        onSuccess: async (created) => {
           setSelectedForRequest({});
           setRequestNotes('');
+          try {
+            await generateSupplyRequestPdf(created);
+          } catch (e) {
+            console.error(e);
+            toast.error('Could not generate PDF');
+          }
         },
       },
     );
+  };
+
+  const downloadPdf = async (r: SupplyRequest) => {
+    try {
+      await generateSupplyRequestPdf(r);
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not generate PDF');
+    }
   };
 
   const copyLink = (token: string) => {
