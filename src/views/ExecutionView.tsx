@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle } from 'lucide-react';
 import { Job, ExecutionStep, ChecklistSection, InventoryItem, DamageReport, SupplyAuditEntry, LostAndFoundItem } from '@/types';
