@@ -678,7 +678,7 @@ const translations: Record<Language, Record<string, string>> = {
     'exec.summary.after': 'Depois',
     'exec.summary.photos': 'fotos',
     'exec.summary.damagesRecorded': 'Danos Registrados',
-    'exec.summary.lowStock': 'Estoque Baixo',
+    'exec.summary.suppliesToRestock': 'Suprimentos para Repor',
     'exec.summary.photoDocumentation': 'Documentação Fotográfica',
     'exec.summary.addNote': 'Adicionar Observação (opcional)',
     'exec.summary.notePlaceholder': 'Problemas, notas especiais ou feedback...',
