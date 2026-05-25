@@ -518,7 +518,8 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
 
       <AddInventoryItemSheet
         open={addOpen}
-        onOpenChange={setAddOpen}
+        onOpenChange={(o) => { setAddOpen(o); if (!o) setAddCategory(undefined); }}
+        defaultCategory={addCategory}
         onSubmit={(values) => {
           addItem({
             name: values.name,
