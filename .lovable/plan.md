@@ -1,53 +1,63 @@
-## Objetivo
+# Redesign da página Suprimentos & Inventário
 
-Remover Supplies/Inventário do fluxo de execução (checklist) e criar uma **seção dedicada** no mesmo padrão de Invoices e Estimates. A Kamila seleciona a propriedade, vê/edita o inventário daquela casa, adiciona itens com fotos e observações, e gera um documento público compartilhável com o cliente quando precisar de reposição.
+Hoje a tela `/supplies` mostra todas as propriedades empilhadas na lateral e o inventário aparece como uma lista plana, sem agrupamento. Vou reorganizar a página em duas camadas claras: **seleção de propriedade** → **inventário por ambiente**, com sugestões prontas para acelerar o cadastro.
 
-## Estrutura
+## 1. Topo: seletor de propriedade (uma por vez)
 
-### 1. Nova rota `/supplies` (admin)
-Adicionada ao menu (Dashboard desktop + bottom nav mobile) ao lado de Invoices e Estimates. Layout:
-- **Desktop**: 2 colunas — lista de propriedades à esquerda, painel da propriedade selecionada à direita.
-- **Mobile**: seletor de propriedade no topo, painel abaixo.
+Substituir a sidebar fixa por um **seletor compacto no topo**:
 
-### 2. Painel da propriedade selecionada
-- Cabeçalho: foto, nome, endereço, botão "Compartilhar lista com cliente".
-- Tabs internas:
-  - **Inventário** — tabela densa: nome, categoria, qty atual, unidade, threshold, status (Low/OK), foto miniatura. Ações inline: editar qty, +/−, remover, adicionar/trocar foto.
-  - **Solicitar reposição** — marcar itens em falta, preencher qty desejada e nota, gerar Supply Request (token público).
-  - **Histórico** — solicitações anteriores enviadas, com status (draft/sent/fulfilled) e link público.
-- Botão "Adicionar item" abre Sheet (nome, categoria, qty, unidade, threshold, foto opcional).
+- Card horizontal com foto da propriedade selecionada, nome, endereço e badge de "Low stock".
+- Botão "Trocar propriedade" abre um `Sheet` com busca + lista de propriedades (foto, nome, endereço, contagem de itens). Só uma fica ativa de cada vez.
+- Persiste a última escolha em `localStorage` (`supplies:lastPropertyId`) para abrir direto.
 
-### 3. Documento público `/supplies/:token`
-- Sem login, padrão dos invoices (RPC `SECURITY DEFINER`).
-- Branding Maison Pur: logo, propriedade, lista de itens necessários (foto + qty + nota), contato +1 (941) 330-4713.
-- Botão "Compartilhar via WhatsApp" com resumo formatado.
+## 2. Abas mantidas, mas Inventário reorganizado por área
 
-### 4. Remover do fluxo de execução
-- Tirar `SUPPLIES_AUDIT` de `STEP_ORDER` em `ExecutionStepper.tsx` e `ExecutionView.tsx`.
-- `normalizeStep` mapeia legados `'SUPPLIES_AUDIT'` e `'INVENTORY_CHECK'` → `'AFTER_PHOTOS'` para não quebrar jobs em andamento.
-- Excluir `SuppliesAuditStep.tsx` e referências em `SummaryStep` e `pdfGenerator` (PDF do report deixa de incluir auditoria de supplies).
+Mantém `Inventory · Request · History`. O conteúdo da aba **Inventory** muda:
 
-## Densidade visual (aplicar refinamentos pedidos antes)
-- Linhas/cards compactos (py-2, gap-2), divisórias finas `border-stone-200`.
-- Chip âmbar para Low stock; verde claro para OK.
-- Playfair só no cabeçalho da propriedade; Inter no resto.
-- Ações sempre visíveis (Edit / Remove / +Foto), não escondidas em menu.
+### Agrupamento por ambiente
+Itens agrupados em seções colapsáveis por `category`, na ordem fixa:
+**Kitchen · Bathroom · Bedroom · Laundry · Cleaning · General**
 
-## Detalhes técnicos
+Cada seção mostra:
+- Cabeçalho com ícone (lucide: `ChefHat`, `Bath`, `Bed`, `WashingMachine`, `Spray`, `Package`), nome do ambiente, contagem `X items · Y low`.
+- Linhas compactas como já existem (foto, nome, qty − / + , editar, excluir), com badge LOW.
+- Seções vazias ficam colapsadas com botão "+ Add to Kitchen" inline.
 
-- Reaproveita tabela `inventory` existente (`property_id`, `threshold`, `reorder_photo`) — sem migração para o inventário base.
-- **Nova tabela `supply_requests`**:
-  - `id`, `user_id`, `property_id`, `public_token` (default `gen_random_bytes`), `status` (`draft`/`sent`/`fulfilled`), `notes`, `items` jsonb `[{inventory_id, name, qty_needed, photo_url, note}]`, timestamps.
-  - RLS: owner full; `anon SELECT` quando `status <> 'draft'`.
-  - RPC `get_supply_request_by_token` `SECURITY DEFINER`.
-- **Novos arquivos**:
-  - `src/pages/Supplies.tsx`, `src/views/SuppliesView.tsx`
-  - `src/components/supplies/PropertySuppliesPanel.tsx`, `InventoryItemRow.tsx`, `AddInventoryItemSheet.tsx`, `SupplyRequestSheet.tsx`
-  - `src/pages/PublicSupplyRequest.tsx` + rota `/supplies/:token`
-  - `src/hooks/useInventory.ts` (estender) e `useSupplyRequests.ts`
-- Entrada no menu admin (Dashboard, MobileBottomNav) com `RequireAdmin`.
-- i18n EN/PT-BR em `LanguageContext`.
-- Hooks aguardam `!roleLoading` (regra do projeto).
+### Biblioteca de itens pré-preenchidos (Quick add)
 
-## Fora de escopo
-- Não alterar lógica financeira, reports, branding ou dependências.
+Acima da lista, um bloco "Suggested items" com chips clicáveis por ambiente. Um toque adiciona o item com `quantity` padrão sugerida e `threshold` padrão — sem abrir formulário. Itens já presentes no inventário ficam marcados (✓) e não duplicam (incrementam quantidade).
+
+Presets propostos (em `src/data/supplyPresets.ts`):
+
+- **Kitchen**: Dish soap, Sponges, Trash bags, Paper towels, Coffee filters, Dishwasher pods, Salt, Pepper, Olive oil, Sugar
+- **Bathroom**: Toilet paper, Hand soap, Shampoo, Conditioner, Body wash, Bath towels, Hand towels, Toilet brush, Cotton swabs
+- **Bedroom**: Bed sheets (Queen), Bed sheets (King), Pillowcases, Mattress protector, Extra blankets, Hangers
+- **Laundry**: Laundry detergent, Fabric softener, Bleach, Dryer sheets, Stain remover
+- **Cleaning**: All-purpose cleaner, Glass cleaner, Disinfectant wipes, Microfiber cloths, Vacuum bags, Mop refills, Rubber gloves
+- **General**: Light bulbs, Batteries (AA), Batteries (AAA), Welcome cards, Pens
+
+Cada preset traz `name`, `category`, `unit`, `defaultQuantity`, `defaultThreshold`.
+
+### Botão "+ Add custom item"
+Permanece visível no topo da aba e no rodapé de cada ambiente, abrindo o `AddInventoryItemSheet` já existente (com `category` pré-selecionada quando aberto a partir da seção).
+
+## 3. Sem mudanças nas abas Request / History
+Continuam como estão; apenas herdam o item agrupado por categoria visualmente quando renderizar a lista de seleção.
+
+## 4. Mobile
+- Seletor de propriedade vira card de largura total.
+- Chips de suggested items ficam em `flex-wrap` com scroll horizontal opcional.
+- Seções colapsáveis (`<details>` estilizado) para evitar rolagem longa.
+
+## Arquivos afetados
+
+- `src/views/SuppliesView.tsx` — remove sidebar; adiciona card seletor + `Sheet` de troca de propriedade; persiste `localStorage`.
+- `src/components/supplies/PropertySuppliesPanel.tsx` — reescrita da aba Inventory: agrupamento por categoria + bloco de Suggested items + add com categoria pré-selecionada.
+- `src/components/supplies/AddInventoryItemSheet.tsx` — aceita prop opcional `defaultCategory`.
+- `src/data/supplyPresets.ts` *(novo)* — lista dos presets por ambiente.
+
+## Fora do escopo
+
+- Sem mudanças em RLS, tabelas, hooks (`useInventory`, `useSupplyRequests`) ou rotas.
+- Sem mudanças no fluxo público `/supplies/:token`.
+- Sem mudanças em branding/cores além dos tokens já existentes.
