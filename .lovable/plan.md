@@ -1,50 +1,75 @@
+# Plano: Auditoria de Suprimentos no Checklist
+
 ## Objetivo
-Manter apenas dois templates de checklist no sistema — **Standard** e **Airbnb** — e torná-los significativamente mais completos, cobrindo todos os cômodos e áreas possíveis (sauna, piscina, lavanderia, academia, garagem, escritório, kids, game room, bar, varanda, hall, pet, etc.). Cleaners removerão na lixeira o que não se aplica ao imóvel.
+Mover o controle de estoque/suprimentos da edição da propriedade para uma etapa final dentro da execução do checklist, espelhando o padrão de "Achados & Perdidos" e "Danos". O cleaner faz uma checagem rápida do que ficou faltando na casa (papel higiênico, sabonete, pilhas, talheres etc.), com **quantidade restante, foto e nota escrita**.
 
-## Mudanças
+## Fluxo Novo (Execução)
 
-### 1. `src/data/checklist.ts` — Reformular templates
-- **Expandir as áreas-base do Standard**:
-  - Kitchen: adicionar dishwasher, geladeira (interno básico), descalcificar torneira, exaustor, rodapés, interruptores.
-  - Living Room: ventilador de teto, rodapés, controle remoto, janelas internas, plantas.
-  - Bedroom: trocar capa de travesseiro, rodapés, ventilador, espelho do guarda-roupa, persianas.
-  - Bathroom: descalcificar chuveiro, exaustor, rejunte, embaixo da pia, secador.
-  - Adicionar nova seção base "Entry & Hallway" (porta principal, capacho, sapateira).
-- **Expandir as áreas-base do Airbnb**:
-  - Reforçar Kitchen com Nespresso/cápsulas, sal/pimenta, papel toalha, filtro de café (alinhado com Guest Supplies).
-  - Adicionar inspeção de roupas de cama extras (pack n' play, blankets) na seção Bedroom.
-  - Adicionar Welcome Touches (cartão de boas-vindas, mapa local, manual da casa).
-  - Adicionar Safety Check (extintor, detectores, primeiros socorros) reforçado.
-- **Manter `buildExtraAreaSections`** já existentes (14 áreas: Laundry, Pool, Spa, Sauna, Gym, Garage, Outdoor, Office, Kids, Game, Bar, Balcony, Hallway, Pet) anexadas a ambos os templates.
-- **Adicionar novas áreas extras**:
-  - **Cinema/Media Room** (projetor, poltronas reclináveis, pipoqueira)
-  - **Rooftop/Terrace** (jacuzzi, fire pit, vista)
-  - **Dock/Pier** (cadeiras, salva-vidas) — útil para casas de praia
-  - **EV Charger / Garage Tech** (limpar carregador, organizar cabos)
-  - **Guest House / In-Law Suite** (mini-cozinha, banheiro extra)
-  - **Mudroom / Drop Zone** (cabides, organizadores, sapatos)
-- **Remover do arquivo**:
-  - `DEEP_CLEAN_BASE_SECTIONS`, `DEEP_CLEAN_CHECKLIST_TEMPLATE`
-  - `MOVE_IN_OUT_BASE_SECTIONS`, `MOVE_IN_OUT_CHECKLIST_TEMPLATE`
-  - `RECURRING_BASE_SECTIONS`, `RECURRING_CHECKLIST_TEMPLATE`
-  - `POST_CONSTRUCTION_BASE_SECTIONS`, `POST_CONSTRUCTION_CHECKLIST_TEMPLATE`
-  - `COMMERCIAL_BASE_SECTIONS`, `COMMERCIAL_CHECKLIST_TEMPLATE`
-- **Atualizar `CHECKLIST_PRESETS`** mantendo apenas `standard`, `airbnb`, `guest_supplies_3_4br`, `guest_supplies_5_6br` (os Guest Supplies são complementos úteis, não duplicam a função).
-- **Atualizar `ChecklistPresetKey`** para refletir os tipos restantes.
+Substituir o passo atual `INVENTORY_CHECK` (que pede "quantidade usada" e é confuso) por um novo passo **`SUPPLIES_AUDIT`** posicionado logo antes do `AFTER_PHOTOS`:
 
-### 2. `src/views/DashboardView.tsx`
-- Remover imports de `DEEP_CLEAN_CHECKLIST_TEMPLATE`, `MOVE_IN_OUT_CHECKLIST_TEMPLATE`, `RECURRING_CHECKLIST_TEMPLATE`, `POST_CONSTRUCTION_CHECKLIST_TEMPLATE`, `COMMERCIAL_CHECKLIST_TEMPLATE`.
-- Remover os 5 cards de quick action correspondentes (Deep Clean, Move-in/out, Recorrente, Pós-obra, Comercial), deixando apenas Standard e Airbnb com cards visuais reforçados.
+```text
+BEFORE → CHECKLIST → DAMAGE → LOST&FOUND → SUPPLIES AUDIT → AFTER → SUMMARY
+```
 
-### 3. `src/contexts/LanguageContext.tsx`
-- Remover chaves de tradução não usadas: `checklist.preset.deepClean`, `moveInOut`, `recurring`, `postConstruction`, `commercial` (EN e PT-BR).
+Na tela de Auditoria de Suprimentos o cleaner vê:
 
-### 4. Validação
-- Garantir que `selectedProperty?.checklistTemplate` segue funcional para imóveis existentes (já é JSONB independente).
-- Tipo `Job['type']` em `src/types/index.ts` continua aceitando `'Standard' | 'Deep Clean' | 'Move-out'` — manter por compatibilidade com jobs antigos no banco, sem oferecer Deep Clean/Move-out na criação. (Opcional: simplificar UI de tipo de serviço em `JobFormFields` para só Standard/Airbnb, se aplicável.)
+- Lista pré-preenchida agrupada por categoria (Banheiro, Cozinha, Lavanderia, Quarto, Geral).
+- Para cada item: status rápido em 3 botões — **OK / Baixo / Acabou**.
+- Botão "+ Adicionar item" para incluir algo fora da lista padrão.
+- Ícone de lixeira para remover itens não aplicáveis (mesmo padrão dos cômodos do checklist).
+- Em qualquer item marcado como Baixo/Acabou: campo de **quantidade restante** (opcional), **foto** (opcional) e **observação escrita** (opcional).
+- Resumo no topo: "X itens precisam de reposição".
 
-## Resultado esperado
-- Apenas **dois templates oficiais** exibidos na UI: Standard e Airbnb.
-- Cada um nasce com **~25 seções e 130+ itens** cobrindo toda área que um imóvel residencial de luxo possa ter.
-- Cleaners apagam (ícone lixeira) o que não se aplica em cada execução, conforme já funciona.
-- Dashboard fica mais limpo (2 quick actions principais em vez de 7).
+## Itens Pré-preenchidos (catálogo padrão Maison Pur)
+
+Banheiro: Papel higiênico, Sabonete em barra, Body Wash, Shampoo, Condicionador, Hand soap, Toalhas de papel, Lenços de papel, Cotonetes, Algodão.
+
+Cozinha: Detergente, Esponja, Pano de prato, Papel toalha, Sacos de lixo, Filtro de café, Cápsulas Nespresso, Sal, Pimenta, Azeite, Açúcar, Café, Chá, Água engarrafada.
+
+Lavanderia: Sabão de roupa, Amaciante, Tira-manchas, Sacos de lavanderia.
+
+Geral / Outros: Pilhas AA, Pilhas AAA, Lâmpadas, Velas, Fósforos, Pet supplies (se aplicável), Aromatizador, Talheres extras (garfo/faca/colher), Taças, Copos.
+
+Este catálogo vive em `src/data/supplies.ts` e é injetado automaticamente na primeira auditoria de cada propriedade.
+
+## Mudanças por Arquivo
+
+### Novos
+- `src/data/supplies.ts` — catálogo padrão com `DEFAULT_SUPPLY_ITEMS` (name, category, unit).
+- `src/components/execution/SuppliesAuditStep.tsx` — UI da nova etapa (lista, status OK/Baixo/Acabou, foto, nota, adicionar/remover).
+- `src/hooks/usePropertySupplies.ts` — leitura/escrita do estado de suprimentos por propriedade (reutiliza tabela `inventory` existente — ver seção Técnica).
+
+### Editados
+- `src/types/index.ts` — adicionar tipo `SupplyAuditEntry { itemId, name, category, status: 'ok'|'low'|'out', remainingQty?, photoUrl?, note? }`. Trocar `ExecutionStep` `INVENTORY_CHECK` por `SUPPLIES_AUDIT`. Adicionar `Job.suppliesAudit: SupplyAuditEntry[]`.
+- `src/views/ExecutionView.tsx` — substituir `InventoryCheckStep` por `SuppliesAuditStep` no `STEP_ORDER` e nas props.
+- `src/components/execution/ExecutionStepper.tsx` — atualizar label/ícone do passo.
+- `src/components/execution/SummaryStep.tsx` — exibir bloco "Suprimentos para repor" no resumo final, igual aos blocos de Danos/Achados.
+- `src/lib/pdfGenerator.ts` — incluir seção "Supplies to Restock" no PDF do relatório, com foto e nota.
+- `src/views/PropertyDetailsView.tsx` (e onde for renderizado) — **remover** o componente `PropertyInventory` da tela de edição da propriedade. Em seu lugar, mostrar um resumo somente-leitura: "Última auditoria: 3 dias atrás — 4 itens em falta", com link para o último relatório.
+- `src/hooks/useJobs.ts` — persistir `suppliesAudit` no campo JSONB do job (campo `inventory_used` é reaproveitado, ver Técnica).
+- `src/contexts/LanguageContext.tsx` — chaves novas em EN/PT-BR (`exec.supplies.*`).
+
+### Removidos (após migração suave)
+- `src/components/execution/InventoryCheckStep.tsx` — substituído.
+- `src/components/PropertyInventory.tsx` — removido da UI da propriedade (arquivo pode ser deletado).
+
+## Detalhes Técnicos
+
+**Persistência sem migração de schema:**
+- Reaproveitar a coluna `jobs.inventory_used` (JSONB já existente) para armazenar o array `SupplyAuditEntry[]`. Sem mudanças no banco.
+- A tabela `inventory` continua existindo para guardar o **catálogo customizado por propriedade** (itens que o admin adicionou além do padrão). O hook `usePropertySupplies` faz merge entre `DEFAULT_SUPPLY_ITEMS` + itens da tabela `inventory` filtrados por `property_id`.
+- Auditorias passadas ficam consultáveis via `cleaning_reports` (já guardam o snapshot do job).
+
+**Upload de foto:** reusa `usePhotoUpload` apontando para o bucket `cleaning-photos` (mesmo padrão dos danos).
+
+**Relatório público (Dossier):** a seção de suprimentos aparece no `PublicReport` apenas se houver itens com status `low` ou `out` — mantém o documento elegante quando está tudo OK.
+
+**i18n:** chaves novas seguem padrão `exec.supplies.title`, `exec.supplies.status.ok|low|out`, `exec.supplies.addItem`, `exec.supplies.remaining`, `exec.supplies.note`.
+
+## Fora de Escopo
+- Pedidos automáticos a fornecedores.
+- Histórico/gráfico de consumo (pode vir depois aproveitando os snapshots em `cleaning_reports`).
+- Alertas push de baixo estoque (já existe infra; pode ser ativado em iteração futura).
+
+## Pergunta única antes de implementar
+O catálogo padrão acima cobre o que você precisa, ou quer ajustar/adicionar itens específicos (ex.: cápsulas de marca específica, produtos premium) antes de eu construir?

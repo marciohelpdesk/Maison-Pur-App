@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle } from 'lucide-react';
-import { Job, ExecutionStep, ChecklistSection, InventoryItem, DamageReport, InventoryUsage, LostAndFoundItem } from '@/types';
+import { Job, ExecutionStep, ChecklistSection, InventoryItem, DamageReport, SupplyAuditEntry, LostAndFoundItem } from '@/types';
 import { ExecutionStepper } from '@/components/execution/ExecutionStepper';
 import { PhotoCaptureStep } from '@/components/execution/PhotoCaptureStep';
 import { ChecklistStep } from '@/components/execution/ChecklistStep';
 import { DamageReportStep } from '@/components/execution/DamageReportStep';
 import { LostAndFoundStep } from '@/components/execution/LostAndFoundStep';
-import { InventoryCheckStep } from '@/components/execution/InventoryCheckStep';
+import { SuppliesAuditStep } from '@/components/execution/SuppliesAuditStep';
 import { SummaryStep } from '@/components/execution/SummaryStep';
 import { LiquidProgressBubble } from '@/components/LiquidProgressBubble';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,7 +31,7 @@ interface ExecutionViewProps {
   onCancel: () => void;
 }
 
-const STEP_ORDER: ExecutionStep[] = ['BEFORE_PHOTOS', 'CHECKLIST', 'DAMAGE_REPORT', 'LOST_AND_FOUND', 'INVENTORY_CHECK', 'AFTER_PHOTOS', 'SUMMARY'];
+const STEP_ORDER: ExecutionStep[] = ['BEFORE_PHOTOS', 'CHECKLIST', 'DAMAGE_REPORT', 'LOST_AND_FOUND', 'SUPPLIES_AUDIT', 'AFTER_PHOTOS', 'SUMMARY'];
 
 export const ExecutionView = ({ job, inventory, userId, onUpdateJob, onComplete, onCancel }: ExecutionViewProps) => {
   const { t } = useLanguage();
@@ -96,8 +96,8 @@ export const ExecutionView = ({ job, inventory, userId, onUpdateJob, onComplete,
     onUpdateJob({ ...job, lostAndFound });
   };
 
-  const handleInventoryUsedChange = (inventoryUsed: InventoryUsage[]) => {
-    onUpdateJob({ ...job, inventoryUsed });
+  const handleSuppliesAuditChange = (suppliesAudit: SupplyAuditEntry[]) => {
+    onUpdateJob({ ...job, suppliesAudit });
   };
 
   const handleComplete = (note?: string) => {
@@ -198,14 +198,16 @@ export const ExecutionView = ({ job, inventory, userId, onUpdateJob, onComplete,
             />
           )}
 
-          {currentStep === 'INVENTORY_CHECK' && (
-            <InventoryCheckStep
-              key="inventory"
-              inventory={inventory}
-              inventoryUsed={job.inventoryUsed || []}
-              onInventoryUsedChange={handleInventoryUsedChange}
+          {currentStep === 'SUPPLIES_AUDIT' && (
+            <SuppliesAuditStep
+              key="supplies"
+              propertyId={job.propertyId}
+              entries={job.suppliesAudit || []}
+              onEntriesChange={handleSuppliesAuditChange}
               onNext={goToNextStep}
               onBack={goToPrevStep}
+              userId={userId}
+              jobId={job.id}
             />
           )}
 

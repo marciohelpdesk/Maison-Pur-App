@@ -662,89 +662,82 @@ class PremiumReportGenerator {
   }
 
   // ─── Inventory ─────────────────────────────────
-  private drawInventory(inventory: InventoryItem[], used: { itemId: string; quantityUsed: number }[]) {
-    if (!inventory || inventory.length === 0) return;
+  private drawInventory(inventory: InventoryItem[], _used: { itemId: string; quantityUsed: number }[]) {
+    // Legacy inventory section deprecated. Supplies are now rendered by drawSuppliesAudit().
+    return;
+  }
 
-    const usedItems = used.filter(u => u.quantityUsed > 0);
-    const lowStock = inventory.filter(item => {
-      const u = used.find(x => x.itemId === item.id);
-      return (item.quantity - (u?.quantityUsed || 0)) <= item.threshold;
-    });
-    if (usedItems.length === 0 && lowStock.length === 0) return;
+  private drawSuppliesAudit(entries: import('@/types').SupplyAuditEntry[]) {
+    if (!entries || entries.length === 0) return;
+    const issues = entries.filter(e => e.status === 'low' || e.status === 'out');
+    if (issues.length === 0) return;
 
-    this.sectionTitle('INVENTARIO E SUPRIMENTOS');
+    this.sectionTitle('SUPPLIES TO RESTOCK');
 
-    if (usedItems.length > 0) {
-      const rowH = 8;
-      const tableH = 14 + usedItems.length * rowH;
-      this.pageBreak(tableH + 5);
+    const rowH = 9;
+    const headerH = 11;
+    const tableH = headerH + 3 + issues.length * rowH + 4;
+    this.pageBreak(tableH + 5);
 
-      this.card(this.M, this.y, this.CW, tableH);
+    this.card(this.M, this.y, this.CW, tableH);
 
-      // Header row
-      this.sf(P.navy);
-      this.rr(this.M, this.y, this.CW, 11, 3, 'F');
-      this.pdf.rect(this.M, this.y + 8, this.CW, 3, 'F');
-      this.sc(P.white);
-      this.pdf.setFont('helvetica', 'bold');
-      this.pdf.setFontSize(7);
-      this.pdf.text('PRODUTO', this.M + 10, this.y + 7.5);
-      this.pdf.text('QTDE USADA', this.M + this.CW / 2, this.y + 7.5, { align: 'center' });
-      this.pdf.text('ESTOQUE', this.M + this.CW - 10, this.y + 7.5, { align: 'right' });
+    // Header row
+    this.sf(P.navy);
+    this.rr(this.M, this.y, this.CW, headerH, 3, 'F');
+    this.pdf.rect(this.M, this.y + 8, this.CW, 3, 'F');
+    this.sc(P.white);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setFontSize(7);
+    this.pdf.text('ITEM', this.M + 10, this.y + 7.5);
+    this.pdf.text('CATEGORY', this.M + this.CW / 2 - 20, this.y + 7.5);
+    this.pdf.text('STATUS', this.M + this.CW - 10, this.y + 7.5, { align: 'right' });
 
-      usedItems.forEach((u, idx) => {
-        const item = inventory.find(i => i.id === u.itemId);
-        if (!item) return;
-        const ry = this.y + 17 + idx * rowH;
-        const remaining = item.quantity - u.quantityUsed;
-        const isLow = remaining <= item.threshold;
-
-        if (idx % 2 === 0) {
-          this.sf(P.gray50);
-          this.pdf.rect(this.M + 1, ry - 4, this.CW - 2, rowH, 'F');
-        }
-
-        this.sc(P.gray700);
-        this.pdf.setFont('helvetica', 'normal');
-        this.pdf.setFontSize(8);
-        this.pdf.text(item.name, this.M + 10, ry);
-        this.pdf.text(`${u.quantityUsed} ${item.unit}`, this.M + this.CW / 2, ry, { align: 'center' });
-
-        this.sc(isLow ? P.rose : P.gray700);
-        this.pdf.setFont('helvetica', isLow ? 'bold' : 'normal');
-        this.pdf.text(`${remaining} ${item.unit}`, this.M + this.CW - 10, ry, { align: 'right' });
-
-        if (isLow) {
-          this.badge('! BAIXO', this.M + this.CW - 42, ry - 3.5, P.rose, P.white, 18);
-        }
-      });
-
-      this.y += tableH + 5;
-    }
-
-    // Low stock alert
-    if (lowStock.length > 0) {
-      this.pageBreak(22);
-      const alertH = 14 + lowStock.length * 7;
-      this.card(this.M, this.y, this.CW, alertH, P.rose);
-
-      this.sc(P.rose);
-      this.pdf.setFont('helvetica', 'bold');
+    issues.forEach((s, idx) => {
+      const ry = this.y + headerH + 6 + idx * rowH;
+      if (idx % 2 === 0) {
+        this.sf(P.gray50);
+        this.pdf.rect(this.M + 1, ry - 4, this.CW - 2, rowH, 'F');
+      }
+      this.sc(P.gray700);
+      this.pdf.setFont('helvetica', 'normal');
       this.pdf.setFontSize(8);
-      this.pdf.text('ALERTA: REPOSICAO NECESSARIA', this.M + 12, this.y + 9);
+      this.pdf.text(s.name.substring(0, 36), this.M + 10, ry);
+      this.pdf.text(s.category, this.M + this.CW / 2 - 20, ry);
+      const statusColor = s.status === 'out' ? P.rose : P.amber;
+      const statusLabel = s.status === 'out' ? 'OUT' : 'LOW';
+      this.badge(statusLabel, this.M + this.CW - 24, ry - 3.5, statusColor, P.white, 18);
 
-      lowStock.forEach((item, i) => {
-        const u = used.find(x => x.itemId === item.id);
-        const rem = item.quantity - (u?.quantityUsed || 0);
+      // Optional note line below
+      if (s.note && s.note.trim().length > 0) {
+        // (Skip per-row notes to keep table compact; covered by dossier link.)
+      }
+    });
+
+    this.y += tableH + 5;
+
+    // Notes block for items with notes/photos
+    const withNotes = issues.filter(s => (s.note && s.note.trim()) || s.photoUrl || s.remainingQty !== undefined);
+    if (withNotes.length > 0) {
+      this.pageBreak(20);
+      withNotes.slice(0, 8).forEach(s => {
+        this.pageBreak(14);
         this.sc(P.gray700);
-        this.pdf.setFont('helvetica', 'normal');
+        this.pdf.setFont('helvetica', 'bold');
         this.pdf.setFontSize(8);
-        this.pdf.text(`- ${item.name} -- Estoque: ${rem} ${item.unit} (Min: ${item.threshold})`, this.M + 12, this.y + 17 + i * 7);
+        this.pdf.text(`- ${s.name}`, this.M + 4, this.y + 4);
+        this.pdf.setFont('helvetica', 'normal');
+        this.pdf.setFontSize(7.5);
+        const detail = [
+          s.remainingQty !== undefined ? `Remaining: ${s.remainingQty} ${s.unit || ''}` : null,
+          s.note ? s.note.substring(0, 120) : null,
+        ].filter(Boolean).join(' — ');
+        if (detail) this.pdf.text(detail, this.M + 8, this.y + 9);
+        this.y += s.note ? 12 : 7;
       });
-
-      this.y += alertH + 5;
+      this.y += 4;
     }
   }
+
 
   // ─── Dossier Link Banner ──────────────────────
   private drawDossierBanner() {
@@ -860,7 +853,9 @@ class PremiumReportGenerator {
     this.drawGalleryLinks('FOTOS APOS A LIMPEZA', job.photosAfter, P.cyan);
 
     // Inventory
-    this.drawInventory(inventory, job.inventoryUsed || []);
+    // Supplies Audit (new)
+    this.drawSuppliesAudit(job.suppliesAudit || []);
+
 
     // Dossier link banner at the end
     this.drawDossierBanner();

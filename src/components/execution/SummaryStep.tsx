@@ -107,11 +107,9 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
     return `${mins} min`;
   };
 
-  const lowStockItems = (inventory || []).filter(item => {
-    const usage = job.inventoryUsed?.find(u => u.itemId === item.id);
-    const remaining = item.quantity - (usage?.quantityUsed || 0);
-    return remaining <= item.threshold;
-  });
+  const suppliesToRestock = (job.suppliesAudit || []).filter(
+    s => s.status === 'low' || s.status === 'out',
+  );
 
   const handlePreviewPdf = () => {
     setShowPreview(true);
@@ -232,25 +230,31 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
           </div>
         )}
 
-        {/* Low Stock Warning */}
-        {lowStockItems.length > 0 && (
+        {/* Supplies to Restock */}
+        {suppliesToRestock.length > 0 && (
           <div className="glass-panel p-4 mb-4 border-l-4 border-l-warning">
             <div className="flex items-center gap-2 mb-3">
               <Package className="w-4 h-4 text-warning" />
-              <h3 className="text-sm font-semibold text-foreground">{t('exec.summary.lowStock')} ({lowStockItems.length})</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                {t('exec.summary.suppliesToRestock')} ({suppliesToRestock.length})
+              </h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              {lowStockItems.slice(0, 3).map(item => (
-                <span 
-                  key={item.id}
-                  className="px-2 py-1 rounded-full bg-warning/20 text-warning text-xs"
+              {suppliesToRestock.slice(0, 5).map(s => (
+                <span
+                  key={s.itemId}
+                  className={`px-2 py-1 rounded-full text-xs ${
+                    s.status === 'out'
+                      ? 'bg-rose-500/20 text-rose-400'
+                      : 'bg-amber-500/20 text-amber-400'
+                  }`}
                 >
-                  {item.name}
+                  {s.name}
                 </span>
               ))}
-              {lowStockItems.length > 3 && (
+              {suppliesToRestock.length > 5 && (
                 <span className="px-2 py-1 rounded-full bg-muted text-muted-foreground text-xs">
-                  +{lowStockItems.length - 3}
+                  +{suppliesToRestock.length - 5}
                 </span>
               )}
             </div>

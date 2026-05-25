@@ -13,7 +13,7 @@ const STEP_KEYS: { key: ExecutionStep; labelKey: string; icon: React.ElementType
   { key: 'CHECKLIST', labelKey: 'exec.step.checklist', icon: ClipboardList },
   { key: 'DAMAGE_REPORT', labelKey: 'exec.step.damages', icon: AlertTriangle },
   { key: 'LOST_AND_FOUND', labelKey: 'exec.step.lostFound', icon: Search },
-  { key: 'INVENTORY_CHECK', labelKey: 'exec.step.inventory', icon: Package },
+  { key: 'SUPPLIES_AUDIT', labelKey: 'exec.step.supplies', icon: Package },
   { key: 'AFTER_PHOTOS', labelKey: 'exec.step.afterPhotos', icon: CameraIcon },
   { key: 'SUMMARY', labelKey: 'exec.step.summary', icon: FileText },
 ];

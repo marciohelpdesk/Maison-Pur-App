@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Property, Room, ChecklistSection } from '@/types';
-import { PropertyInventory } from '@/components/PropertyInventory';
+// PropertyInventory removed — supplies are audited per-job in the Supplies Audit execution step
 import { RoomManagement } from '@/components/RoomManagement';
 import { ChecklistTemplateEditor } from '@/components/ChecklistTemplateEditor';
 import { openAddressInMaps } from '@/lib/utils';
@@ -459,20 +459,7 @@ export const PropertyDetailsView = ({ property, onBack, onUpdate, onDelete }: Pr
           )}
         </motion.div>
         
-        {/* Property Inventory */}
-        {user?.id && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.21 }}
-          >
-            <PropertyInventory
-              propertyId={property.id}
-              userId={user.id}
-              isEditing={isEditing}
-            />
-          </motion.div>
-        )}
+        {/* Property Inventory moved to end-of-job Supplies Audit step */}
 
         {/* Room Management */}
         <motion.div
