@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Loader2, Phone, Globe, Package, Download } from 'lucide-react';
+
 import { format, parseISO } from 'date-fns';
 import { BrandLogo } from '@/components/BrandLogo';
 import { usePublicSupplyRequest } from '@/hooks/useSupplyRequests';
@@ -33,14 +35,20 @@ export default function PublicSupplyRequest() {
     );
   }
 
+  const [downloading, setDownloading] = useState(false);
   const downloadPdf = async () => {
+    if (downloading) return;
+    setDownloading(true);
     try {
       await generateSupplyRequestPdf(req!);
     } catch (e: any) {
       console.error('[supply pdf]', e);
       toast.error(e?.message || 'Could not generate PDF');
+    } finally {
+      setDownloading(false);
     }
   };
+
 
 
   return (
@@ -110,10 +118,11 @@ export default function PublicSupplyRequest() {
           )}
 
           <div className="px-4 sm:px-8 pb-6">
-            <Button onClick={downloadPdf} className="w-full h-11 rounded-lg gap-2" style={{ background: '#2D5016' }}>
-              <Download size={16} /> Download PDF
-
+            <Button onClick={downloadPdf} disabled={downloading} className="w-full h-11 rounded-lg gap-2" style={{ background: '#2D5016' }}>
+              {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              {downloading ? 'Generating PDF…' : 'Download PDF'}
             </Button>
+
           </div>
 
           <div className="px-4 sm:px-8 py-4 border-t border-gray-100 text-center text-xs text-gray-500 space-y-1">
