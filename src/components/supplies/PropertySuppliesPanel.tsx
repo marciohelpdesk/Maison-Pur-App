@@ -48,6 +48,7 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
   const [selectedForRequest, setSelectedForRequest] = useState<Record<string, number>>({});
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [pdfBusy, setPdfBusy] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'inventory' | 'request' | 'history'>('inventory');
 
 
   const lowItems = useMemo(
