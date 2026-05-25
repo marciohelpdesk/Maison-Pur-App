@@ -274,5 +274,11 @@ export async function generateSupplyRequestPdf(
   drawFooter();
 
   const slug = (req.property_name || 'maison-pur').replace(/\s+/g, '-').toLowerCase();
-  pdf.save(`supply-request-${slug}-${shortId}.pdf`);
+  const filename = `supply-request-${slug}-${shortId}.pdf`;
+  if (opts.mode === 'open') {
+    window.open(pdf.output('bloburl'), '_blank');
+  } else {
+    pdf.save(filename);
+  }
 }
+
