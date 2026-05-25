@@ -19,7 +19,8 @@ import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-const CATEGORY_ICONS: Record<SupplyCategory, React.ComponentType<{ size?: number; className?: string }>> = {
+import type { LucideIcon } from 'lucide-react';
+const CATEGORY_ICONS: Record<SupplyCategory, LucideIcon> = {
   Kitchen: ChefHat,
   Bathroom: Bath,
   Bedroom: Bed,
