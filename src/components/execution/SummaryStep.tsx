@@ -107,9 +107,8 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
     return `${mins} min`;
   };
 
-  const suppliesToRestock = (job.suppliesAudit || []).filter(
-    s => s.status === 'low' || s.status === 'out',
-  );
+  // suppliesToRestock removed — supplies now managed in /supplies
+
 
   const handlePreviewPdf = () => {
     setShowPreview(true);
@@ -230,36 +229,8 @@ export const SummaryStep = ({ job, inventory, onComplete, onBack }: SummaryStepP
           </div>
         )}
 
-        {/* Supplies to Restock */}
-        {suppliesToRestock.length > 0 && (
-          <div className="glass-panel p-4 mb-4 border-l-4 border-l-warning">
-            <div className="flex items-center gap-2 mb-3">
-              <Package className="w-4 h-4 text-warning" />
-              <h3 className="text-sm font-semibold text-foreground">
-                {t('exec.summary.suppliesToRestock')} ({suppliesToRestock.length})
-              </h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {suppliesToRestock.slice(0, 5).map(s => (
-                <span
-                  key={s.itemId}
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    s.status === 'out'
-                      ? 'bg-rose-500/20 text-rose-400'
-                      : 'bg-amber-500/20 text-amber-400'
-                  }`}
-                >
-                  {s.name}
-                </span>
-              ))}
-              {suppliesToRestock.length > 5 && (
-                <span className="px-2 py-1 rounded-full bg-muted text-muted-foreground text-xs">
-                  +{suppliesToRestock.length - 5}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Supplies removed — now managed in dedicated /supplies section */}
+
 
         {/* Photo Preview */}
         {(job.photosBefore.length > 0 || job.photosAfter.length > 0) && (

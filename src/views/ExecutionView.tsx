@@ -1,13 +1,12 @@
 import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle } from 'lucide-react';
-import { Job, ExecutionStep, ChecklistSection, InventoryItem, DamageReport, SupplyAuditEntry, LostAndFoundItem } from '@/types';
+import { Job, ExecutionStep, ChecklistSection, InventoryItem, DamageReport, LostAndFoundItem } from '@/types';
 import { ExecutionStepper } from '@/components/execution/ExecutionStepper';
 import { PhotoCaptureStep } from '@/components/execution/PhotoCaptureStep';
 import { ChecklistStep } from '@/components/execution/ChecklistStep';
 import { DamageReportStep } from '@/components/execution/DamageReportStep';
 import { LostAndFoundStep } from '@/components/execution/LostAndFoundStep';
-import { SuppliesAuditStep } from '@/components/execution/SuppliesAuditStep';
 import { SummaryStep } from '@/components/execution/SummaryStep';
 import { LiquidProgressBubble } from '@/components/LiquidProgressBubble';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,11 +30,11 @@ interface ExecutionViewProps {
   onCancel: () => void;
 }
 
-const STEP_ORDER: ExecutionStep[] = ['BEFORE_PHOTOS', 'CHECKLIST', 'DAMAGE_REPORT', 'LOST_AND_FOUND', 'SUPPLIES_AUDIT', 'AFTER_PHOTOS', 'SUMMARY'];
+const STEP_ORDER: ExecutionStep[] = ['BEFORE_PHOTOS', 'CHECKLIST', 'DAMAGE_REPORT', 'LOST_AND_FOUND', 'AFTER_PHOTOS', 'SUMMARY'];
 
 const normalizeStep = (s: ExecutionStep | string | undefined): ExecutionStep => {
   if (s && (STEP_ORDER as string[]).includes(s)) return s as ExecutionStep;
-  if (s === 'INVENTORY_CHECK') return 'SUPPLIES_AUDIT';
+  if (s === 'INVENTORY_CHECK' || s === 'SUPPLIES_AUDIT') return 'AFTER_PHOTOS';
   return 'BEFORE_PHOTOS';
 };
 
@@ -109,9 +108,8 @@ export const ExecutionView = ({ job, inventory, userId, onUpdateJob, onComplete,
     onUpdateJob({ ...job, lostAndFound });
   };
 
-  const handleSuppliesAuditChange = (suppliesAudit: SupplyAuditEntry[]) => {
-    onUpdateJob({ ...job, suppliesAudit });
-  };
+  // handleSuppliesAuditChange removed (supplies now in /supplies section)
+
 
   const handleComplete = (note?: string) => {
     const completedJob: Job = {
@@ -211,18 +209,8 @@ export const ExecutionView = ({ job, inventory, userId, onUpdateJob, onComplete,
             />
           )}
 
-          {currentStep === 'SUPPLIES_AUDIT' && (
-            <SuppliesAuditStep
-              key="supplies"
-              propertyId={job.propertyId}
-              entries={job.suppliesAudit || []}
-              onEntriesChange={handleSuppliesAuditChange}
-              onNext={goToNextStep}
-              onBack={goToPrevStep}
-              userId={userId}
-              jobId={job.id}
-            />
-          )}
+          {/* SUPPLIES_AUDIT removed — supplies are now managed in /supplies */}
+
 
           {currentStep === 'AFTER_PHOTOS' && (
             <PhotoCaptureStep

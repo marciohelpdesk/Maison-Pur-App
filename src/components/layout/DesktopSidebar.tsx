@@ -1,4 +1,4 @@
-import { Home, Calendar, Building2, Settings, FileText, DollarSign, Receipt, ClipboardList, LogOut } from 'lucide-react';
+import { Home, Calendar, Building2, Settings, FileText, DollarSign, Receipt, ClipboardList, Package, LogOut } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -14,6 +14,7 @@ const allNavItems = [
   { path: '/reports', icon: FileText, label: 'Relatórios', adminOnly: true },
   { path: '/invoices', icon: Receipt, label: 'Faturas', adminOnly: true },
   { path: '/estimates', icon: ClipboardList, label: 'Orçamentos', adminOnly: true },
+  { path: '/supplies', icon: Package, label: 'Suprimentos', adminOnly: true },
   { path: '/finance', icon: DollarSign, label: 'Financeiro', adminOnly: true },
   { path: '/settings', icon: Settings, label: 'Configurações', adminOnly: false },
 ];

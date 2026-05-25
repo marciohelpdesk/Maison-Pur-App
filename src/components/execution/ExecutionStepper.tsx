@@ -1,5 +1,5 @@
 import { ExecutionStep } from '@/types';
-import { Check, Camera, ClipboardList, CameraIcon, FileText, AlertTriangle, Package, Search } from 'lucide-react';
+import { Check, Camera, ClipboardList, CameraIcon, FileText, AlertTriangle, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -13,7 +13,6 @@ const STEP_KEYS: { key: ExecutionStep; labelKey: string; icon: React.ElementType
   { key: 'CHECKLIST', labelKey: 'exec.step.checklist', icon: ClipboardList },
   { key: 'DAMAGE_REPORT', labelKey: 'exec.step.damages', icon: AlertTriangle },
   { key: 'LOST_AND_FOUND', labelKey: 'exec.step.lostFound', icon: Search },
-  { key: 'SUPPLIES_AUDIT', labelKey: 'exec.step.supplies', icon: Package },
   { key: 'AFTER_PHOTOS', labelKey: 'exec.step.afterPhotos', icon: CameraIcon },
   { key: 'SUMMARY', labelKey: 'exec.step.summary', icon: FileText },
 ];
