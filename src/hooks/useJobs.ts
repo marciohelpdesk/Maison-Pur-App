@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Job, JobStatus, ChecklistSection, DamageReport, InventoryUsage, LostAndFoundItem, ExecutionStep } from '@/types';
+import { Job, JobStatus, ChecklistSection, DamageReport, InventoryUsage, LostAndFoundItem, ExecutionStep, SupplyAuditEntry } from '@/types';
 import { Json } from '@/integrations/supabase/types';
 import { useRole } from '@/hooks/useRole';
 
@@ -57,7 +57,15 @@ const mapDbToJob = (db: DbJob): Job => ({
   reportNote: db.report_note || undefined,
   reportPdfUrl: db.report_pdf_url || undefined,
   damages: (db.damages as unknown as DamageReport[]) || [],
-  inventoryUsed: (db.inventory_used as unknown as InventoryUsage[]) || [],
+  inventoryUsed: (() => {
+    const raw = (db.inventory_used as unknown as any[]) || [];
+    // legacy shape only: keep entries that look like InventoryUsage
+    return raw.filter(x => x && typeof x === 'object' && 'quantityUsed' in x) as InventoryUsage[];
+  })(),
+  suppliesAudit: (() => {
+    const raw = (db.inventory_used as unknown as any[]) || [];
+    return raw.filter(x => x && typeof x === 'object' && 'status' in x) as SupplyAuditEntry[];
+  })(),
   lostAndFound: (db.lost_and_found as unknown as LostAndFoundItem[]) || [],
 });
 
@@ -84,7 +92,9 @@ const mapJobToDb = (job: Partial<Job>, userId: string): Partial<DbJob> => ({
   report_note: job.reportNote || null,
   report_pdf_url: job.reportPdfUrl || null,
   damages: (job.damages || []) as unknown as Json,
-  inventory_used: (job.inventoryUsed || []) as unknown as Json,
+  inventory_used: (job.suppliesAudit && job.suppliesAudit.length > 0
+    ? job.suppliesAudit
+    : (job.inventoryUsed || [])) as unknown as Json,
   lost_and_found: (job.lostAndFound || []) as unknown as Json,
 });
 
