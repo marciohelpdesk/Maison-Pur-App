@@ -130,7 +130,7 @@ const translations: Record<Language, Record<string, string>> = {
     'exec.step.beforePhotos': 'Before',
     'exec.step.checklist': 'Tasks',
     'exec.step.damages': 'Damages',
-    'exec.step.inventory': 'Inventory',
+    'exec.step.supplies': 'Supplies',
     'exec.step.afterPhotos': 'After',
     'exec.step.summary': 'Summary',
     
@@ -181,13 +181,25 @@ const translations: Record<Language, Record<string, string>> = {
     'exec.damage.severityMedium': 'Medium',
     'exec.damage.severityHigh': 'High',
     
-    // Execution - Inventory
-    'exec.inventory.title': 'Inventory',
-    'exec.inventory.subtitle': 'Record items used during cleaning',
-    'exec.inventory.lowStock': 'Low Stock',
-    'exec.inventory.available': 'Available',
-    'exec.inventory.used': 'used',
-    'exec.inventory.noItems': 'No inventory items registered',
+    // Execution - Supplies Audit
+    'exec.supplies.title': 'Supplies Audit',
+    'exec.supplies.subtitle': 'Mark what is OK, low or out at the property',
+    'exec.supplies.needRestock': 'item(s) need restocking',
+    'exec.supplies.status.ok': 'OK',
+    'exec.supplies.status.low': 'Low',
+    'exec.supplies.status.out': 'Out',
+    'exec.supplies.remaining': 'Remaining',
+    'exec.supplies.remainingPlaceholder': 'Qty remaining',
+    'exec.supplies.notePlaceholder': 'Notes (brand, size, where to buy…)',
+    'exec.supplies.addItem': 'Add custom item',
+    'exec.supplies.newItem': 'New item',
+    'exec.supplies.itemNamePlaceholder': 'Item name',
+    'exec.supplies.remove': 'Remove from list',
+    'exec.supplies.cat.bathroom': 'Bathroom',
+    'exec.supplies.cat.kitchen': 'Kitchen',
+    'exec.supplies.cat.laundry': 'Laundry',
+    'exec.supplies.cat.bedroom': 'Bedroom',
+    'exec.supplies.cat.general': 'General',
     
     // Execution - Summary
     'exec.summary.greatJob': 'Great Job!',
