@@ -110,8 +110,9 @@ export default function PublicSupplyRequest() {
           )}
 
           <div className="px-4 sm:px-8 pb-6">
-            <Button onClick={shareWhatsApp} className="w-full h-11 rounded-lg gap-2" style={{ background: '#2D5016' }}>
-              <Share2 size={16} /> Share via WhatsApp
+            <Button onClick={downloadPdf} className="w-full h-11 rounded-lg gap-2" style={{ background: '#2D5016' }}>
+              <Download size={16} /> Download PDF
+
             </Button>
           </div>
 
