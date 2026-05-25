@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus, Minus, Trash2, Camera, Share2, ExternalLink, Copy, Send, CheckCircle2,
-  History, Pencil,
+  History, Pencil, ChefHat, Bath, Bed, WashingMachine, SprayCan, Package,
+  ChevronDown, Check,
 } from 'lucide-react';
 import { Property, InventoryItem } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,19 @@ import { useInventory } from '@/hooks/useInventory';
 import { useSupplyRequests, SupplyRequestItem } from '@/hooks/useSupplyRequests';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { AddInventoryItemSheet } from './AddInventoryItemSheet';
+import { SUPPLY_CATEGORIES, SUPPLY_PRESETS, SupplyCategory } from '@/data/supplyPresets';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
+
+const CATEGORY_ICONS: Record<SupplyCategory, React.ComponentType<{ size?: number; className?: string }>> = {
+  Kitchen: ChefHat,
+  Bathroom: Bath,
+  Bedroom: Bed,
+  Laundry: WashingMachine,
+  Cleaning: SprayCan,
+  General: Package,
+};
 
 interface Props {
   property: Property;
