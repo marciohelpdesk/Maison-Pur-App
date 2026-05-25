@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   Plus, Minus, Trash2, Camera, Share2, ExternalLink, Copy, Send, CheckCircle2,
   History, Pencil, ChefHat, Bath, Bed, WashingMachine, SprayCan, Package,
-  ChevronDown, Check,
+  ChevronDown, Check, FileDown,
 } from 'lucide-react';
 import { Property, InventoryItem } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useInventory } from '@/hooks/useInventory';
-import { useSupplyRequests, SupplyRequestItem } from '@/hooks/useSupplyRequests';
+import { useSupplyRequests, SupplyRequestItem, SupplyRequest } from '@/hooks/useSupplyRequests';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { AddInventoryItemSheet } from './AddInventoryItemSheet';
 import { SUPPLY_CATEGORIES, SUPPLY_PRESETS, SupplyCategory } from '@/data/supplyPresets';
+import { generateSupplyRequestPdf } from '@/lib/supplyRequestPdf';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -148,12 +149,27 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
         items,
       },
       {
-        onSuccess: () => {
+        onSuccess: async (created) => {
           setSelectedForRequest({});
           setRequestNotes('');
+          try {
+            await generateSupplyRequestPdf(created);
+          } catch (e) {
+            console.error(e);
+            toast.error('Could not generate PDF');
+          }
         },
       },
     );
+  };
+
+  const downloadPdf = async (r: SupplyRequest) => {
+    try {
+      await generateSupplyRequestPdf(r);
+    } catch (e) {
+      console.error(e);
+      toast.error('Could not generate PDF');
+    }
   };
 
   const copyLink = (token: string) => {
@@ -479,6 +495,9 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
                     {r.items.map(i => i.name).join(', ')}
                   </p>
                   <div className="flex flex-wrap gap-1.5 mt-2">
+                    <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg text-emerald-700 border-emerald-500/40" onClick={() => downloadPdf(r)}>
+                      <FileDown size={11} /> PDF
+                    </Button>
                     <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" onClick={() => copyLink(r.public_token)}>
                       <Copy size={11} /> Copy link
                     </Button>
