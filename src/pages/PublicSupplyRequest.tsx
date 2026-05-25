@@ -1,13 +1,16 @@
 import { useParams } from 'react-router-dom';
-import { Loader2, Phone, Globe, Package, Share2 } from 'lucide-react';
+import { Loader2, Phone, Globe, Package, Download } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { BrandLogo } from '@/components/BrandLogo';
 import { usePublicSupplyRequest } from '@/hooks/useSupplyRequests';
 import { Button } from '@/components/ui/button';
+import { generateSupplyRequestPdf } from '@/lib/supplyRequestPdf';
+import { toast } from 'sonner';
 
 export default function PublicSupplyRequest() {
   const { token } = useParams<{ token: string }>();
   const { data: req, isLoading, isError } = usePublicSupplyRequest(token);
+
 
   if (isLoading) {
     return (
@@ -30,11 +33,15 @@ export default function PublicSupplyRequest() {
     );
   }
 
-  const shareWhatsApp = () => {
-    const lines = req.items.map(i => `• ${i.name} — ${i.qty_needed} ${i.unit || ''}`).join('\n');
-    const text = `Maison Pur – Supply request for ${req.property_name}\n\n${lines}\n\n${window.location.href}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  const downloadPdf = async () => {
+    try {
+      await generateSupplyRequestPdf(req!);
+    } catch (e: any) {
+      console.error('[supply pdf]', e);
+      toast.error(e?.message || 'Could not generate PDF');
+    }
   };
+
 
   return (
     <>
@@ -103,8 +110,9 @@ export default function PublicSupplyRequest() {
           )}
 
           <div className="px-4 sm:px-8 pb-6">
-            <Button onClick={shareWhatsApp} className="w-full h-11 rounded-lg gap-2" style={{ background: '#2D5016' }}>
-              <Share2 size={16} /> Share via WhatsApp
+            <Button onClick={downloadPdf} className="w-full h-11 rounded-lg gap-2" style={{ background: '#2D5016' }}>
+              <Download size={16} /> Download PDF
+
             </Button>
           </div>
 

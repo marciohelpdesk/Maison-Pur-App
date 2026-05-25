@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Plus, Minus, Trash2, Camera, Share2, ExternalLink, Copy, Send, CheckCircle2,
+  Plus, Minus, Trash2, Camera, ExternalLink, Copy, Send, CheckCircle2,
   History, Pencil, ChefHat, Bath, Bed, WashingMachine, SprayCan, Package,
   ChevronDown, Check, FileDown,
 } from 'lucide-react';
+
+
 import { Property, InventoryItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -154,9 +156,10 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
           setRequestNotes('');
           try {
             await generateSupplyRequestPdf(created);
-          } catch (e) {
-            console.error(e);
-            toast.error('Could not generate PDF');
+            toast.success('PDF generated');
+          } catch (e: any) {
+            console.error('[supply pdf]', e);
+            toast.error(e?.message || 'Could not generate PDF');
           }
         },
       },
@@ -166,11 +169,12 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
   const downloadPdf = async (r: SupplyRequest) => {
     try {
       await generateSupplyRequestPdf(r);
-    } catch (e) {
-      console.error(e);
-      toast.error('Could not generate PDF');
+    } catch (e: any) {
+      console.error('[supply pdf]', e);
+      toast.error(e?.message || 'Could not generate PDF');
     }
   };
+
 
   const copyLink = (token: string) => {
     const url = `https://maisonpur.lovable.app/supplies/${token}`;
@@ -178,11 +182,8 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
     toast.success('Link copied');
   };
 
-  const shareWhatsApp = (token: string) => {
-    const url = `https://maisonpur.lovable.app/supplies/${token}`;
-    const text = `Maison Pur – Supply request for ${property.name}\n${url}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
+
+
 
   return (
     <div className="space-y-3">
@@ -501,9 +502,8 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
                     <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" onClick={() => copyLink(r.public_token)}>
                       <Copy size={11} /> Copy link
                     </Button>
-                    <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" onClick={() => shareWhatsApp(r.public_token)}>
-                      <Share2 size={11} /> WhatsApp
-                    </Button>
+
+
                     <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" asChild>
                       <a href={`/supplies/${r.public_token}`} target="_blank" rel="noreferrer">
                         <ExternalLink size={11} /> Open

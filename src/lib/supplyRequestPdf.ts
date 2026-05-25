@@ -15,43 +15,57 @@ const C = {
   white: [255, 255, 255] as RGB,
 };
 
-const loadLogo = (): Promise<string | null> =>
+const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T | null> =>
   new Promise((resolve) => {
+    const t = setTimeout(() => resolve(null), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); }).catch(() => { clearTimeout(t); resolve(null); });
+  });
+
+const loadLogo = (): Promise<string | null> =>
+  withTimeout(new Promise<string | null>((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = img.width;
-      c.height = img.height;
-      const ctx = c.getContext('2d');
-      if (!ctx) return resolve(null);
-      ctx.drawImage(img, 0, 0);
-      resolve(c.toDataURL('image/png'));
+      try {
+        const c = document.createElement('canvas');
+        c.width = img.width;
+        c.height = img.height;
+        const ctx = c.getContext('2d');
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0);
+        resolve(c.toDataURL('image/png'));
+      } catch { resolve(null); }
     };
     img.onerror = () => resolve(null);
     img.src = `${window.location.origin}/logo-512.png`;
-  });
+  }), 5000);
 
 const loadImage = (url: string): Promise<string | null> =>
-  new Promise((resolve) => {
+  withTimeout(new Promise<string | null>((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      const max = 400;
-      const ratio = Math.min(max / img.width, max / img.height, 1);
-      const c = document.createElement('canvas');
-      c.width = img.width * ratio;
-      c.height = img.height * ratio;
-      const ctx = c.getContext('2d');
-      if (!ctx) return resolve(null);
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-      resolve(c.toDataURL('image/jpeg', 0.7));
+      try {
+        const max = 400;
+        const ratio = Math.min(max / img.width, max / img.height, 1);
+        const c = document.createElement('canvas');
+        c.width = img.width * ratio;
+        c.height = img.height * ratio;
+        const ctx = c.getContext('2d');
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', 0.7));
+      } catch { resolve(null); }
     };
     img.onerror = () => resolve(null);
     img.src = url;
-  });
+  }), 5000);
 
-export async function generateSupplyRequestPdf(req: SupplyRequest): Promise<void> {
+export async function generateSupplyRequestPdf(
+  req: SupplyRequest,
+  opts: { mode?: 'save' | 'open' } = {},
+): Promise<void> {
+
   const pdf = new jsPDF('p', 'mm', 'a4');
   const W = pdf.internal.pageSize.getWidth();
   const H = pdf.internal.pageSize.getHeight();
@@ -260,5 +274,11 @@ export async function generateSupplyRequestPdf(req: SupplyRequest): Promise<void
   drawFooter();
 
   const slug = (req.property_name || 'maison-pur').replace(/\s+/g, '-').toLowerCase();
-  pdf.save(`supply-request-${slug}-${shortId}.pdf`);
+  const filename = `supply-request-${slug}-${shortId}.pdf`;
+  if (opts.mode === 'open') {
+    window.open(pdf.output('bloburl'), '_blank');
+  } else {
+    pdf.save(filename);
+  }
 }
+
