@@ -200,11 +200,13 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
         </TabsList>
 
         {/* INVENTORY TAB */}
-        <TabsContent value="inventory" className="mt-3 space-y-2">
+        <TabsContent value="inventory" className="mt-3 space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">{inventory.length} items</p>
-            <Button size="sm" className="h-8 gap-1.5 rounded-lg" onClick={() => setAddOpen(true)}>
-              <Plus size={14} /> Add item
+            <p className="text-xs text-muted-foreground">
+              {inventory.length} items · <span className="text-amber-600 font-medium">{lowItems.length} low</span>
+            </p>
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg" onClick={() => openAdd()}>
+              <Plus size={14} /> Custom item
             </Button>
           </div>
 
@@ -212,71 +214,157 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
             <p className="text-xs text-muted-foreground py-6 text-center">Loading…</p>
           )}
 
-          {!isLoading && inventory.length === 0 && (
-            <div className="rounded-xl border border-dashed border-border p-8 text-center">
-              <p className="text-sm text-muted-foreground mb-3">No inventory yet for this property.</p>
-              <Button size="sm" onClick={() => setAddOpen(true)} className="rounded-lg gap-1.5">
-                <Plus size={14} /> Add first item
-              </Button>
-            </div>
-          )}
+          {/* Grouped by area */}
+          {!isLoading &&
+            SUPPLY_CATEGORIES.map(cat => {
+              const Icon = CATEGORY_ICONS[cat];
+              const items = grouped[cat] || [];
+              const lowCount = items.filter(i => i.quantity <= i.threshold).length;
+              const presets = SUPPLY_PRESETS.filter(p => p.category === cat);
+              const isCollapsed = collapsed[cat] ?? items.length === 0;
 
-          <div className="rounded-xl border border-border overflow-hidden divide-y divide-stone-200/60">
-            {inventory.map(item => {
-              const isLow = item.quantity <= item.threshold;
               return (
-                <div key={item.id} className="flex items-center gap-2 px-3 py-2 bg-card/30 hover:bg-card/60 transition-colors">
-                  {item.reorderPhoto ? (
-                    <img src={item.reorderPhoto} alt="" className="w-10 h-10 rounded-md object-cover shrink-0" />
-                  ) : (
-                    <label className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 cursor-pointer hover:bg-muted/70">
-                      <Camera size={14} className="text-muted-foreground" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        className="hidden"
-                        onChange={e => e.target.files?.[0] && onPhoto(item, e.target.files[0])}
-                      />
-                    </label>
-                  )}
+                <div key={cat} className="rounded-2xl border border-border bg-card/30 overflow-hidden">
+                  {/* Section header */}
+                  <button
+                    onClick={() => toggleCollapse(cat)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-muted/40 transition-colors text-left"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Icon size={15} className="text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground">{cat}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {items.length} item{items.length === 1 ? '' : 's'}
+                        {lowCount > 0 && <> · <span className="text-amber-600">{lowCount} low</span></>}
+                      </p>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={cn(
+                        'text-muted-foreground transition-transform shrink-0',
+                        !isCollapsed && 'rotate-180',
+                      )}
+                    />
+                  </button>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
-                      {isLow && (
-                        <Badge variant="outline" className="h-4 text-[9px] px-1.5 border-amber-500/40 text-amber-600 bg-amber-500/10">
-                          LOW
-                        </Badge>
+                  {!isCollapsed && (
+                    <div className="border-t border-border/60">
+                      {/* Suggested quick-add chips */}
+                      {presets.length > 0 && (
+                        <div className="px-3 py-2.5 bg-muted/20 border-b border-border/60">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Suggested · tap to add
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {presets.map(preset => {
+                              const already = existingNames.has(preset.name.trim().toLowerCase());
+                              return (
+                                <button
+                                  key={preset.name}
+                                  onClick={() => quickAddPreset(preset)}
+                                  className={cn(
+                                    'inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-[11px] font-medium border transition-colors',
+                                    already
+                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/20'
+                                      : 'bg-background border-border text-foreground hover:bg-primary/5 hover:border-primary/40',
+                                  )}
+                                >
+                                  {already ? <Check size={11} /> : <Plus size={11} />}
+                                  {preset.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Items in this category */}
+                      {items.length === 0 ? (
+                        <div className="px-3 py-4 text-center">
+                          <p className="text-xs text-muted-foreground mb-2">No items in {cat} yet.</p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 rounded-lg text-[11px] gap-1"
+                            onClick={() => openAdd(cat)}
+                          >
+                            <Plus size={12} /> Add custom to {cat}
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="divide-y divide-border/60">
+                            {items.map(item => {
+                              const isLow = item.quantity <= item.threshold;
+                              return (
+                                <div key={item.id} className="flex items-center gap-2 px-3 py-2 hover:bg-card/60 transition-colors">
+                                  {item.reorderPhoto ? (
+                                    <img src={item.reorderPhoto} alt="" className="w-10 h-10 rounded-md object-cover shrink-0" />
+                                  ) : (
+                                    <label className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 cursor-pointer hover:bg-muted/70">
+                                      <Camera size={14} className="text-muted-foreground" />
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        className="hidden"
+                                        onChange={e => e.target.files?.[0] && onPhoto(item, e.target.files[0])}
+                                      />
+                                    </label>
+                                  )}
+
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                                      {isLow && (
+                                        <Badge variant="outline" className="h-4 text-[9px] px-1.5 border-amber-500/40 text-amber-600 bg-amber-500/10">
+                                          LOW
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground truncate">
+                                      min {item.threshold} {item.unit}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => inc(item, -1)}>
+                                      <Minus size={13} />
+                                    </Button>
+                                    <span className={cn('text-sm font-semibold w-8 text-center', isLow && 'text-amber-600')}>
+                                      {item.quantity}
+                                    </span>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => inc(item, 1)}>
+                                      <Plus size={13} />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => setEditItem(item)}>
+                                      <Pencil size={13} />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteItem(item.id)}>
+                                      <Trash2 size={13} />
+                                    </Button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <button
+                            onClick={() => openAdd(cat)}
+                            className="w-full px-3 py-2 text-[11px] text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors flex items-center justify-center gap-1 border-t border-border/60"
+                          >
+                            <Plus size={12} /> Add custom item to {cat}
+                          </button>
+                        </>
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {item.category} · min {item.threshold} {item.unit}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => inc(item, -1)}>
-                      <Minus size={13} />
-                    </Button>
-                    <span className={cn('text-sm font-semibold w-8 text-center', isLow && 'text-amber-600')}>
-                      {item.quantity}
-                    </span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => inc(item, 1)}>
-                      <Plus size={13} />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => setEditItem(item)}>
-                      <Pencil size={13} />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteItem(item.id)}>
-                      <Trash2 size={13} />
-                    </Button>
-                  </div>
+                  )}
                 </div>
               );
             })}
-          </div>
         </TabsContent>
+
 
         {/* REQUEST TAB */}
         <TabsContent value="request" className="mt-3 space-y-2">
