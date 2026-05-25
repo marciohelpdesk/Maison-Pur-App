@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus, Minus, Trash2, Camera, Share2, ExternalLink, Copy, Send, CheckCircle2,
-  History, AlertTriangle, Pencil,
+  History, Pencil,
 } from 'lucide-react';
 import { Property, InventoryItem } from '@/types';
 import { Button } from '@/components/ui/button';
