@@ -468,9 +468,30 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
         {/* HISTORY TAB */}
         <TabsContent value="history" className="mt-3 space-y-2">
           {requests.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">
-              No requests sent yet.
-            </p>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border border-dashed border-border bg-card/30 px-6 py-10 text-center"
+            >
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
+                <History className="w-7 h-7 text-primary/70" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground mb-1">
+                No supply requests yet
+              </h3>
+              <p className="text-xs text-muted-foreground max-w-[260px] mx-auto mb-4">
+                Send your first restock request to the client. It will appear here with a shareable link and PDF.
+              </p>
+              <Button
+                size="sm"
+                className="h-8 rounded-lg gap-1.5"
+                onClick={() => setActiveTab('request')}
+                disabled={inventory.length === 0}
+              >
+                <Send size={13} />
+                {inventory.length === 0 ? 'Add inventory first' : 'Create first request'}
+              </Button>
+            </motion.div>
           ) : (
             <div className="space-y-2">
               {requests.map(r => (
