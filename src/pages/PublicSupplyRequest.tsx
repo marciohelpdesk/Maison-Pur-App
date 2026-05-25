@@ -12,7 +12,20 @@ import { toast } from 'sonner';
 export default function PublicSupplyRequest() {
   const { token } = useParams<{ token: string }>();
   const { data: req, isLoading, isError } = usePublicSupplyRequest(token);
+  const [downloading, setDownloading] = useState(false);
 
+  const downloadPdf = async () => {
+    if (downloading || !req) return;
+    setDownloading(true);
+    try {
+      await generateSupplyRequestPdf(req);
+    } catch (e: any) {
+      console.error('[supply pdf]', e);
+      toast.error(e?.message || 'Could not generate PDF');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -34,22 +47,6 @@ export default function PublicSupplyRequest() {
       </div>
     );
   }
-
-  const [downloading, setDownloading] = useState(false);
-  const downloadPdf = async () => {
-    if (downloading) return;
-    setDownloading(true);
-    try {
-      await generateSupplyRequestPdf(req!);
-    } catch (e: any) {
-      console.error('[supply pdf]', e);
-      toast.error(e?.message || 'Could not generate PDF');
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-
 
   return (
     <>
@@ -122,7 +119,6 @@ export default function PublicSupplyRequest() {
               {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
               {downloading ? 'Generating PDF…' : 'Download PDF'}
             </Button>
-
           </div>
 
           <div className="px-4 sm:px-8 py-4 border-t border-gray-100 text-center text-xs text-gray-500 space-y-1">
