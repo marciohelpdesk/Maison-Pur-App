@@ -503,9 +503,8 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
                     <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" onClick={() => copyLink(r.public_token)}>
                       <Copy size={11} /> Copy link
                     </Button>
-                    <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" onClick={() => shareWhatsApp(r.public_token)}>
-                      <Share2 size={11} /> WhatsApp
-                    </Button>
+
+
                     <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg" asChild>
                       <a href={`/supplies/${r.public_token}`} target="_blank" rel="noreferrer">
                         <ExternalLink size={11} /> Open
