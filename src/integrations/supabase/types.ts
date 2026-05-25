@@ -721,6 +721,48 @@ export type Database = {
           },
         ]
       }
+      supply_requests: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          notes: string
+          property_address: string
+          property_id: string | null
+          property_name: string
+          public_token: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          notes?: string
+          property_address?: string
+          property_id?: string | null
+          property_name?: string
+          public_token?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          notes?: string
+          property_address?: string
+          property_id?: string | null
+          property_name?: string
+          public_token?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       team_invites: {
         Row: {
           admin_id: string
@@ -860,6 +902,28 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "invoices"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_supply_request_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          created_at: string
+          id: string
+          items: Json
+          notes: string
+          property_address: string
+          property_id: string | null
+          property_name: string
+          public_token: string
+          status: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "supply_requests"
           isOneToOne: false
           isSetofReturn: true
         }
