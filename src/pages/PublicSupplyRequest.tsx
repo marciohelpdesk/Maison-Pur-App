@@ -1,13 +1,16 @@
 import { useParams } from 'react-router-dom';
-import { Loader2, Phone, Globe, Package, Share2 } from 'lucide-react';
+import { Loader2, Phone, Globe, Package, Download } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { BrandLogo } from '@/components/BrandLogo';
 import { usePublicSupplyRequest } from '@/hooks/useSupplyRequests';
 import { Button } from '@/components/ui/button';
+import { generateSupplyRequestPdf } from '@/lib/supplyRequestPdf';
+import { toast } from 'sonner';
 
 export default function PublicSupplyRequest() {
   const { token } = useParams<{ token: string }>();
   const { data: req, isLoading, isError } = usePublicSupplyRequest(token);
+
 
   if (isLoading) {
     return (
