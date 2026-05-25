@@ -156,9 +156,10 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
           setRequestNotes('');
           try {
             await generateSupplyRequestPdf(created);
-          } catch (e) {
-            console.error(e);
-            toast.error('Could not generate PDF');
+            toast.success('PDF generated');
+          } catch (e: any) {
+            console.error('[supply pdf]', e);
+            toast.error(e?.message || 'Could not generate PDF');
           }
         },
       },
@@ -168,11 +169,12 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
   const downloadPdf = async (r: SupplyRequest) => {
     try {
       await generateSupplyRequestPdf(r);
-    } catch (e) {
-      console.error(e);
-      toast.error('Could not generate PDF');
+    } catch (e: any) {
+      console.error('[supply pdf]', e);
+      toast.error(e?.message || 'Could not generate PDF');
     }
   };
+
 
   const copyLink = (token: string) => {
     const url = `https://maisonpur.lovable.app/supplies/${token}`;
