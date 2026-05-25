@@ -120,16 +120,18 @@ export const SettingsView = ({ userId, userProfile, onLogout, onViewFinance, onU
               <ChevronRight size={20} className="text-muted-foreground" />
             </motion.button>
 
-            {/* Supplies */}
-            <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.165 }}
-              onClick={() => navigate('/supplies')}
-              className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Package size={20} className="text-primary" /></div>
-                <div className="text-left"><p className="font-medium">Supplies</p><p className="text-xs text-muted-foreground">Inventory & restock requests</p></div>
-              </div>
-              <ChevronRight size={20} className="text-muted-foreground" />
-            </motion.button>
+            {/* Supplies — admin only */}
+            {isAdmin && (
+              <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.165 }}
+                onClick={() => navigate('/supplies')}
+                className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Package size={20} className="text-primary" /></div>
+                  <div className="text-left"><p className="font-medium">Supplies</p><p className="text-xs text-muted-foreground">Inventory & restock requests</p></div>
+                </div>
+                <ChevronRight size={20} className="text-muted-foreground" />
+              </motion.button>
+            )}
 
 
             {/* Estimates */}
