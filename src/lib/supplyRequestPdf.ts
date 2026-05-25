@@ -159,14 +159,24 @@ export async function buildSupplyRequestPdfBlob(req: SupplyRequest): Promise<{ b
   pdf.setFontSize(9);
   pdf.text(req.property_address || '', M + 5, y + 18.5);
 
-  const statusLabel = req.status.toUpperCase();
-  const badgeW = 32;
-  setFill(req.status === 'fulfilled' ? C.emeraldMid : C.amber);
-  pdf.roundedRect(W - M - badgeW - 5, y + 6, badgeW, 7, 2, 2, 'F');
-  setText(C.white);
+  // Right-aligned: Requested by + date (replaces status badge)
+  const rightX = W - M - 5;
+  setText(C.emeraldMid);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(7.5);
-  pdf.text(statusLabel, W - M - 5 - badgeW / 2, y + 10.7, { align: 'center' });
+  pdf.setFontSize(7);
+  pdf.text('REQUESTED BY', rightX, y + 6, { align: 'right' });
+
+  setText(C.stone900);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.text('Maison Pur', rightX, y + 12, { align: 'right' });
+
+  setText(C.stone500);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8.5);
+  const dateLong = new Date(req.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  pdf.text(dateLong, rightX, y + 18.5, { align: 'right' });
+
 
   y += 30;
 
