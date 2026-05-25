@@ -39,14 +39,59 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
   const { requests, createRequest, updateStatus, deleteRequest } = useSupplyRequests(userId, property.id);
   const { uploadPhoto } = usePhotoUpload();
   const [addOpen, setAddOpen] = useState(false);
+  const [addCategory, setAddCategory] = useState<string | undefined>(undefined);
   const [editItem, setEditItem] = useState<InventoryItem | null>(null);
   const [requestNotes, setRequestNotes] = useState('');
   const [selectedForRequest, setSelectedForRequest] = useState<Record<string, number>>({});
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const lowItems = useMemo(
     () => inventory.filter(i => i.quantity <= i.threshold),
     [inventory],
   );
+
+  const grouped = useMemo(() => {
+    const map: Record<string, InventoryItem[]> = {};
+    SUPPLY_CATEGORIES.forEach(c => (map[c] = []));
+    inventory.forEach(i => {
+      const key = (SUPPLY_CATEGORIES as readonly string[]).includes(i.category) ? i.category : 'General';
+      (map[key] ||= []).push(i);
+    });
+    return map;
+  }, [inventory]);
+
+  const existingNames = useMemo(
+    () => new Set(inventory.map(i => i.name.trim().toLowerCase())),
+    [inventory],
+  );
+
+  const openAdd = (cat?: string) => {
+    setAddCategory(cat);
+    setAddOpen(true);
+  };
+
+  const quickAddPreset = (preset: typeof SUPPLY_PRESETS[number]) => {
+    const existing = inventory.find(
+      i => i.name.trim().toLowerCase() === preset.name.trim().toLowerCase(),
+    );
+    if (existing) {
+      updateItem({ ...existing, quantity: existing.quantity + preset.defaultQuantity });
+      toast.success(`+${preset.defaultQuantity} ${preset.unit} of ${preset.name}`);
+      return;
+    }
+    addItem({
+      name: preset.name,
+      category: preset.category,
+      quantity: preset.defaultQuantity,
+      unit: preset.unit,
+      threshold: preset.defaultThreshold,
+      propertyId: property.id,
+    });
+    toast.success(`Added ${preset.name}`);
+  };
+
+  const toggleCollapse = (cat: string) =>
+    setCollapsed(prev => ({ ...prev, [cat]: !prev[cat] }));
 
   const inc = (item: InventoryItem, delta: number) => {
     const next = Math.max(0, item.quantity + delta);
