@@ -61,10 +61,8 @@ const loadImage = (url: string): Promise<string | null> =>
     img.src = url;
   }), 5000);
 
-export async function generateSupplyRequestPdf(
-  req: SupplyRequest,
-  opts: { mode?: 'save' | 'open' } = {},
-): Promise<void> {
+export async function buildSupplyRequestPdfBlob(req: SupplyRequest): Promise<{ blob: Blob; filename: string }> {
+
 
   const pdf = new jsPDF('p', 'mm', 'a4');
   const W = pdf.internal.pageSize.getWidth();
@@ -275,10 +273,24 @@ export async function generateSupplyRequestPdf(
 
   const slug = (req.property_name || 'maison-pur').replace(/\s+/g, '-').toLowerCase();
   const filename = `supply-request-${slug}-${shortId}.pdf`;
-  if (opts.mode === 'open') {
-    window.open(pdf.output('bloburl'), '_blank');
-  } else {
-    pdf.save(filename);
-  }
+  const blob = pdf.output('blob') as Blob;
+  return { blob, filename };
 }
+
+export async function generateSupplyRequestPdf(
+  req: SupplyRequest,
+  _opts: { mode?: 'save' | 'open' } = {},
+): Promise<void> {
+  const { blob, filename } = await buildSupplyRequestPdfBlob(req);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
 
