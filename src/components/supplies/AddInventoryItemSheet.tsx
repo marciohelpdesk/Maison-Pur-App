@@ -18,12 +18,13 @@ interface Props {
   onOpenChange: (o: boolean) => void;
   onSubmit: (v: Values) => void;
   initial?: InventoryItem;
+  defaultCategory?: string;
 }
 
-const CATEGORIES = ['Bathroom', 'Kitchen', 'Bedroom', 'Cleaning', 'Laundry', 'General'];
-const UNITS = ['units', 'rolls', 'bottles', 'packs', 'pieces'];
+const CATEGORIES = ['Kitchen', 'Bathroom', 'Bedroom', 'Laundry', 'Cleaning', 'General'];
+const UNITS = ['units', 'rolls', 'bottles', 'packs', 'pieces', 'sets', 'pairs'];
 
-export const AddInventoryItemSheet = ({ open, onOpenChange, onSubmit, initial }: Props) => {
+export const AddInventoryItemSheet = ({ open, onOpenChange, onSubmit, initial, defaultCategory }: Props) => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('General');
   const [quantity, setQuantity] = useState(0);
@@ -33,12 +34,12 @@ export const AddInventoryItemSheet = ({ open, onOpenChange, onSubmit, initial }:
   useEffect(() => {
     if (open) {
       setName(initial?.name || '');
-      setCategory(initial?.category || 'General');
+      setCategory(initial?.category || defaultCategory || 'General');
       setQuantity(initial?.quantity ?? 0);
       setUnit(initial?.unit || 'units');
       setThreshold(initial?.threshold ?? 2);
     }
-  }, [open, initial]);
+  }, [open, initial, defaultCategory]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
