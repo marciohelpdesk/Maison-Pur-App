@@ -4,7 +4,20 @@ export enum JobStatus {
   COMPLETED = 'COMPLETED'
 }
 
-export type ExecutionStep = 'BEFORE_PHOTOS' | 'CHECKLIST' | 'DAMAGE_REPORT' | 'LOST_AND_FOUND' | 'INVENTORY_CHECK' | 'AFTER_PHOTOS' | 'SUMMARY';
+export type ExecutionStep = 'BEFORE_PHOTOS' | 'CHECKLIST' | 'DAMAGE_REPORT' | 'LOST_AND_FOUND' | 'SUPPLIES_AUDIT' | 'AFTER_PHOTOS' | 'SUMMARY';
+
+export type SupplyStatus = 'ok' | 'low' | 'out';
+
+export interface SupplyAuditEntry {
+  itemId: string;            // stable slug from DEFAULT_SUPPLY_ITEMS or custom id
+  name: string;
+  category: string;
+  status: SupplyStatus;
+  remainingQty?: number;
+  unit?: string;
+  photoUrl?: string;
+  note?: string;
+}
 
 export interface UserProfile {
   name: string;
@@ -79,7 +92,8 @@ export interface Job {
   reportPdfUrl?: string;     // URL to saved PDF report in storage
   
   damages: DamageReport[];
-  inventoryUsed: InventoryUsage[];
+  inventoryUsed: InventoryUsage[];          // legacy, kept for historical jobs
+  suppliesAudit?: SupplyAuditEntry[];       // new supplies audit at end of job
   lostAndFound: LostAndFoundItem[];
 }
 
