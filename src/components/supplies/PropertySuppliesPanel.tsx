@@ -217,7 +217,7 @@ export const PropertySuppliesPanel = ({ property, userId }: Props) => {
         </div>
       </div>
 
-      <Tabs defaultValue="inventory" className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
         <TabsList className="grid grid-cols-3 h-9">
           <TabsTrigger value="inventory" className="text-xs">Inventory</TabsTrigger>
           <TabsTrigger value="request" className="text-xs">Request</TabsTrigger>
