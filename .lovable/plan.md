@@ -1,17 +1,27 @@
 ## Contexto
-A aba **History** em `PropertySuppliesPanel.tsx` (linha 469-472) já possui um estado vazio, porém é apenas um texto simples (`<p>No requests sent yet.</p>`). O usuário deseja algo mais visual, profissional e completo.
 
-## Alterações
-1. **Substituir** o texto simples por um componente de estado vazio rico contendo:
-   - Ícone ilustrativo (`ClipboardList` ou `FileText`) com opacidade reduzida
-   - Título em destaque: "No supply requests yet"
-   - Descrição curta explicando como criar uma solicitação
-   - Botão de ação que troca para a aba "Request" para iniciar o fluxo
+Analisei o código e verifiquei que o botão **Supplies** em Settings já está condicionalmente renderizado dentro do bloco `{isAdmin && (...)}` em `src/views/SettingsView.tsx` (linhas 123-132). A prop `isAdmin` vem do hook `useRole`, que retorna `role !== 'cleaner'`.
 
-2. **Arquivo alvo:** `src/components/supplies/PropertySuppliesPanel.tsx` (linhas 468-473)
+A restrição já funciona: cleaners não veem o botão. Porém, para tornar a intenção **explicitamente clara** no código-fonte e prevenir regressões futuras, propono adicionar uma verificação redundante diretamente na renderização do botão.
 
-3. **Estilo:** seguir o padrão do projeto — ícone centralizado, tipografia usando tokens do design system (`text-muted-foreground`, `font-semibold`), padding generoso e borda tracejada opcional para manter consistência com o estado vazio de "no properties" em `SuppliesView.tsx`.
+## Plano
 
-## Não inclui
-- Nenhuma mudança em lógica de dados, hooks, RLS ou banco
-- Nenhuma alteração nas outras abas (Inventory, Request)
+1. **Fortalecer a verificação no `SettingsView.tsx`**
+   - Manter o botão Supplies dentro do bloco `isAdmin` existente.
+   - Adicionar uma verificação explícita inline (`isAdmin === true`) para deixar claro que o botão só aparece para admins.
+
+2. **Validar no preview**
+   - Verificar visualmente que o botão Supplies renderiza corretamente para usuários admin.
+   - Confirmar que não há regressões nos outros botões admin-only (Invoices, Estimates, KPI, Expenses, etc.).
+
+## Alteração
+
+Arquivo: `src/views/SettingsView.tsx`
+- Linhas 123-132: manter o botão dentro do bloco `{isAdmin && (...)}` já existente.
+- Nenhuma mudança de lógica necessária — a proteção já está em vigor.
+
+## Nota
+
+Se o objetivo for restringir ainda mais (apenas `role === 'admin'`, excluindo moderadores e usuários comuns), precisaremos criar uma nova propriedade no `useRole` (ex: `isOwner`) e aplicá-la seletivamente, evitando quebrar outras funcionalidades que hoje dependem de `isAdmin = role !== 'cleaner'`.
+
+A implementação atual (`isAdmin = role !== 'cleaner'`) é consistente com o restante do app: tudo o que não é cleaner é considerado admin/proprietário do workspace.
