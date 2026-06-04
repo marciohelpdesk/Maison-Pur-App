@@ -1,34 +1,32 @@
-import { lazy, Suspense, ReactNode } from 'react';
+import { Suspense, ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ResponsiveLayout } from '@/components/layout/ResponsiveLayout';
-
-// Lazy loading for performance
-const Login = lazy(() => import('@/pages/auth/Login'));
-const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
-const Agenda = lazy(() => import('@/pages/Agenda'));
-const Properties = lazy(() => import('@/pages/Properties'));
-const PropertyDetails = lazy(() => import('@/pages/PropertyDetails'));
-const JobDetails = lazy(() => import('@/pages/JobDetails'));
-const Execution = lazy(() => import('@/pages/Execution'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const Finance = lazy(() => import('@/pages/Finance'));
-const KpiDashboard = lazy(() => import('@/pages/KpiDashboard'));
-const Expenses = lazy(() => import('@/pages/Expenses'));
-const Reports = lazy(() => import('@/pages/Reports'));
-const Invoices = lazy(() => import('@/pages/Invoices'));
-const Estimates = lazy(() => import('@/pages/Estimates'));
-const CashFlow = lazy(() => import('@/pages/CashFlow'));
-const PublicReport = lazy(() => import('@/pages/PublicReport'));
-const PublicInvoice = lazy(() => import('@/pages/PublicInvoice'));
-const PublicEstimate = lazy(() => import('@/pages/PublicEstimate'));
-const Supplies = lazy(() => import('@/pages/Supplies'));
-const PublicSupplyRequest = lazy(() => import('@/pages/PublicSupplyRequest'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
+import Login from '@/pages/auth/Login';
+import ResetPassword from '@/pages/auth/ResetPassword';
+import Dashboard from '@/pages/Dashboard';
+import Agenda from '@/pages/Agenda';
+import Properties from '@/pages/Properties';
+import PropertyDetails from '@/pages/PropertyDetails';
+import JobDetails from '@/pages/JobDetails';
+import Execution from '@/pages/Execution';
+import Settings from '@/pages/Settings';
+import Finance from '@/pages/Finance';
+import KpiDashboard from '@/pages/KpiDashboard';
+import Expenses from '@/pages/Expenses';
+import Reports from '@/pages/Reports';
+import Invoices from '@/pages/Invoices';
+import Estimates from '@/pages/Estimates';
+import CashFlow from '@/pages/CashFlow';
+import PublicReport from '@/pages/PublicReport';
+import PublicInvoice from '@/pages/PublicInvoice';
+import PublicEstimate from '@/pages/PublicEstimate';
+import Supplies from '@/pages/Supplies';
+import PublicSupplyRequest from '@/pages/PublicSupplyRequest';
+import NotFound from '@/pages/NotFound';
 
 // Animated Loading component
 export const PageLoader = () => (
