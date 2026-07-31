@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Plus, Copy, Trash2, X, CalendarIcon, ExternalLink, ChevronRight, Receipt, Send, CheckCircle, XCircle, FileEdit } from 'lucide-react';
 import { useEstimates } from '@/hooks/useEstimates';
@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ESTIMATE_SERVICE_PRESETS = [
   { label: '🛋️ Sofa Cleaning', description: 'Sofa / Upholstery Cleaning' },
@@ -42,6 +42,7 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
   const { createInvoice } = useInvoices(userId);
   const { properties } = useProperties(userId);
   const navigate = useNavigate();
+  const location = useLocation();
   const [showForm, setShowForm] = useState(false);
 
   const [clientName, setClientName] = useState('');
@@ -54,6 +55,18 @@ export const EstimateSection = ({ userId }: EstimateSectionProps) => {
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
+
+  // Prefill coming from a property walkthrough
+  useEffect(() => {
+    const prefill = (location.state as any)?.prefillEstimate;
+    if (!prefill) return;
+    setClientName(prefill.client_name || '');
+    setClientEmail(prefill.client_email || '');
+    setClientAddress(prefill.client_address || '');
+    setLineItems(prefill.line_items || []);
+    setShowForm(true);
+    window.history.replaceState({}, '');
+  }, [location.state]);
 
   const addPropertyLineItem = (propertyId: string) => {
     const property = properties.find(p => p.id === propertyId);

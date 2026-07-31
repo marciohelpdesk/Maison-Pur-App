@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, ClipboardList } from 'lucide-react';
+import { ArrowLeft, FileText, ClipboardList, ClipboardCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EstimateSection } from '@/components/EstimateSection';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,11 +10,12 @@ import EstimateHistoryContent from '@/components/EstimateHistoryContent';
 export default function Estimates() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
+  const [activeTab, setActiveTab] = useState<'new' | 'history' | 'walkthrough'>('new');
 
   const tabs = [
     { id: 'new' as const, label: 'New Estimate', icon: ClipboardList },
     { id: 'history' as const, label: 'History', icon: FileText },
+    { id: 'walkthrough' as const, label: 'Walkthrough', icon: ClipboardCheck },
   ];
 
   return (
@@ -49,7 +50,16 @@ export default function Estimates() {
       </div>
 
       <div className="px-6 pt-2 relative z-10">
-        {activeTab === 'new' ? (
+        {activeTab === 'walkthrough' ? (
+          <motion.div key="walkthrough" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }} className="glass-panel p-6 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+              <ClipboardCheck className="text-emerald-600" />
+            </div>
+            <h3 className="font-semibold text-foreground mb-1">On-site walkthrough</h3>
+            <p className="text-sm text-muted-foreground mb-4">Inventory every area of the property, flag what is missing and turn it into an accurate estimate.</p>
+            <Button className="rounded-xl" onClick={() => navigate('/walkthrough')}>Open walkthrough</Button>
+          </motion.div>
+        ) : activeTab === 'new' ? (
           <motion.div key="new" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2 }}>
             <EstimateSection userId={user?.id} />
           </motion.div>
