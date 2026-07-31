@@ -838,6 +838,71 @@ export type Database = {
         }
         Relationships: []
       }
+      walkthroughs: {
+        Row: {
+          areas: Json
+          client_email: string
+          client_name: string
+          condition: Json
+          config: Json
+          created_at: string
+          id: string
+          notes: string
+          pricing: Json
+          property_address: string
+          property_id: string | null
+          property_name: string
+          public_token: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          areas?: Json
+          client_email?: string
+          client_name?: string
+          condition?: Json
+          config?: Json
+          created_at?: string
+          id?: string
+          notes?: string
+          pricing?: Json
+          property_address?: string
+          property_id?: string | null
+          property_name?: string
+          public_token?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          areas?: Json
+          client_email?: string
+          client_name?: string
+          condition?: Json
+          config?: Json
+          created_at?: string
+          id?: string
+          notes?: string
+          pricing?: Json
+          property_address?: string
+          property_id?: string | null
+          property_name?: string
+          public_token?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "walkthroughs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -924,6 +989,33 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "supply_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_walkthrough_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          areas: Json
+          client_email: string
+          client_name: string
+          condition: Json
+          config: Json
+          created_at: string
+          id: string
+          notes: string
+          pricing: Json
+          property_address: string
+          property_id: string | null
+          property_name: string
+          public_token: string
+          status: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "walkthroughs"
           isOneToOne: false
           isSetofReturn: true
         }

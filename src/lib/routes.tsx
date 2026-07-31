@@ -26,6 +26,8 @@ import PublicInvoice from '@/pages/PublicInvoice';
 import PublicEstimate from '@/pages/PublicEstimate';
 import Supplies from '@/pages/Supplies';
 import PublicSupplyRequest from '@/pages/PublicSupplyRequest';
+import Walkthrough from '@/pages/Walkthrough';
+import PublicWalkthrough from '@/pages/PublicWalkthrough';
 import NotFound from '@/pages/NotFound';
 
 // Animated Loading component
@@ -169,6 +171,7 @@ export const routes = [
       { path: 'invoices', element: <RequireAdmin><Invoices /></RequireAdmin> },
       { path: 'estimates', element: <RequireAdmin><Estimates /></RequireAdmin> },
       { path: 'supplies', element: <RequireAdmin><Supplies /></RequireAdmin> },
+      { path: 'walkthrough', element: <RequireAdmin><Walkthrough /></RequireAdmin> },
       { path: 'cashflow', element: <RequireAdmin><CashFlow /></RequireAdmin> },
     ],
   },
@@ -190,5 +193,6 @@ export const routes = [
   { path: '/invoice/:token', element: <SuspenseWrapper><PublicInvoice /></SuspenseWrapper> },
   { path: '/estimate/:token', element: <SuspenseWrapper><PublicEstimate /></SuspenseWrapper> },
   { path: '/supplies/:token', element: <SuspenseWrapper><PublicSupplyRequest /></SuspenseWrapper> },
+  { path: '/walkthrough/:token', element: <SuspenseWrapper><PublicWalkthrough /></SuspenseWrapper> },
   { path: '*', element: <SuspenseWrapper><NotFound /></SuspenseWrapper> },
 ];

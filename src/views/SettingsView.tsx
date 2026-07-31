@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil, Receipt, ClipboardList, Package } from 'lucide-react';
+import { ChevronRight, LogOut, Wallet, Bell, Shield, HelpCircle, Globe, Pencil, Receipt, ClipboardList, Package, ClipboardCheck } from 'lucide-react';
 import { UserProfile } from '@/types';
 import { TeamInviteManagement } from '@/components/TeamInviteManagement';
 import { EditProfileModal } from '@/components/EditProfileModal';
@@ -144,6 +144,19 @@ export const SettingsView = ({ userId, userProfile, onLogout, onViewFinance, onU
               </div>
               <ChevronRight size={20} className="text-muted-foreground" />
             </motion.button>
+
+            {/* Walkthrough */}
+            {isAdmin && (
+              <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.175 }}
+                onClick={() => navigate('/walkthrough')}
+                className="glass-panel w-full p-5 flex items-center justify-between text-foreground active:scale-95 transition-transform mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center"><ClipboardCheck size={20} className="text-emerald-600" /></div>
+                  <div className="text-left"><p className="font-medium">Walkthrough</p><p className="text-xs text-muted-foreground">On-site audit & pricing checklist</p></div>
+                </div>
+                <ChevronRight size={20} className="text-muted-foreground" />
+              </motion.button>
+            )}
           </>
         )}
 
