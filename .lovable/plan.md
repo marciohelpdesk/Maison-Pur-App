@@ -1,67 +1,51 @@
-## Objetivo
+# Fix: "o app não está funcionando" (tela branca / erro de script)
 
-Criar uma seção de **Vistoria de Propriedade (Walkthrough / Site Survey)** onde, ao visitar uma casa nova, você percorre um checklist completo por área (cozinha, banheiros, quartos, sala, closet, lavanderia, áreas externas etc.), marca o que existe / o que falta, registra quantidades (ex.: nº de toalhas, jogos de lençol, panelas), tira fotos e anota observações. Ao final, a vistoria gera:
+## O que eu verifiquei agora
 
-1. Um **resumo de precificação** que pode ser convertido em Estimate com 1 clique.
-2. Um **relatório em PDF** (mesmo padrão visual do Supply Request) para enviar ao cliente.
-3. Um **link público** (sem login) para o cliente visualizar e baixar o PDF.
+- Servidor de preview: responde 200 e a tela de login renderiza normalmente.
+- Site publicado (maisonpur.lovable.app): carrega, a tela de login renderiza e nenhum arquivo retorna erro.
+- No console só aparecem avisos do React sobre `ref` (não quebram nada).
 
-## Onde fica
+Conclusão: o código está saudável nos dois ambientes. O erro recorrente
+"Importing a module script failed" vem do **Service Worker do PWA + cache do
+navegador** do seu dispositivo, que continua servindo um `index-*.js` antigo
+depois de cada publicação. Por isso some com hard refresh e volta depois.
 
-- Nova rota `/walkthrough` (lista + nova vistoria), com atalho em **Settings**, logo abaixo de *Estimates*, e no menu desktop — mesmo estilo `glass-panel` já usado por Supplies/Invoices, restrito a admin.
-- Dentro da página `Estimates`, uma terceira aba **"Walkthrough"** listando vistorias prontas para converter em orçamento.
-- Rota pública `/walkthrough/:token` (sem autenticação), igual ao padrão de `/supplies/:token`.
+## O que fazer
 
-## Fluxo da vistoria
+1. **Auto-recuperação de chunk antigo**
+   Adicionar um handler global em `src/main.tsx` que detecta falhas de
+   carregamento de módulo/chunk e faz um único reload forçado da página
+   (com marca em `sessionStorage` para não entrar em loop). Isso resolve o
+   sintoma sozinho, sem o usuário precisar limpar cache.
 
-```text
-1. Selecionar propriedade (ou digitar nome/endereço de prospect)
-2. Config rápida: nº de quartos, banheiros, tem lavanderia? closet? piscina?
-   -> gera automaticamente as áreas do checklist
-3. Percorrer áreas (accordion, uma por vez, denso e rápido):
-     [Cozinha]  Panelas .......  [Tem][Falta][N/A]  Qtd: 4   📷  📝
-                Talheres ......  [Tem][Falta][N/A]  Qtd: 12  📷  📝
-     [Banheiro 1] Toalhas de banho [Tem][Falta] Qtd: 2 ...
-   + botão "Add item" em cada área
-4. Aba "Condição & Esforço": estado geral por área (Bom/Regular/Pesado),
-   nº de andares, animais, sujeira acumulada -> multiplicadores
-5. Resumo: itens faltantes, fotos, horas estimadas, preço sugerido
-6. Salvar -> gera PDF + link público -> botão "Convert to Estimate"
-```
+2. **Service Worker que não segura assets**
+   Revisar `public/push-sw.js` para garantir que ele só trate push/notificações
+   e nunca faça cache de navegação/JS, e chamar `skipWaiting` + `clients.claim`
+   para que a versão nova assuma imediatamente após publicar.
 
-## Catálogo pré-preenchido (novo arquivo `src/data/walkthroughCatalog.ts`)
+3. **Limpeza de registros antigos**
+   No boot do app, desregistrar service workers obsoletos e apagar caches
+   antigos da Cache Storage antes de registrar o atual.
 
-Itens por área, com unidade e quantidade "ideal" de referência:
+4. **Higiene de console**
+   Corrigir os avisos de `ref` em `Login` / `ForgotPasswordModal` envolvendo os
+   componentes internos com `React.forwardRef`, para o console ficar limpo e
+   erros reais ficarem visíveis.
 
-- **Kitchen**: panelas, frigideiras, talheres, pratos, copos, taças, tábua, facas, abridor, torradeira, cafeteira, liquidificador, potes, formas, luvas térmicas, panos de prato, lixeira.
-- **Bathroom** (por banheiro): toalhas de banho, de rosto, de piso, cortina, tapete, lixeira, secador, kit amenities, papel higiênico, escova sanitária, dispensers.
-- **Bedroom** (por quarto): jogos de lençol, fronhas, travesseiros, edredom, protetor de colchão, cobertores, cabides, cortinas/blackout, abajur.
-- **Living**: almofadas, mantas, controle remoto, decoração, tapete.
-- **Closet**: cabides, organizadores, ferro, tábua de passar, cofre.
-- **Laundry**: detergente, amaciante, alvejante, tira-manchas, cesto, varal, ferro.
-- **Outdoor/Extras**: móveis de área externa, churrasqueira, toalhas de piscina, guarda-sol.
-- **Cleaning/Consumables**: produtos de limpeza, sacos de lixo, papel toalha, esponjas, pilhas, lâmpadas.
+5. **Republicar** e validar novamente no preview e no domínio publicado.
 
-Cada item: `Presente / Faltando / Danificado / N/A`, quantidade encontrada vs. ideal, foto opcional e nota.
+## Detalhe técnico
 
-## Precificação
+- Handler: escutar `window.addEventListener('vite:preloadError')` e
+  `unhandledrejection` filtrando mensagens de "Failed to fetch dynamically
+  imported module" / "Importing a module script failed"; guard em
+  `sessionStorage` (`__chunk_reloaded`) limpo após load bem-sucedido.
+- SW: sem `fetch` handler de cache-first para documentos/assets; apenas `push`
+  e `notificationclick`.
+- Nenhuma mudança de banco de dados ou de regras de acesso.
 
-Bloco de estimativa calculado no cliente (`src/lib/walkthroughPricing.ts`):
-- Horas base a partir de quartos/banheiros/m² + tipo de serviço.
-- Ajuste por condição de cada área (Bom ×1.0, Regular ×1.25, Pesado ×1.6).
-- Extras marcados (piscina, pós-obra, animais).
-- Preço sugerido = horas × taxa/hora (configurável no formulário) + custo estimado de reposição dos itens faltantes.
-- Botão **Convert to Estimate** pré-preenche `EstimateSection` com line items: serviço de limpeza + (opcional) linha de reposição de suprimentos.
+## Se o problema for outro
 
-## Relatório para o cliente
-
-- PDF gerado com `jsPDF`, reaproveitando o layout já aprovado em `src/lib/supplyRequestPdf.ts` (logo proporcional, cabeçalhos emerald, sem menções externas): capa com propriedade e data, sumário (itens OK / faltando / danificados), tabela por área, grade de fotos, bloco de recomendação e preço sugerido.
-- Botão de download no app e na página pública.
-
-## Detalhes técnicos
-
-- **Banco**: nova tabela `walkthroughs` (user_id, property_id, property_name, property_address, client_name/email, status, config jsonb, areas jsonb com itens/quantidades/fotos, condition jsonb, pricing jsonb, public_token, timestamps) + GRANTs, RLS por `auth.uid()` e RPC `get_walkthrough_by_token` com `SECURITY DEFINER` para o link público (mesmo padrão de `get_supply_request_by_token`).
-- **Fotos**: bucket `report-photos` já existente, com a compressão de `src/lib/imageUtils.ts`.
-- **Novos arquivos**: `src/data/walkthroughCatalog.ts`, `src/hooks/useWalkthroughs.ts`, `src/pages/Walkthrough.tsx`, `src/views/WalkthroughView.tsx`, `src/components/walkthrough/*` (AreaAccordion, ItemRow, ConditionStep, SummaryStep), `src/lib/walkthroughPricing.ts`, `src/lib/walkthroughPdf.ts`, `src/pages/PublicWalkthrough.tsx`.
-- **Alterados**: `src/lib/routes.tsx` (rotas nova + pública), `src/views/SettingsView.tsx` (atalho admin), `src/pages/Estimates.tsx` (aba Walkthrough), `src/components/EstimateSection.tsx` (aceitar pré-preenchimento vindo da vistoria).
-- UI densa, mobile-first, no mesmo padrão visual já usado em Supplies.
+Se após isso ainda não funcionar, me diga a tela exata e o que aparece
+(branco, erro, login travado) que eu investigo esse caso específico.
